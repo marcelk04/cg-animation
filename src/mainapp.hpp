@@ -3,6 +3,8 @@
 #include <glm/glm.hpp>
 using namespace glm;
 
+#include "movingcamera.hpp"
+
 #include "framework/app.hpp"
 
 #include "framework/mesh.hpp"
@@ -27,6 +29,7 @@ class MainApp : public App {
        Mesh mesh;
        Program meshshader;
        Camera boringCamera;
+       MovingCamera coolCamera{ glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f) };
 
        glm::vec3 lightDir;
 };

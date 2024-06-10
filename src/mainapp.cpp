@@ -10,6 +10,8 @@ using namespace glm;
 
 #include "framework/imguiutil.hpp"
 
+#include <iostream>
+
 MainApp::MainApp() : App(800, 600) {
     App::setTitle("cgintro"); // set title
     App::setVSync(true); // Limit framerate
@@ -34,8 +36,8 @@ void MainApp::buildImGui() {
 }
 
 void MainApp::render() {
-    if (boringCamera.updateIfChanged()) {
-        meshshader.set("uWorldToClip", boringCamera.projectionMatrix * boringCamera.viewMatrix);
+    if (coolCamera.updateIfChanged()) {
+        meshshader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
     }
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -45,15 +47,36 @@ void MainApp::render() {
 }
 
 void MainApp::keyCallback(Key key, Action action) {
+    float cameraSpeed = 2.5f;
 
+    if (action != Action::REPEAT) return;
+
+    if (key == Key::W) {
+        coolCamera.move(delta * cameraSpeed * coolCamera.m_Direction);
+    }
+    else if (key == Key::S) {
+        coolCamera.move(-delta * cameraSpeed * coolCamera.m_Direction);
+    }
+    else if (key == Key::A) {
+        coolCamera.move(-delta * cameraSpeed * coolCamera.m_Right);
+    }
+    else if (key == Key::D) {
+        coolCamera.move(delta * cameraSpeed * coolCamera.m_Right);
+    }
+    else if (key == Key::SPACE) {
+        coolCamera.move(delta * cameraSpeed * coolCamera.m_Up);
+    }
+    else if (key == Key::LEFT_SHIFT) {
+        coolCamera.move(-delta * cameraSpeed * coolCamera.m_Up);
+    }
 }
 
 void MainApp::scrollCallback(float amount) {
-    boringCamera.zoom(amount);
+    coolCamera.zoom(0.05f * amount);
 }
 
 void MainApp::moveCallback(const vec2& movement, bool leftButton, bool rightButton, bool middleButton) {
     if (leftButton || rightButton || middleButton) {
-        boringCamera.rotate(0.01f * movement);
+        coolCamera.rotate(0.1f * movement);
     }
 }

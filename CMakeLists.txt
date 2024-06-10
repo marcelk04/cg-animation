@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 3.26)
 set(SRC
     src/main.cpp
     src/mainapp.cpp
+    src/movingcamera.cpp
     src/framework/app.cpp
     src/framework/camera.cpp
     src/framework/common.cpp
@@ -198,7 +199,7 @@ if(APPLE)
     # Packaging macOS installer
     install(TARGETS ${PROJECT_NAME} BUNDLE DESTINATION .)
     set(CPACK_GENERATOR DragNDrop)
-    
+
 elseif(WIN32)
     foreach(RES_FILE IN LISTS RES)
         cmake_path(GET RES_FILE PARENT_PATH LOC)
