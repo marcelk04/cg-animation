@@ -2,6 +2,8 @@
 **/.DS_Store
 # VSCode specific
 .vscode/
+.vs/
 # Build files
 build/
 composed/
+out/
