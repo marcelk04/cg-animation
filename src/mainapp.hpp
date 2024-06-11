@@ -11,11 +11,13 @@ using namespace glm;
 #include "framework/camera.hpp"
 #include "framework/gl/program.hpp"
 
+#include <vector>
+
 class MainApp : public App {
-   public:
+public:
     MainApp();
 
-   protected:
+protected:
     void init() override;
     void buildImGui() override;
     void render() override;
@@ -25,10 +27,17 @@ class MainApp : public App {
     void moveCallback(const vec2& movement, bool leftButton, bool rightButton, bool middleButton) override;
     // void resizeCallback(const vec2& resolution) override;
 
-   private:
-       Mesh mesh;
-       Program meshshader;
-       MovingCamera coolCamera{ glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f) };
+private:
+    glm::vec3 deCasteljau(const std::vector<glm::vec3>& spline, float t);
 
-       glm::vec3 lightDir;
+private:
+    Mesh mesh;
+    Program meshshader;
+    MovingCamera coolCamera{ glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f) };
+    //std::vector<glm::vec3> spline{ glm::vec3(-2.0f, -1.0f, 3.0f), glm::vec3(-1.0f, -1.0f, 3.0f), glm::vec3(1.0f, 1.0f, 3.0f), glm::vec3(2.0f, 1.0f, 3.0f)};
+    //std::vector<glm::vec3> spline{ glm::vec3(-2.0f, -1.0f, 3.0f), glm::vec3(0.0f, 3.0f, 2.0f), glm::vec3(2.0f, -1.0f, 3.0f) };
+    std::vector<glm::vec3> spline{ glm::vec3(-2.0f, -1.0f, 3.0f), glm::vec3(0.0f, 3.0f, 2.0f), glm::vec3(2.0f, 2.0f, 0.0f), glm::vec3(3.0f, 1.5f, 0.0f) };
+    float t = 0;
+
+    glm::vec3 lightDir;
 };

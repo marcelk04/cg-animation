@@ -34,9 +34,16 @@ void MainApp::buildImGui() {
     if (ImGui::SphericalSlider("Light Direction", lightDir)) {
         meshshader.set("uLightDir", lightDir);
     }
+
+    ImGui::SliderFloat("t", &t, 0.0f, 1.0f);
 }
 
 void MainApp::render() {
+    glm::vec3 pos = deCasteljau(spline, t);
+
+    coolCamera.moveTo(pos);
+    coolCamera.lookAt(glm::vec3(0.0f));
+
     if (coolCamera.updateIfChanged()) {
         meshshader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
     }
@@ -80,4 +87,21 @@ void MainApp::moveCallback(const vec2& movement, bool leftButton, bool rightButt
     if (leftButton || rightButton || middleButton) {
         coolCamera.rotate(0.002f * movement);
     }
+}
+
+glm::vec3 MainApp::deCasteljau(const std::vector<glm::vec3>& spline, float t) {
+    std::vector<glm::vec3> points(spline.size());
+
+    for (int i = 0; i < spline.size(); i++) {
+        points[i] = glm::vec3(spline[i]);
+    }
+
+    int n = points.size();
+    for (int j = 1; j < n; j++) {
+        for (int i = 0; i < n - j; i++) {
+            points[i] = (1 - t) * points[i] + t * points[i + 1];
+        }
+    }
+
+    return points[0];
 }
