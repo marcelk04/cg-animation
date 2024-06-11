@@ -9,6 +9,9 @@ public:
 	glm::mat4& view() { return m_View; }
 	glm::mat4& projection() { return m_Projection; }
 
+	void moveTo(const glm::vec3& position);
+	void lookAt(const glm::vec3& target);
+
 	void move(const glm::vec3& delta);
 	void rotate(const glm::vec2& delta);
 	void zoom(const float amount);
@@ -31,14 +34,14 @@ public:
 	glm::mat4 m_View;
 	glm::mat4 m_Projection;
 
-	// other stuff i have no name for
+
 	float m_Fov = glm::radians(60.0f);
 	float m_Near = 0.1f;
 	float m_Far = 100.0f;
 	float m_AspectRatio = 1.0f;
 
-	float m_Yaw = -90.0f;
-	float m_Pitch = 0.0f;
+	float m_Yaw;
+	float m_Pitch;
 
 	bool m_UpToDate;
 };

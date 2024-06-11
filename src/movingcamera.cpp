@@ -1,13 +1,37 @@
 #include "movingcamera.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/constants.hpp>
+
 
 #include <iostream>
+
+
+inline std::ostream& operator<<(std::ostream& os, const glm::vec3& vec) {
+	return os << '[' << vec.x << ", " << vec.y << ", " << vec.z << ']';
+}
 
 MovingCamera::MovingCamera(const glm::vec3& position, const glm::vec3& target) {
 	m_Position = position;
 
+	lookAt(target);
+
 	update();
+}
+
+void MovingCamera::moveTo(const glm::vec3& position) {
+	m_Position = position;
+
+	m_UpToDate = false;
+}
+
+void MovingCamera::lookAt(const glm::vec3& target) {
+	m_Direction = glm::normalize(target - m_Position);
+
+	m_Pitch = glm::asin(-m_Direction.y);
+	m_Yaw = glm::atan(m_Direction.z, m_Direction.x);
+
+	m_UpToDate = false;
 }
 
 void MovingCamera::move(const glm::vec3& delta) {
@@ -18,20 +42,17 @@ void MovingCamera::move(const glm::vec3& delta) {
 
 void MovingCamera::rotate(const glm::vec2& delta) {
 	m_Yaw -= delta.x;
-	m_Pitch += delta.y;
+	m_Pitch -= delta.y;
 
-	if (m_Pitch > 89.0f) {
-		m_Pitch = 89.0f;
-	}
-	else if (m_Pitch < -89.0f) {
-		m_Pitch = -89.0f;
-	}
+	m_Direction.x = glm::cos(m_Yaw) * glm::cos(m_Pitch);
+	m_Direction.y = -glm::sin(m_Pitch);
+	m_Direction.z = glm::sin(m_Yaw) * glm::cos(m_Pitch);
 
 	m_UpToDate = false;
 }
 
 void MovingCamera::zoom(const float amount) {
-	m_Fov = glm::clamp(m_Fov - amount, 1.0f, 90.0f);
+	m_Fov = glm::clamp(m_Fov - amount, glm::radians(1.0f), glm::radians(90.0f));
 
 	m_UpToDate = false;
 }
@@ -47,13 +68,8 @@ bool MovingCamera::updateIfChanged() {
 }
 
 void MovingCamera::update() {
-	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+	glm::vec3 up(0.0f, 1.0f, 0.0f);
 
-	m_Direction.x = glm::cos(glm::radians(m_Yaw)) * glm::cos(glm::radians(m_Pitch));
-	m_Direction.y = glm::sin(glm::radians(m_Pitch));
-	m_Direction.z = glm::sin(glm::radians(m_Yaw)) * glm::cos(glm::radians(m_Pitch));
-
-	m_Direction = glm::normalize(m_Direction);
 	m_Right = glm::normalize(glm::cross(up, -m_Direction));
 	m_Up = glm::cross(-m_Direction, m_Right);
 

@@ -28,7 +28,6 @@ class MainApp : public App {
    private:
        Mesh mesh;
        Program meshshader;
-       Camera boringCamera;
        MovingCamera coolCamera{ glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f) };
 
        glm::vec3 lightDir;

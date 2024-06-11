@@ -18,6 +18,7 @@ MainApp::MainApp() : App(800, 600) {
 
     mesh.load("meshes/bunny.obj");
     meshshader.load("meshshader.vert", "meshshader.frag");
+    meshshader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
 
     lightDir = glm::vec3(1.0f);
 }
@@ -72,11 +73,11 @@ void MainApp::keyCallback(Key key, Action action) {
 }
 
 void MainApp::scrollCallback(float amount) {
-    coolCamera.zoom(0.05f * amount);
+    coolCamera.zoom(0.1f * amount);
 }
 
 void MainApp::moveCallback(const vec2& movement, bool leftButton, bool rightButton, bool middleButton) {
     if (leftButton || rightButton || middleButton) {
-        coolCamera.rotate(0.1f * movement);
+        coolCamera.rotate(0.002f * movement);
     }
 }

@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 
+
 using namespace glm;
 
 const float ALTITUDE_DELTA = 0.1f;
