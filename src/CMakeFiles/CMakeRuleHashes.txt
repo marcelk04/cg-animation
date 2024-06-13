@@ -1,0 +1,5 @@
+# Hashes of file build rules.
+fc375b51ca8e6fd9d04c1abe2a69e75d CMakeFiles/zip
+f4ff803de8e89b11638b6a61e18b8488 _deps/glad-build/CMakeFiles/glad-generate-files
+ed219f4cac7a093a3c613f7859431f01 _deps/glad-build/include/glad/glad.h
+1bc9b6d0a0ba348bdb1c82b30d3ed3d0 _deps/tinyobjloader-build/CMakeFiles/uninstall

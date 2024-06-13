@@ -1,0 +1,23 @@
+# ninja log v6
+749	753	1718225156581870093	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glm-subbuild/glm-populate-prefix/src/glm-populate-stamp/glm-populate-update	953ab4455e021e9f
+753	757	1718225156585870094	glm-populate-prefix/src/glm-populate-stamp/glm-populate-patch	53ea3a575644dfa0
+765	769	1718225156596870098	glm-populate-prefix/src/glm-populate-stamp/glm-populate-install	6bd0915e1653111a
+773	777	1718225156605870101	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glm-subbuild/CMakeFiles/glm-populate-complete	ad94e9262fd6cf8c
+765	769	1718225156596870098	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glm-subbuild/glm-populate-prefix/src/glm-populate-stamp/glm-populate-install	6bd0915e1653111a
+773	777	1718225156605870101	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glm-subbuild/glm-populate-prefix/src/glm-populate-stamp/glm-populate-done	ad94e9262fd6cf8c
+773	777	1718225156605870101	glm-populate-prefix/src/glm-populate-stamp/glm-populate-done	ad94e9262fd6cf8c
+4	749	1718225156576870091	glm-populate-prefix/src/glm-populate-stamp/glm-populate-download	bb7af2cf62b5312e
+749	753	1718225156581870093	glm-populate-prefix/src/glm-populate-stamp/glm-populate-update	953ab4455e021e9f
+773	777	1718225156605870101	CMakeFiles/glm-populate-complete	ad94e9262fd6cf8c
+753	757	1718225156585870094	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glm-subbuild/glm-populate-prefix/src/glm-populate-stamp/glm-populate-patch	53ea3a575644dfa0
+757	761	1718225156589870095	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glm-subbuild/glm-populate-prefix/src/glm-populate-stamp/glm-populate-configure	d6e32e2e16ec31e8
+0	4	1718225155832869841	glm-populate-prefix/src/glm-populate-stamp/glm-populate-mkdir	afa5f68f9bc4c5b7
+4	749	1718225156576870091	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glm-subbuild/glm-populate-prefix/src/glm-populate-stamp/glm-populate-download	bb7af2cf62b5312e
+761	765	1718225156593870097	glm-populate-prefix/src/glm-populate-stamp/glm-populate-build	7d3a0dcaab558db
+0	4	1718225155832869841	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glm-subbuild/glm-populate-prefix/src/glm-populate-stamp/glm-populate-mkdir	afa5f68f9bc4c5b7
+761	765	1718225156593870097	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glm-subbuild/glm-populate-prefix/src/glm-populate-stamp/glm-populate-build	7d3a0dcaab558db
+769	773	1718225156600870099	glm-populate-prefix/src/glm-populate-stamp/glm-populate-test	968c2513578257cf
+4	749	1718225156576870091	glm-populate-prefix/src/1.0.1.tar.gz	bb7af2cf62b5312e
+757	761	1718225156589870095	glm-populate-prefix/src/glm-populate-stamp/glm-populate-configure	d6e32e2e16ec31e8
+4	749	1718225156576870091	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glm-subbuild/glm-populate-prefix/src/1.0.1.tar.gz	bb7af2cf62b5312e
+769	773	1718225156600870099	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glm-subbuild/glm-populate-prefix/src/glm-populate-stamp/glm-populate-test	968c2513578257cf

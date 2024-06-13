@@ -1,0 +1,23 @@
+# ninja log v6
+496	499	1718225154533869405	glfw-populate-prefix/src/glfw-populate-stamp/glfw-populate-configure	ea61bf6bc6043e9a
+5	488	1718225154522869401	glfw-populate-prefix/src/glfw-populate-stamp/glfw-populate-download	7ebfa5e2bc2ed842
+510	515	1718225154549869410	CMakeFiles/glfw-populate-complete	725550fc5692247f
+493	496	1718225154530869404	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glfw-subbuild/glfw-populate-prefix/src/glfw-populate-stamp/glfw-populate-patch	ae43d4336f3afa7f
+496	499	1718225154533869405	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glfw-subbuild/glfw-populate-prefix/src/glfw-populate-stamp/glfw-populate-configure	ea61bf6bc6043e9a
+506	510	1718225154543869409	glfw-populate-prefix/src/glfw-populate-stamp/glfw-populate-test	e7397a6970c3bc6c
+488	493	1718225154526869403	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glfw-subbuild/glfw-populate-prefix/src/glfw-populate-stamp/glfw-populate-update	16fc53fa10406890
+488	493	1718225154526869403	glfw-populate-prefix/src/glfw-populate-stamp/glfw-populate-update	16fc53fa10406890
+5	488	1718225154522869401	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glfw-subbuild/glfw-populate-prefix/src/glfw-populate-stamp/glfw-populate-download	7ebfa5e2bc2ed842
+5	488	1718225154522869401	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glfw-subbuild/glfw-populate-prefix/src/3.3.tar.gz	7ebfa5e2bc2ed842
+5	488	1718225154522869401	glfw-populate-prefix/src/3.3.tar.gz	7ebfa5e2bc2ed842
+510	515	1718225154549869410	glfw-populate-prefix/src/glfw-populate-stamp/glfw-populate-done	725550fc5692247f
+503	506	1718225154540869407	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glfw-subbuild/glfw-populate-prefix/src/glfw-populate-stamp/glfw-populate-install	9019f902d94bc2ca
+499	503	1718225154536869406	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glfw-subbuild/glfw-populate-prefix/src/glfw-populate-stamp/glfw-populate-build	975ae571ecfe049e
+510	515	1718225154549869410	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glfw-subbuild/glfw-populate-prefix/src/glfw-populate-stamp/glfw-populate-done	725550fc5692247f
+499	503	1718225154536869406	glfw-populate-prefix/src/glfw-populate-stamp/glfw-populate-build	975ae571ecfe049e
+506	510	1718225154543869409	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glfw-subbuild/glfw-populate-prefix/src/glfw-populate-stamp/glfw-populate-test	e7397a6970c3bc6c
+510	515	1718225154549869410	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glfw-subbuild/CMakeFiles/glfw-populate-complete	725550fc5692247f
+503	506	1718225154540869407	glfw-populate-prefix/src/glfw-populate-stamp/glfw-populate-install	9019f902d94bc2ca
+1	5	1718225154039869239	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glfw-subbuild/glfw-populate-prefix/src/glfw-populate-stamp/glfw-populate-mkdir	40bf134e401efaf
+493	496	1718225154530869404	glfw-populate-prefix/src/glfw-populate-stamp/glfw-populate-patch	ae43d4336f3afa7f
+1	5	1718225154039869239	glfw-populate-prefix/src/glfw-populate-stamp/glfw-populate-mkdir	40bf134e401efaf

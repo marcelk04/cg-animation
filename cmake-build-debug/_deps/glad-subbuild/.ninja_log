@@ -1,0 +1,23 @@
+# ninja log v6
+505	509	1718225155609869766	glad-populate-prefix/src/glad-populate-stamp/glad-populate-configure	79e7501a03da837b
+496	500	1718225155600869763	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glad-subbuild/glad-populate-prefix/src/glad-populate-stamp/glad-populate-update	5a8dd224d7a11b8a
+520	525	1718225155624869771	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glad-subbuild/glad-populate-prefix/src/glad-populate-stamp/glad-populate-done	7fa2b40a3947bfc9
+496	500	1718225155600869763	glad-populate-prefix/src/glad-populate-stamp/glad-populate-update	5a8dd224d7a11b8a
+500	505	1718225155604869764	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glad-subbuild/glad-populate-prefix/src/glad-populate-stamp/glad-populate-patch	e0f05ab003a6e385
+520	525	1718225155624869771	CMakeFiles/glad-populate-complete	7fa2b40a3947bfc9
+5	496	1718225155595869761	glad-populate-prefix/src/glad-populate-stamp/glad-populate-download	9ebf8fda4de4f0db
+500	505	1718225155604869764	glad-populate-prefix/src/glad-populate-stamp/glad-populate-patch	e0f05ab003a6e385
+5	496	1718225155595869761	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glad-subbuild/glad-populate-prefix/src/glad-populate-stamp/glad-populate-download	9ebf8fda4de4f0db
+516	520	1718225155619869769	glad-populate-prefix/src/glad-populate-stamp/glad-populate-test	22bd2ba90442ea59
+520	525	1718225155624869771	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glad-subbuild/CMakeFiles/glad-populate-complete	7fa2b40a3947bfc9
+513	516	1718225155616869768	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glad-subbuild/glad-populate-prefix/src/glad-populate-stamp/glad-populate-install	8d8f98ae286fe5bb
+505	509	1718225155609869766	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glad-subbuild/glad-populate-prefix/src/glad-populate-stamp/glad-populate-configure	79e7501a03da837b
+5	496	1718225155595869761	glad-populate-prefix/src/v0.1.36.tar.gz	9ebf8fda4de4f0db
+520	525	1718225155624869771	glad-populate-prefix/src/glad-populate-stamp/glad-populate-done	7fa2b40a3947bfc9
+1	4	1718225155104869597	glad-populate-prefix/src/glad-populate-stamp/glad-populate-mkdir	2e211d323e815776
+516	520	1718225155619869769	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glad-subbuild/glad-populate-prefix/src/glad-populate-stamp/glad-populate-test	22bd2ba90442ea59
+509	513	1718225155612869767	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glad-subbuild/glad-populate-prefix/src/glad-populate-stamp/glad-populate-build	6e9d22e196f016ff
+1	4	1718225155104869597	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glad-subbuild/glad-populate-prefix/src/glad-populate-stamp/glad-populate-mkdir	2e211d323e815776
+509	513	1718225155612869767	glad-populate-prefix/src/glad-populate-stamp/glad-populate-build	6e9d22e196f016ff
+5	496	1718225155595869761	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/glad-subbuild/glad-populate-prefix/src/v0.1.36.tar.gz	9ebf8fda4de4f0db
+513	516	1718225155616869768	glad-populate-prefix/src/glad-populate-stamp/glad-populate-install	8d8f98ae286fe5bb

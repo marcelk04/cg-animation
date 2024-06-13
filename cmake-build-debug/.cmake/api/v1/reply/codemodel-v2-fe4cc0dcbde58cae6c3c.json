@@ -1,0 +1,280 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						3,
+						4,
+						6
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.26"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						5,
+						8
+					]
+				},
+				{
+					"build" : "_deps/glfw-build",
+					"childIndexes" : 
+					[
+						2
+					],
+					"jsonFile" : "directory-_deps.glfw-build-Debug-81d4f461aa69ab6fd4e3.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "cmake-build-debug/_deps/glfw-src"
+				},
+				{
+					"build" : "_deps/glfw-build/src",
+					"jsonFile" : "directory-_deps.glfw-build.src-Debug-4ae9615550f1a687d20b.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 1,
+					"source" : "cmake-build-debug/_deps/glfw-src/src",
+					"targetIndexes" : 
+					[
+						3
+					]
+				},
+				{
+					"build" : "_deps/glad-build",
+					"jsonFile" : "directory-_deps.glad-build-Debug-20928222860b234befe4.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 2,
+					"source" : "cmake-build-debug/_deps/glad-src",
+					"targetIndexes" : 
+					[
+						1,
+						2
+					]
+				},
+				{
+					"build" : "_deps/glm-build",
+					"childIndexes" : 
+					[
+						5
+					],
+					"jsonFile" : "directory-_deps.glm-build-Debug-3ab0f2b8ca6d44de8bbe.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.6"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 3,
+					"source" : "cmake-build-debug/_deps/glm-src"
+				},
+				{
+					"build" : "_deps/glm-build/glm",
+					"jsonFile" : "directory-_deps.glm-build.glm-Debug-afa33c3e425f714e5927.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.6"
+					},
+					"parentIndex" : 4,
+					"projectIndex" : 3,
+					"source" : "cmake-build-debug/_deps/glm-src/glm",
+					"targetIndexes" : 
+					[
+						4
+					]
+				},
+				{
+					"build" : "_deps/tinyobjloader-build",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-_deps.tinyobjloader-build-Debug-4bde8ea3f6e79c71fc03.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.16"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 4,
+					"source" : "cmake-build-debug/_deps/tinyobjloader-src",
+					"targetIndexes" : 
+					[
+						6,
+						7
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1,
+						2,
+						3,
+						4
+					],
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "cgintro-animation",
+					"targetIndexes" : 
+					[
+						0,
+						5,
+						8
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						1,
+						2
+					],
+					"name" : "GLFW",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						3
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						3
+					],
+					"name" : "GLAD",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						1,
+						2
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						4,
+						5
+					],
+					"name" : "glm",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						4
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						6
+					],
+					"name" : "tinyobjloader",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						6,
+						7
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "cgintro-animation::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-cgintro-animation-Debug-1310b0c3cbb3878ef9e5.json",
+					"name" : "cgintro-animation",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "glad::@f022c46af7fd79d63a94",
+					"jsonFile" : "target-glad-Debug-09ece6f2bb9dc4014a9a.json",
+					"name" : "glad",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "glad-generate-files::@f022c46af7fd79d63a94",
+					"jsonFile" : "target-glad-generate-files-Debug-cc2b6081cff23840a6ef.json",
+					"name" : "glad-generate-files",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "glfw::@fa9f4482d3a2b070f206",
+					"jsonFile" : "target-glfw-Debug-28b66416e70a3d77ccfc.json",
+					"name" : "glfw",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 5,
+					"id" : "glm::@ce54d98d7b326a3e12a8",
+					"jsonFile" : "target-glm-Debug-926d940529167c6470ff.json",
+					"name" : "glm",
+					"projectIndex" : 3
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "imgui_glfw::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-imgui_glfw-Debug-5e54ad74c4ee7965eb3e.json",
+					"name" : "imgui_glfw",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 6,
+					"id" : "tinyobjloader::@504dab42fa214d3d2823",
+					"jsonFile" : "target-tinyobjloader-Debug-e4fba72b59d1a8851a09.json",
+					"name" : "tinyobjloader",
+					"projectIndex" : 4
+				},
+				{
+					"directoryIndex" : 6,
+					"id" : "uninstall::@504dab42fa214d3d2823",
+					"jsonFile" : "target-uninstall-Debug-ad74918144cd3515c5eb.json",
+					"name" : "uninstall",
+					"projectIndex" : 4
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "zip::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-zip-Debug-5781839f5a737fcbf431.json",
+					"name" : "zip",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/timnogga/CLionProjects/cg-animation/cmake-build-debug",
+		"source" : "/home/timnogga/CLionProjects/cg-animation"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 6
+	}
+}

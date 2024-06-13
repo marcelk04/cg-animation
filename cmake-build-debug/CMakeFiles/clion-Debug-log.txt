@@ -1,0 +1,7 @@
+/snap/clion/282/bin/cmake/linux/x64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/snap/clion/282/bin/ninja/linux/x64/ninja -G Ninja -S /home/timnogga/CLionProjects/cg-animation -B /home/timnogga/CLionProjects/cg-animation/cmake-build-debug
+-- Using X11 for window creation
+-- GLM: Version 1.0.1
+-- GLM: Build with C++ features auto detection
+-- Configuring done (0.7s)
+-- Generating done (0.1s)
+-- Build files have been written to: /home/timnogga/CLionProjects/cg-animation/cmake-build-debug

@@ -1,0 +1,12 @@
+# This is a generated file and its contents are an internal implementation detail.
+# The download step will be re-executed if anything in this file changes.
+# No other meaning or use of this file is supported.
+
+method=url
+command=/usr/bin/cmake;-P;/home/timnogga/CLionProjects/cg-animation/src/_deps/tinyobjloader-subbuild/tinyobjloader-populate-prefix/src/tinyobjloader-populate-stamp/download-tinyobjloader-populate.cmake;COMMAND;/usr/bin/cmake;-P;/home/timnogga/CLionProjects/cg-animation/src/_deps/tinyobjloader-subbuild/tinyobjloader-populate-prefix/src/tinyobjloader-populate-stamp/verify-tinyobjloader-populate.cmake;COMMAND;/usr/bin/cmake;-P;/home/timnogga/CLionProjects/cg-animation/src/_deps/tinyobjloader-subbuild/tinyobjloader-populate-prefix/src/tinyobjloader-populate-stamp/extract-tinyobjloader-populate.cmake
+source_dir=/home/timnogga/CLionProjects/cg-animation/src/_deps/tinyobjloader-src
+work_dir=/home/timnogga/CLionProjects/cg-animation/src/_deps
+url(s)=https://github.com/tinyobjloader/tinyobjloader/archive/v2.0.0rc13.tar.gz
+hash=
+no_extract=
+

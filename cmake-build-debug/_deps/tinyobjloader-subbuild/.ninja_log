@@ -1,0 +1,23 @@
+# ninja log v6
+426	431	1718225157724870476	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/tinyobjloader-subbuild/tinyobjloader-populate-prefix/src/tinyobjloader-populate-stamp/tinyobjloader-populate-update	43c9e77305d2c0e4
+426	431	1718225157724870476	tinyobjloader-populate-prefix/src/tinyobjloader-populate-stamp/tinyobjloader-populate-update	43c9e77305d2c0e4
+436	440	1718225157733870479	tinyobjloader-populate-prefix/src/tinyobjloader-populate-stamp/tinyobjloader-populate-configure	d92b9842546df4a1
+440	443	1718225157736870480	tinyobjloader-populate-prefix/src/tinyobjloader-populate-stamp/tinyobjloader-populate-build	762c4aa7e4eba010
+0	4	1718225157297870333	tinyobjloader-populate-prefix/src/tinyobjloader-populate-stamp/tinyobjloader-populate-mkdir	fdaa7a1bd9deb988
+4	426	1718225157718870474	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/tinyobjloader-subbuild/tinyobjloader-populate-prefix/src/v2.0.0rc13.tar.gz	820444e8529f7b1a
+450	456	1718225157748870484	tinyobjloader-populate-prefix/src/tinyobjloader-populate-stamp/tinyobjloader-populate-done	b38632810bce3dd5
+450	456	1718225157748870484	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/tinyobjloader-subbuild/tinyobjloader-populate-prefix/src/tinyobjloader-populate-stamp/tinyobjloader-populate-done	b38632810bce3dd5
+447	450	1718225157743870483	tinyobjloader-populate-prefix/src/tinyobjloader-populate-stamp/tinyobjloader-populate-test	fe6a458335d093fb
+440	443	1718225157736870480	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/tinyobjloader-subbuild/tinyobjloader-populate-prefix/src/tinyobjloader-populate-stamp/tinyobjloader-populate-build	762c4aa7e4eba010
+443	447	1718225157740870481	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/tinyobjloader-subbuild/tinyobjloader-populate-prefix/src/tinyobjloader-populate-stamp/tinyobjloader-populate-install	dd6d77ef49aab78
+0	4	1718225157297870333	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/tinyobjloader-subbuild/tinyobjloader-populate-prefix/src/tinyobjloader-populate-stamp/tinyobjloader-populate-mkdir	fdaa7a1bd9deb988
+4	426	1718225157718870474	tinyobjloader-populate-prefix/src/tinyobjloader-populate-stamp/tinyobjloader-populate-download	820444e8529f7b1a
+4	426	1718225157718870474	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/tinyobjloader-subbuild/tinyobjloader-populate-prefix/src/tinyobjloader-populate-stamp/tinyobjloader-populate-download	820444e8529f7b1a
+432	436	1718225157728870477	tinyobjloader-populate-prefix/src/tinyobjloader-populate-stamp/tinyobjloader-populate-patch	6e9c083a85413174
+447	450	1718225157743870483	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/tinyobjloader-subbuild/tinyobjloader-populate-prefix/src/tinyobjloader-populate-stamp/tinyobjloader-populate-test	fe6a458335d093fb
+450	456	1718225157748870484	CMakeFiles/tinyobjloader-populate-complete	b38632810bce3dd5
+450	456	1718225157748870484	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/tinyobjloader-subbuild/CMakeFiles/tinyobjloader-populate-complete	b38632810bce3dd5
+436	440	1718225157733870479	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/tinyobjloader-subbuild/tinyobjloader-populate-prefix/src/tinyobjloader-populate-stamp/tinyobjloader-populate-configure	d92b9842546df4a1
+432	436	1718225157728870477	/home/timnogga/CLionProjects/cg-animation/cmake-build-debug/_deps/tinyobjloader-subbuild/tinyobjloader-populate-prefix/src/tinyobjloader-populate-stamp/tinyobjloader-populate-patch	6e9c083a85413174
+4	426	1718225157718870474	tinyobjloader-populate-prefix/src/v2.0.0rc13.tar.gz	820444e8529f7b1a
+443	447	1718225157740870481	tinyobjloader-populate-prefix/src/tinyobjloader-populate-stamp/tinyobjloader-populate-install	dd6d77ef49aab78

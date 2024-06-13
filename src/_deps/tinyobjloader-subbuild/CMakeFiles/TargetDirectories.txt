@@ -1,0 +1,3 @@
+/home/timnogga/CLionProjects/cg-animation/src/_deps/tinyobjloader-subbuild/CMakeFiles/tinyobjloader-populate.dir
+/home/timnogga/CLionProjects/cg-animation/src/_deps/tinyobjloader-subbuild/CMakeFiles/edit_cache.dir
+/home/timnogga/CLionProjects/cg-animation/src/_deps/tinyobjloader-subbuild/CMakeFiles/rebuild_cache.dir

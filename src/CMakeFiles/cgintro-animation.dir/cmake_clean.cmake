@@ -1,0 +1,41 @@
+file(REMOVE_RECURSE
+  "CMakeFiles/cgintro-animation.dir/framework/app.cpp.o"
+  "CMakeFiles/cgintro-animation.dir/framework/app.cpp.o.d"
+  "CMakeFiles/cgintro-animation.dir/framework/camera.cpp.o"
+  "CMakeFiles/cgintro-animation.dir/framework/camera.cpp.o.d"
+  "CMakeFiles/cgintro-animation.dir/framework/common.cpp.o"
+  "CMakeFiles/cgintro-animation.dir/framework/common.cpp.o.d"
+  "CMakeFiles/cgintro-animation.dir/framework/gl/buffer.cpp.o"
+  "CMakeFiles/cgintro-animation.dir/framework/gl/buffer.cpp.o.d"
+  "CMakeFiles/cgintro-animation.dir/framework/gl/framebuffer.cpp.o"
+  "CMakeFiles/cgintro-animation.dir/framework/gl/framebuffer.cpp.o.d"
+  "CMakeFiles/cgintro-animation.dir/framework/gl/program.cpp.o"
+  "CMakeFiles/cgintro-animation.dir/framework/gl/program.cpp.o.d"
+  "CMakeFiles/cgintro-animation.dir/framework/gl/query.cpp.o"
+  "CMakeFiles/cgintro-animation.dir/framework/gl/query.cpp.o.d"
+  "CMakeFiles/cgintro-animation.dir/framework/gl/shader.cpp.o"
+  "CMakeFiles/cgintro-animation.dir/framework/gl/shader.cpp.o.d"
+  "CMakeFiles/cgintro-animation.dir/framework/gl/texture.cpp.o"
+  "CMakeFiles/cgintro-animation.dir/framework/gl/texture.cpp.o.d"
+  "CMakeFiles/cgintro-animation.dir/framework/gl/vertexarray.cpp.o"
+  "CMakeFiles/cgintro-animation.dir/framework/gl/vertexarray.cpp.o.d"
+  "CMakeFiles/cgintro-animation.dir/framework/imguiutil.cpp.o"
+  "CMakeFiles/cgintro-animation.dir/framework/imguiutil.cpp.o.d"
+  "CMakeFiles/cgintro-animation.dir/framework/mesh.cpp.o"
+  "CMakeFiles/cgintro-animation.dir/framework/mesh.cpp.o.d"
+  "CMakeFiles/cgintro-animation.dir/framework/objparser.cpp.o"
+  "CMakeFiles/cgintro-animation.dir/framework/objparser.cpp.o.d"
+  "CMakeFiles/cgintro-animation.dir/main.cpp.o"
+  "CMakeFiles/cgintro-animation.dir/main.cpp.o.d"
+  "CMakeFiles/cgintro-animation.dir/mainapp.cpp.o"
+  "CMakeFiles/cgintro-animation.dir/mainapp.cpp.o.d"
+  "CMakeFiles/cgintro-animation.dir/movingcamera.cpp.o"
+  "CMakeFiles/cgintro-animation.dir/movingcamera.cpp.o.d"
+  "cgintro-animation"
+  "cgintro-animation.pdb"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang CXX)
+  include(CMakeFiles/cgintro-animation.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()
