@@ -44,7 +44,9 @@ set(TEXTURES
 set(ICON
     icons/AppIcon.icns
 )
-set(RES "${SHADERS};${MESHES};${TEXTURES}")
+set(RES "${SHADERS};${MESHES};${TEXTURES}"
+        src/fireshader.h
+        src/fireshader.cpp)
 set_source_files_properties(${RES} PROPERTIES HEADER_FILE_ONLY True)
 
 ####################################################################
