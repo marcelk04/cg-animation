@@ -16,7 +16,7 @@ ParticleSystem::ParticleSystem() {
 }
 
 void ParticleSystem::init() {
-    particles.resize(1000);
+    particles.resize(50000);
     for (auto& p : particles) {
         p.position = glm::vec3(0.0f);
         p.velocity = glm::vec3((rand() % 100 - 50) / 50.0f, (rand() % 100) / 50.0f, (rand() % 100 - 50) / 50.0f);
