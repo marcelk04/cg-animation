@@ -19,7 +19,6 @@ public:
 
 protected:
     void init() override;
-    void buildImGui() override;
     void render() override;
     void keyCallback(Key key, Action action) override;
     // void clickCallback(Button button, Action action, Modifier modifier) override;
@@ -31,8 +30,6 @@ private:
     glm::vec3 deCasteljau(const std::vector<glm::vec3>& spline, float t);
 
 private:
-    Mesh mesh;
-    Program meshshader;
     MovingCamera coolCamera{ glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f) };
     //std::vector<glm::vec3> spline{ glm::vec3(-2.0f, -1.0f, 3.0f), glm::vec3(-1.0f, -1.0f, 3.0f), glm::vec3(1.0f, 1.0f, 3.0f), glm::vec3(2.0f, 1.0f, 3.0f)};
     //std::vector<glm::vec3> spline{ glm::vec3(-2.0f, -1.0f, 3.0f), glm::vec3(0.0f, 3.0f, 2.0f), glm::vec3(2.0f, -1.0f, 3.0f) };
@@ -40,4 +37,5 @@ private:
     float t = 0;
 
     glm::vec3 lightDir;
+    Program fireshader;
 };
