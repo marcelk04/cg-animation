@@ -14,13 +14,17 @@ using namespace glm;
 ParticleSystem::ParticleSystem() {
     shader.load("particles.vert", "particles.frag");
 }
-
+float generateLifetime() {
+    float lambda = 1.0f / 1.0f; // Adjust the rate parameter for the exponential distribution
+    float random = static_cast<float>(rand()) / RAND_MAX;
+    return -log(1.0f - random) / lambda;
+}
 void ParticleSystem::init() {
     particles.resize(50000);
     for (auto& p : particles) {
         p.position = glm::vec3(0.0f);
-        p.velocity = glm::vec3((rand() % 100 - 50) / 50.0f, (rand() % 100) / 50.0f, (rand() % 100 - 50) / 50.0f);
-        p.lifetime = (rand() % 100) / 10.0f;
+        p.velocity = glm::vec3((rand() % 100 - 50) / 200.0f, (rand() % 100) / 200.0f, (rand() % 100 - 50) / 200.0f);
+        p.lifetime = generateLifetime();
     }
 
     glGenVertexArrays(1, &vao);
