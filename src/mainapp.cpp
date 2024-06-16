@@ -16,6 +16,12 @@ MainApp::MainApp() : App(800, 600) {
     App::setTitle("cgintro"); // set title
     App::setVSync(true); // Limit framerate
 
+    texture.load(Texture::Format::SRGB8, "textures\\checker.png", 0);
+    plane.load("meshes/plane.obj");
+    textureShader.load("textureshader.vert", "textureshader.frag");
+    textureShader.bindTextureUnit("uTexture", 0);
+    textureShader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
+
     mesh.load("meshes/bunny.obj");
     meshshader.load("meshshader.vert", "meshshader.frag");
     meshshader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
@@ -32,7 +38,7 @@ void MainApp::buildImGui() {
     ImGui::StatisticsWindow(delta, resolution);
 
     if (ImGui::SphericalSlider("Light Direction", lightDir)) {
-        meshshader.set("uLightDir", lightDir);
+        textureShader.set("uLightDir", lightDir);
     }
 
     ImGui::SliderFloat("t", &t, 0.0f, 1.0f);
@@ -45,13 +51,14 @@ void MainApp::render() {
     coolCamera.lookAt(glm::vec3(0.0f));
 
     if (coolCamera.updateIfChanged()) {
-        meshshader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
+        textureShader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
     }
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    meshshader.bind();
-    mesh.draw();
+    texture.bind(Texture::Type::TEX2D, 0);
+    textureShader.bind();
+    plane.draw();
 }
 
 void MainApp::keyCallback(Key key, Action action) {

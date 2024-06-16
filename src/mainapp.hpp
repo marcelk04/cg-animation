@@ -10,6 +10,7 @@ using namespace glm;
 #include "framework/mesh.hpp"
 #include "framework/camera.hpp"
 #include "framework/gl/program.hpp"
+#include "framework/gl/texture.hpp"
 
 #include <vector>
 
@@ -34,6 +35,11 @@ private:
     Mesh mesh;
     Program meshshader;
     MovingCamera coolCamera{ glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f) };
+
+    Texture texture;
+    Mesh plane;
+    Program textureShader;
+
     //std::vector<glm::vec3> spline{ glm::vec3(-2.0f, -1.0f, 3.0f), glm::vec3(-1.0f, -1.0f, 3.0f), glm::vec3(1.0f, 1.0f, 3.0f), glm::vec3(2.0f, 1.0f, 3.0f)};
     //std::vector<glm::vec3> spline{ glm::vec3(-2.0f, -1.0f, 3.0f), glm::vec3(0.0f, 3.0f, 2.0f), glm::vec3(2.0f, -1.0f, 3.0f) };
     std::vector<glm::vec3> spline{ glm::vec3(-2.0f, -1.0f, 3.0f), glm::vec3(0.0f, 3.0f, 2.0f), glm::vec3(2.0f, 2.0f, 0.0f), glm::vec3(3.0f, 1.5f, 0.0f) };
