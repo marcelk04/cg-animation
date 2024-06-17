@@ -16,15 +16,15 @@ MainApp::MainApp() : App(800, 600) {
     App::setTitle("cgintro"); // set title
     App::setVSync(true); // Limit framerate
 
-    texture.load(Texture::Format::SRGB8, "textures\\checker.png", 0);
+    texture.load(Texture::Format::SRGB8, "textures/checker.png", 0);
+    texture.bind(Texture::Type::TEX2D);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
     plane.load("meshes/plane.obj");
     textureShader.load("textureshader.vert", "textureshader.frag");
     textureShader.bindTextureUnit("uTexture", 0);
     textureShader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
-
-    mesh.load("meshes/bunny.obj");
-    meshshader.load("meshshader.vert", "meshshader.frag");
-    meshshader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
 
     lightDir = glm::vec3(1.0f);
 }
@@ -40,16 +40,9 @@ void MainApp::buildImGui() {
     if (ImGui::SphericalSlider("Light Direction", lightDir)) {
         textureShader.set("uLightDir", lightDir);
     }
-
-    ImGui::SliderFloat("t", &t, 0.0f, 1.0f);
 }
 
 void MainApp::render() {
-    glm::vec3 pos = deCasteljau(spline, t);
-
-    coolCamera.moveTo(pos);
-    coolCamera.lookAt(glm::vec3(0.0f));
-
     if (coolCamera.updateIfChanged()) {
         textureShader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
     }

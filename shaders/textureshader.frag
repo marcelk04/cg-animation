@@ -14,4 +14,5 @@ void main() {
 	vec4 color = texture(uTexture, sTexCoord);
 
 	outColor = color.rgb;
+	//outColor = vec3(sTexCoord, 0.0);
 }

@@ -32,18 +32,11 @@ private:
     glm::vec3 deCasteljau(const std::vector<glm::vec3>& spline, float t);
 
 private:
-    Mesh mesh;
-    Program meshshader;
-    MovingCamera coolCamera{ glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f) };
+    MovingCamera coolCamera{ glm::vec3(0.0f, 1.0f, 3.0f), glm::vec3(0.0f) };
 
     Texture texture;
     Mesh plane;
     Program textureShader;
-
-    //std::vector<glm::vec3> spline{ glm::vec3(-2.0f, -1.0f, 3.0f), glm::vec3(-1.0f, -1.0f, 3.0f), glm::vec3(1.0f, 1.0f, 3.0f), glm::vec3(2.0f, 1.0f, 3.0f)};
-    //std::vector<glm::vec3> spline{ glm::vec3(-2.0f, -1.0f, 3.0f), glm::vec3(0.0f, 3.0f, 2.0f), glm::vec3(2.0f, -1.0f, 3.0f) };
-    std::vector<glm::vec3> spline{ glm::vec3(-2.0f, -1.0f, 3.0f), glm::vec3(0.0f, 3.0f, 2.0f), glm::vec3(2.0f, 2.0f, 0.0f), glm::vec3(3.0f, 1.5f, 0.0f) };
-    float t = 0;
 
     glm::vec3 lightDir;
 };
