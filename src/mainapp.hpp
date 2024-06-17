@@ -8,27 +8,9 @@ using namespace glm;
 #include "framework/mesh.hpp"
 #include "framework/camera.hpp"
 #include "framework/gl/program.hpp"
+#include "particlesystem.hpp"
 
 #include <vector>
-
-class ParticleSystem {
-public:
-    ParticleSystem();
-    void init();
-    void update(float time);
-    void render(const glm::mat4& viewProj);
-
-private:
-    struct Particle {
-        glm::vec3 position;
-        glm::vec3 velocity;
-        float lifetime;
-    };
-
-    std::vector<Particle> particles;
-    GLuint vao, vbo;
-    Program shader;
-};
 
 class MainApp : public App {
 public:
