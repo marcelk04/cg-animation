@@ -22,18 +22,15 @@ MainApp::MainApp() : App(800, 600) {
     App::setTitle("cgintro"); // set title
     App::setVSync(true); // Limit framerate
 
-    tex.load(Texture::Format::SRGB8, "textures/checker.png", 0);
-    tex.bind(Texture::Type::TEX2D);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
     textureshader.load("textureshader.vert", "textureshader.frag");
-    textureshader.bindTextureUnit("uTexture", 0);
     textureshader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
+
+    meshshader.load("meshshader.vert", "meshshader.frag");
+    meshshader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
 
     lightDir = glm::vec3(1.0f);
 
-    auto segments = LightningGenerator::genBolt(glm::vec3(1.0f), glm::vec3(-1.0f), 4, coolCamera.m_Direction);
+    auto segments = LightningGenerator::genBolt(glm::vec3(1.0f), glm::vec3(-1.0f), 5, coolCamera.m_Direction);
     auto meshdata = LightningGenerator::genMeshData(segments, coolCamera.m_Direction);
 
     lightningMesh.load(meshdata.first, meshdata.second);
@@ -43,8 +40,8 @@ void MainApp::init() {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //glEnable(GL_BLEND);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void MainApp::buildImGui() {
@@ -52,18 +49,19 @@ void MainApp::buildImGui() {
 
     if (ImGui::SphericalSlider("Light Direction", lightDir)) {
         textureshader.set("uLightDir", lightDir);
+        meshshader.set("uLightDir", lightDir);
     }
 }
 
 void MainApp::render() {
     if (coolCamera.updateIfChanged()) {
         textureshader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
+        meshshader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
     }
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    tex.bind(Texture::Type::TEX2D, 0);
-    textureshader.bind();
+    meshshader.bind();
     lightningMesh.draw();
 }
 

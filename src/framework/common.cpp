@@ -41,3 +41,17 @@ void Common::filesInDirectory(const std::string& directoryPath, const std::strin
         }
     }
 }
+
+int Common::randomInt(int first, int last) {
+    return static_cast<int>(randomFloat(first, last));
+}
+
+float Common::randomFloat() {
+    return static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+}
+
+float Common::randomFloat(float first, float last) {
+    float interval = last - first;
+
+    return randomFloat() * interval + first;
+}

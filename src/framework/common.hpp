@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <cmath>
 
 namespace Common {
 
@@ -11,6 +12,10 @@ namespace Common {
 
     template <class T, typename... Rest>
     void hash_combine(std::size_t& seed, const T& v, const Rest&... rest);
+
+    int randomInt(int first, int last);
+    float randomFloat();
+    float randomFloat(float first, float last);
 
 }
 

@@ -1,5 +1,7 @@
 #include "lightninggenerator.hpp"
 
+#include "framework/common.hpp"
+
 #include <list>
 #include <cstdlib>
 #include <iostream>
@@ -25,8 +27,7 @@ std::vector<LightningGenerator::Segment> LightningGenerator::genBolt(glm::vec3 s
 			glm::vec3 midpoint = 0.5f * (seg.startpoint + seg.endpoint);
 			glm::vec3 direction = seg.endpoint - seg.startpoint;
 
-			float randomValue = static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
-            float randomOffset = 2 * randomValue * offsetAmount - offsetAmount;
+			float randomOffset = Common::randomFloat(-offsetAmount, offsetAmount);
 
             midpoint += randomOffset * glm::normalize(glm::cross(direction, camDir));
 
@@ -36,7 +37,7 @@ std::vector<LightningGenerator::Segment> LightningGenerator::genBolt(glm::vec3 s
 			newSegments.push_back(s1);
 			newSegments.push_back(s2);
 
-			if (std::rand() < RAND_MAX / 3) {
+			if (Common::randomFloat() < 0.33f) {
 				glm::vec3 offshootDir = midpoint - seg.startpoint;
 				Segment s3{ midpoint, midpoint + offshootDir * lengthScale };
 				newSegments.push_back(s3);
@@ -71,16 +72,20 @@ LightningGenerator::MeshData LightningGenerator::genMeshData(const std::vector<S
 	std::vector<Mesh::VertexPCN> vertices(segments.size() * 4);
 	std::vector<unsigned int> indices(segments.size() * 6);
 
+	glm::vec3 startpoint = segments[0].startpoint;
+	glm::vec3 endpoint = segments[segments.size()-1].endpoint;
+	glm::vec3 offsetVec = glm::normalize(glm::cross(endpoint - startpoint, camDir));
+
 	int vIdx = 0;
 	int iIdx = 0;
 	int vCount = 0;
 	for (const Segment& seg : segments) {
-		glm::vec3 perp = glm::normalize(glm::cross(seg.endpoint - seg.startpoint, camDir));
+		//glm::vec3 perp = glm::normalize(glm::cross(seg.endpoint - seg.startpoint, camDir));
 
-		Mesh::VertexPCN v0{ seg.startpoint - halfwidth * perp, glm::vec2(0.0f, 0.0f), -camDir };
-		Mesh::VertexPCN v1{ seg.startpoint + halfwidth * perp, glm::vec2(0.0f, 1.0f), -camDir };
-		Mesh::VertexPCN v2{ seg.endpoint - halfwidth * perp, glm::vec2(1.0f, 0.0f), -camDir };
-		Mesh::VertexPCN v3{ seg.endpoint + halfwidth * perp, glm::vec2(1.0f, 1.0f), -camDir };
+		Mesh::VertexPCN v0{ seg.startpoint - halfwidth * offsetVec, glm::vec2(0.0f, 0.0f), -camDir };
+		Mesh::VertexPCN v1{ seg.startpoint + halfwidth * offsetVec, glm::vec2(0.0f, 1.0f), -camDir };
+		Mesh::VertexPCN v2{ seg.endpoint - halfwidth * offsetVec, glm::vec2(1.0f, 0.0f), -camDir };
+		Mesh::VertexPCN v3{ seg.endpoint + halfwidth * offsetVec, glm::vec2(1.0f, 1.0f), -camDir };
 
 		vertices[vIdx++] = v0;
 		vertices[vIdx++] = v1;

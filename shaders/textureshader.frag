@@ -13,10 +13,7 @@ uniform vec3 uLightDir = normalize(vec3(1.0));
 void main() {
 	vec4 color = texture(uTexture, sTexCoord);
 
-	if (color.a < 0.1) {
-		discard;
-	}
-
-	outColor = color.rgb;
+	//outColor = color.rgb;
 	//outColor = vec3(sTexCoord, 0.0);
+	outColor = vec3(1.0);
 }
