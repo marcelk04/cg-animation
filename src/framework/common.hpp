@@ -13,6 +13,7 @@ namespace Common {
     template <class T, typename... Rest>
     void hash_combine(std::size_t& seed, const T& v, const Rest&... rest);
 
+    void randomSeed();
     int randomInt(int first, int last);
     float randomFloat();
     float randomFloat(float first, float last);

@@ -42,6 +42,10 @@ void Common::filesInDirectory(const std::string& directoryPath, const std::strin
     }
 }
 
+void Common::randomSeed() {
+    std::srand(std::time(0));
+}
+
 int Common::randomInt(int first, int last) {
     return static_cast<int>(randomFloat(first, last));
 }

@@ -16,9 +16,9 @@ std::vector<LightningGenerator::Segment> LightningGenerator::genBolt(glm::vec3 s
 	segmentList.push_back(s);
 
 	float offsetAmount = 0.06f;
+	float offshootOffsetAmount = 0.75f * offsetAmount;
 	float lengthScale = 0.7f;
-
-	std::srand(42);
+	float offshotChance = 0.3f;
 
 	for (int g = 0; g < generations; g++) {
 		std::list<Segment> newSegments;
@@ -26,10 +26,11 @@ std::vector<LightningGenerator::Segment> LightningGenerator::genBolt(glm::vec3 s
 		for (Segment seg : segmentList) {
 			glm::vec3 midpoint = 0.5f * (seg.startpoint + seg.endpoint);
 			glm::vec3 direction = seg.endpoint - seg.startpoint;
+			glm::vec3 offsetDir = glm::normalize(glm::cross(direction, camDir));
 
 			float randomOffset = Common::randomFloat(-offsetAmount, offsetAmount);
 
-            midpoint += randomOffset * glm::normalize(glm::cross(direction, camDir));
+            midpoint += randomOffset * offsetDir;
 
 			Segment s1{ seg.startpoint, midpoint };
 			Segment s2{ midpoint, seg.endpoint };
@@ -37,9 +38,13 @@ std::vector<LightningGenerator::Segment> LightningGenerator::genBolt(glm::vec3 s
 			newSegments.push_back(s1);
 			newSegments.push_back(s2);
 
-			if (Common::randomFloat() < 0.33f) {
+			// generate offshoots
+			if (Common::randomFloat() < offshotChance) {
+				float offshootOffset = Common::randomFloat(-offshootOffsetAmount, offshootOffsetAmount);
+
 				glm::vec3 offshootDir = midpoint - seg.startpoint;
-				Segment s3{ midpoint, midpoint + offshootDir * lengthScale };
+				glm::vec3 offshootEnd = (midpoint + offshootDir * lengthScale) + (offshootOffset * offsetDir);
+				Segment s3{ midpoint, offshootEnd };
 				newSegments.push_back(s3);
 			}
 		}
@@ -48,22 +53,6 @@ std::vector<LightningGenerator::Segment> LightningGenerator::genBolt(glm::vec3 s
 	}
 
 	return std::vector<Segment>(segmentList.begin(), segmentList.end());
-}
-
-std::vector<float> LightningGenerator::getVertices(const std::vector<Segment>& segments) {
-	std::vector<float> vertices(segments.size() * 3 * 2);
-
-	int k = 0;
-	for (const Segment& seg : segments) {
-		vertices[k++] = seg.startpoint.x;
-		vertices[k++] = seg.startpoint.y;
-		vertices[k++] = seg.startpoint.z;
-		vertices[k++] = seg.endpoint.x;
-		vertices[k++] = seg.endpoint.y;
-		vertices[k++] = seg.endpoint.z;
-	}
-
-	return vertices;
 }
 
 LightningGenerator::MeshData LightningGenerator::genMeshData(const std::vector<Segment>& segments, const glm::vec3& camDir) {
@@ -80,8 +69,6 @@ LightningGenerator::MeshData LightningGenerator::genMeshData(const std::vector<S
 	int iIdx = 0;
 	int vCount = 0;
 	for (const Segment& seg : segments) {
-		//glm::vec3 perp = glm::normalize(glm::cross(seg.endpoint - seg.startpoint, camDir));
-
 		Mesh::VertexPCN v0{ seg.startpoint - halfwidth * offsetVec, glm::vec2(0.0f, 0.0f), -camDir };
 		Mesh::VertexPCN v1{ seg.startpoint + halfwidth * offsetVec, glm::vec2(0.0f, 1.0f), -camDir };
 		Mesh::VertexPCN v2{ seg.endpoint - halfwidth * offsetVec, glm::vec2(1.0f, 0.0f), -camDir };
@@ -92,11 +79,11 @@ LightningGenerator::MeshData LightningGenerator::genMeshData(const std::vector<S
 		vertices[vIdx++] = v2;
 		vertices[vIdx++] = v3;
 
-		//std::cout << v0.position << " " << v1.position << " " << v2.position << " " << v3.position << std::endl;
-
-		// v0 v1
-		// v2 v3
-		// 0 2 1 1 2 3
+		// v0 - v1
+		// |  /  |
+		// v2 - v3
+		//
+		// Indices: 0 2 1 1 2 3
 
 		indices[iIdx++] = vCount + 0;
 		indices[iIdx++] = vCount + 2;

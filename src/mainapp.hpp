@@ -29,8 +29,6 @@ protected:
     void moveCallback(const vec2& movement, bool leftButton, bool rightButton, bool middleButton) override;
     // void resizeCallback(const vec2& resolution) override;
 
-private:
-    glm::vec3 deCasteljau(const std::vector<glm::vec3>& spline, float t);
 
 private:
     MovingCamera coolCamera{ glm::vec3(0.0f, 1.0f, 3.0f), glm::vec3(0.0f) };
@@ -38,6 +36,8 @@ private:
     Program textureshader;
     Program meshshader;
     Mesh lightningMesh;
+    Mesh plane;
+    Texture texChecker;
 
-    glm::vec3 lightDir;
+    glm::vec3 lightDir{ glm::vec3(1.0f) };
 };

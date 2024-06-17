@@ -9,6 +9,7 @@ using namespace glm;
 #include "framework/app.hpp"
 
 #include "framework/imguiutil.hpp"
+#include "framework/common.hpp"
 
 #include "lightninggenerator.hpp"
 
@@ -22,15 +23,21 @@ MainApp::MainApp() : App(800, 600) {
     App::setTitle("cgintro"); // set title
     App::setVSync(true); // Limit framerate
 
+    texChecker.load(Texture::Format::SRGB8, "textures/checker.png", 0);
+    texChecker.bind(Texture::Type::TEX2D);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
     textureshader.load("textureshader.vert", "textureshader.frag");
     textureshader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
+    textureshader.bindTextureUnit("uTexture", 0);
 
     meshshader.load("meshshader.vert", "meshshader.frag");
     meshshader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
 
-    lightDir = glm::vec3(1.0f);
+    plane.load("meshes/plane.obj");
 
-    auto segments = LightningGenerator::genBolt(glm::vec3(1.0f), glm::vec3(-1.0f), 5, coolCamera.m_Direction);
+    auto segments = LightningGenerator::genBolt(glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 5, coolCamera.m_Direction);
     auto meshdata = LightningGenerator::genMeshData(segments, coolCamera.m_Direction);
 
     lightningMesh.load(meshdata.first, meshdata.second);
@@ -39,6 +46,8 @@ MainApp::MainApp() : App(800, 600) {
 void MainApp::init() {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
+
+    Common::randomSeed();
 
     //glEnable(GL_BLEND);
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -61,6 +70,10 @@ void MainApp::render() {
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    texChecker.bind(Texture::Type::TEX2D);
+    textureshader.bind();
+    plane.draw();
+
     meshshader.bind();
     lightningMesh.draw();
 }
@@ -68,7 +81,7 @@ void MainApp::render() {
 void MainApp::keyCallback(Key key, Action action) {
     float cameraSpeed = 2.5f;
 
-    if (action != Action::REPEAT) return;
+    if (action == Action::RELEASE) return;
 
     if (key == Key::W) {
         coolCamera.move(delta * cameraSpeed * coolCamera.m_Direction);
@@ -88,6 +101,12 @@ void MainApp::keyCallback(Key key, Action action) {
     else if (key == Key::LEFT_SHIFT) {
         coolCamera.move(-delta * cameraSpeed * coolCamera.m_Up);
     }
+    else if (key == Key::G) {
+        auto segments = LightningGenerator::genBolt(glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 5, coolCamera.m_Direction);
+        auto meshdata = LightningGenerator::genMeshData(segments, coolCamera.m_Direction);
+
+        lightningMesh.load(meshdata.first, meshdata.second);
+    }
 }
 
 void MainApp::scrollCallback(float amount) {
@@ -98,21 +117,4 @@ void MainApp::moveCallback(const vec2& movement, bool leftButton, bool rightButt
     if (leftButton || rightButton || middleButton) {
         coolCamera.rotate(0.002f * movement);
     }
-}
-
-glm::vec3 MainApp::deCasteljau(const std::vector<glm::vec3>& spline, float t) {
-    std::vector<glm::vec3> points(spline.size());
-
-    for (int i = 0; i < spline.size(); i++) {
-        points[i] = glm::vec3(spline[i]);
-    }
-
-    int n = points.size();
-    for (int j = 1; j < n; j++) {
-        for (int i = 0; i < n - j; i++) {
-            points[i] = (1 - t) * points[i] + t * points[i + 1];
-        }
-    }
-
-    return points[0];
 }
