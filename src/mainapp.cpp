@@ -16,12 +16,13 @@ MainApp::MainApp() : App(800, 600) {
     App::setTitle("cgintro"); // set title
     App::setVSync(true); // Limit framerate
 
-    texture.load(Texture::Format::SRGB8, "textures/checker.png", 0);
+    texture.load(Texture::Format::SRGB8, "textures/cottage_diffuse.png", 0);
+//    texture.load(Texture::Format::SRGB8, "textures/cottage_normal.png", 0);
     texture.bind(Texture::Type::TEX2D);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    plane.load("meshes/plane.obj");
+    plane.load("meshes/cottage.obj");
     textureShader.load("textureshader.vert", "textureshader.frag");
     textureShader.bindTextureUnit("uTexture", 0);
     textureShader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());

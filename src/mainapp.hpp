@@ -32,7 +32,7 @@ private:
     glm::vec3 deCasteljau(const std::vector<glm::vec3>& spline, float t);
 
 private:
-    MovingCamera coolCamera{ glm::vec3(0.0f, 1.0f, 3.0f), glm::vec3(0.0f) };
+    MovingCamera coolCamera{ glm::vec3(0.0f, 1.0f, 50.0f), glm::vec3(0.0f) };
 
     Texture texture;
     Mesh plane;
