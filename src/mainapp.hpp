@@ -9,6 +9,7 @@ using namespace glm;
 
 #include "framework/mesh.hpp"
 #include "framework/camera.hpp"
+#include "lightninggenerator.hpp"
 #include "framework/gl/program.hpp"
 #include "framework/gl/texture.hpp"
 
@@ -30,14 +31,13 @@ protected:
 
 private:
     glm::vec3 deCasteljau(const std::vector<glm::vec3>& spline, float t);
-    std::vector<glm::vec3> generateLightning(glm::vec3 start, glm::vec3 end, int generations);
-    std::vector<unsigned int> generateLightningIndices(int n);
 
 private:
     MovingCamera coolCamera{ glm::vec3(0.0f, 1.0f, 3.0f), glm::vec3(0.0f) };
 
-    Mesh lightning;
-    Program lineShader;
+    Program textureshader;
+    Mesh lightningMesh;
+    Texture tex;
 
     glm::vec3 lightDir;
 };

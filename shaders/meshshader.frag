@@ -11,4 +11,5 @@ void main() {
 	vec3 normal = normalize(sNormal);
 
 	outColor = normal * max(dot(uLightDir, normal), 0.0);
+	//outColor = vec3(1.0);
 }

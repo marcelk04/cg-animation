@@ -18,4 +18,5 @@ void main() {
 	}
 
 	outColor = color.rgb;
+	//outColor = vec3(sTexCoord, 0.0);
 }

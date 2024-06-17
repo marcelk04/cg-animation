@@ -6,6 +6,7 @@ set(SRC
     src/main.cpp
     src/mainapp.cpp
     src/movingcamera.cpp
+    src/lightninggenerator.cpp
     src/framework/app.cpp
     src/framework/camera.cpp
     src/framework/common.cpp
