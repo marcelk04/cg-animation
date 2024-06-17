@@ -32,6 +32,9 @@ MainApp::MainApp() : App(800, 600) {
 void MainApp::init() {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void MainApp::buildImGui() {
