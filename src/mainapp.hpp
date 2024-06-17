@@ -11,7 +11,7 @@ using namespace glm;
 #include "framework/camera.hpp"
 #include "framework/gl/program.hpp"
 #include "framework/gl/texture.hpp"
-
+#include "particlesystem.hpp"
 #include <vector>
 
 class MainApp : public App {
@@ -39,4 +39,7 @@ private:
     Program textureShader;
 
     glm::vec3 lightDir;
+    Program fireshader;
+    ParticleSystem particleSystem;
 };
+
