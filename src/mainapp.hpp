@@ -31,7 +31,7 @@ protected:
     void resizeCallback(const vec2& resolution) override;
 
 private:
-    MovingCamera cam{ glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f) };
+    MovingCamera cam{ glm::vec3(0.0f, 2.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f) };
 
     Mesh cube;
     Program meshshader;

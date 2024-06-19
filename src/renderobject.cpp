@@ -12,14 +12,16 @@ RenderObject::RenderObject(Mesh& mesh, const glm::vec3& color, const glm::vec3& 
 }
 
 RenderObject::RenderObject(Mesh& mesh, const glm::vec3& color, const glm::mat4& model) 
-	: m_Mesh(mesh), m_Color(color), m_Model(model) {
+	: m_Mesh(mesh), m_Color(color), m_Model(model), m_NormalMatrix(glm::transpose(glm::inverse(model))) {
 
 }
 
-void RenderObject::draw(Program& program) {
+void RenderObject::draw(Program& program, MovingCamera& cam) {
 	program.bind();
 	program.set("uObjectColor", m_Color);
 	program.set("uLocalToWorld", m_Model);
+	program.set("uNormalMatrix", m_NormalMatrix);
+	program.set("uCamPos", cam.m_Position);
 	
 	m_Mesh.draw();
 }

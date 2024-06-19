@@ -22,8 +22,8 @@ MainApp::MainApp()
 
     cube.load("meshes/cube.obj");
 
-    normalCube = std::make_shared<RenderObject>(cube, glm::vec3(1.0f, 0.5f, 0.31f));
-    lightCube = std::make_shared<RenderObject>(cube, glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(2.0f, 1.0f, -5.0f), 0.2f);
+    normalCube = std::make_shared<RenderObject>(cube, glm::vec3(1.0f, 0.5f, 0.31f), glm::vec3(-1.0f, 0.0f, 0.0f), 0.5f);
+    lightCube = std::make_shared<RenderObject>(cube, glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(2.0f, 3.0f, -3.0f), 0.2f);
 
     meshshader.load("meshshader.vert", "meshshader.frag");
     meshshader.set("uWorldToClip", cam.projection() * cam.view());
@@ -31,6 +31,7 @@ MainApp::MainApp()
     lightingshader.load("lightingshader.vert", "lightingshader.frag");
     lightingshader.set("uWorldToClip", cam.projection() * cam.view());
     lightingshader.set("uLightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+    lightingshader.set("uLightPos", glm::vec3(2.0f, 3.0f, -3.0f));
 
     colorshader.load("colorshader.vert", "colorshader.frag");
     colorshader.set("uWorldToClip", cam.projection() * cam.view());
@@ -54,8 +55,8 @@ void MainApp::render() {
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    normalCube->draw(lightingshader);
-    lightCube->draw(colorshader);
+    normalCube->draw(lightingshader, cam);
+    lightCube->draw(colorshader, cam);
 }
 
 void MainApp::keyCallback(Key key, Action action) {
