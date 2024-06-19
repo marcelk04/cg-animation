@@ -11,51 +11,51 @@ using namespace glm;
 #include "framework/imguiutil.hpp"
 
 #include <iostream>
+#include <memory>
 
-MainApp::MainApp() : App(800, 600) {
+MainApp::MainApp() 
+    : App(800, 600) {
     App::setTitle("cgintro"); // set title
     App::setVSync(true); // Limit framerate
 
-    texture.load(Texture::Format::SRGB8, "textures/cottage_diffuse.png", 0);
-//    texture.load(Texture::Format::SRGB8, "textures/cottage_normal.png", 0);
-    texture.bind(Texture::Type::TEX2D);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    cam.setResolution(resolution);
 
-    plane.load("meshes/cottage.obj");
-    textureShader.load("textureshader.vert", "textureshader.frag");
-    textureShader.bindTextureUnit("uTexture", 0);
-    textureShader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
+    cube.load("meshes/cube.obj");
 
-    lightDir = glm::vec3(1.0f);
+    normalCube = std::make_shared<RenderObject>(cube, glm::vec3(1.0f, 0.5f, 0.31f));
+    lightCube = std::make_shared<RenderObject>(cube, glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(2.0f, 1.0f, -5.0f), 0.2f);
+
+    meshshader.load("meshshader.vert", "meshshader.frag");
+    meshshader.set("uWorldToClip", cam.projection() * cam.view());
+
+    lightingshader.load("lightingshader.vert", "lightingshader.frag");
+    lightingshader.set("uWorldToClip", cam.projection() * cam.view());
+    lightingshader.set("uLightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+
+    colorshader.load("colorshader.vert", "colorshader.frag");
+    colorshader.set("uWorldToClip", cam.projection() * cam.view());
 }
 
 void MainApp::init() {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void MainApp::buildImGui() {
     ImGui::StatisticsWindow(delta, resolution);
-
-    if (ImGui::SphericalSlider("Light Direction", lightDir)) {
-        textureShader.set("uLightDir", lightDir);
-    }
 }
 
 void MainApp::render() {
-    if (coolCamera.updateIfChanged()) {
-        textureShader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
+    if (cam.updateIfChanged()) {
+        meshshader.set("uWorldToClip", cam.projection() * cam.view());
+        lightingshader.set("uWorldToClip", cam.projection() * cam.view());
+        colorshader.set("uWorldToClip", cam.projection() * cam.view());
     }
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    texture.bind(Texture::Type::TEX2D, 0);
-    textureShader.bind();
-    plane.draw();
+    normalCube->draw(lightingshader);
+    lightCube->draw(colorshader);
 }
 
 void MainApp::keyCallback(Key key, Action action) {
@@ -64,48 +64,36 @@ void MainApp::keyCallback(Key key, Action action) {
     if (action != Action::REPEAT) return;
 
     if (key == Key::W) {
-        coolCamera.move(delta * cameraSpeed * coolCamera.m_Direction);
+        cam.move(delta * cameraSpeed * cam.m_Direction);
     }
     else if (key == Key::S) {
-        coolCamera.move(-delta * cameraSpeed * coolCamera.m_Direction);
+        cam.move(-delta * cameraSpeed * cam.m_Direction);
     }
     else if (key == Key::A) {
-        coolCamera.move(-delta * cameraSpeed * coolCamera.m_Right);
+        cam.move(-delta * cameraSpeed * cam.m_Right);
     }
     else if (key == Key::D) {
-        coolCamera.move(delta * cameraSpeed * coolCamera.m_Right);
+        cam.move(delta * cameraSpeed * cam.m_Right);
     }
     else if (key == Key::SPACE) {
-        coolCamera.move(delta * cameraSpeed * coolCamera.m_Up);
+        cam.move(delta * cameraSpeed * cam.m_Up);
     }
     else if (key == Key::LEFT_SHIFT) {
-        coolCamera.move(-delta * cameraSpeed * coolCamera.m_Up);
+        cam.move(-delta * cameraSpeed * cam.m_Up);
     }
 }
 
 void MainApp::scrollCallback(float amount) {
-    coolCamera.zoom(0.1f * amount);
+    cam.zoom(0.1f * amount);
 }
 
 void MainApp::moveCallback(const vec2& movement, bool leftButton, bool rightButton, bool middleButton) {
     if (leftButton || rightButton || middleButton) {
-        coolCamera.rotate(0.002f * movement);
+        cam.rotate(0.002f * movement);
     }
 }
 
-glm::vec3 MainApp::deCasteljau(const std::vector<glm::vec3>& spline, float t) {
-    std::vector<glm::vec3> points(spline.size());
-
-    for (int i = 0; i < spline.size(); i++) {
-        points[i] = glm::vec3(spline[i]);
-    }
-
-    int n = points.size();
-    for (int j = 1; j < n; j++) {
-        for (int i = 0; i < n - j; i++) {
-            points[i] = (1 - t) * points[i] + t * points[i + 1];
-        }
-    }
-
-    return points[0];
+void MainApp::resizeCallback(const glm::vec2& resolution) {
+    cam.setResolution(resolution);
 }
+

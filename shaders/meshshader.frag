@@ -9,6 +9,7 @@ uniform vec3 uLightDir = normalize(vec3(1.0));
 
 void main() {
 	vec3 normal = normalize(sNormal);
+	vec3 color = vec3(1.0, 1.0, 1.0);
 
-	outColor = normal * max(dot(uLightDir, normal), 0.0);
+	outColor = color * max(dot(uLightDir, normal), 0.0);
 }

@@ -19,6 +19,12 @@ MovingCamera::MovingCamera(const glm::vec3& position, const glm::vec3& target) {
 	update();
 }
 
+void MovingCamera::setResolution(const glm::vec2& resolution) {
+	m_AspectRatio = resolution.x / resolution.y;
+
+	m_UpToDate = false;	
+}
+
 void MovingCamera::moveTo(const glm::vec3& position) {
 	m_Position = position;
 

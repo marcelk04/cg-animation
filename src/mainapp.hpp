@@ -4,6 +4,7 @@
 using namespace glm;
 
 #include "movingcamera.hpp"
+#include "renderobject.hpp"
 
 #include "framework/app.hpp"
 
@@ -13,6 +14,7 @@ using namespace glm;
 #include "framework/gl/texture.hpp"
 
 #include <vector>
+#include <memory>
 
 class MainApp : public App {
 public:
@@ -26,17 +28,16 @@ protected:
     // void clickCallback(Button button, Action action, Modifier modifier) override;
     void scrollCallback(float amount) override;
     void moveCallback(const vec2& movement, bool leftButton, bool rightButton, bool middleButton) override;
-    // void resizeCallback(const vec2& resolution) override;
+    void resizeCallback(const vec2& resolution) override;
 
 private:
-    glm::vec3 deCasteljau(const std::vector<glm::vec3>& spline, float t);
+    MovingCamera cam{ glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f) };
 
-private:
-    MovingCamera coolCamera{ glm::vec3(0.0f, 1.0f, 50.0f), glm::vec3(0.0f) };
+    Mesh cube;
+    Program meshshader;
+    Program lightingshader;
+    Program colorshader;
 
-    Texture texture;
-    Mesh plane;
-    Program textureShader;
-
-    glm::vec3 lightDir;
+    std::shared_ptr<RenderObject> normalCube;
+    std::shared_ptr<RenderObject> lightCube;
 };
