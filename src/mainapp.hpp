@@ -31,7 +31,7 @@ protected:
 
 
 private:
-    MovingCamera coolCamera{ glm::vec3(0.0f, 1.0f, 3.0f), glm::vec3(0.0f) };
+    MovingCamera coolCamera{ glm::vec3(0.0f, 1.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f) };
 
     Program textureshader;
     Program meshshader;

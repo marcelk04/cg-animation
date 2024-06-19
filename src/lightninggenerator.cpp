@@ -15,7 +15,7 @@ std::vector<LightningGenerator::Segment> LightningGenerator::genBolt(glm::vec3 s
 	Segment s{ startpoint, endpoint };
 	segmentList.push_back(s);
 
-	float offsetAmount = 0.06f;
+	float offsetAmount = 0.2f;
 	float offshootOffsetAmount = 0.75f * offsetAmount;
 	float lengthScale = 0.7f;
 	float offshotChance = 0.3f;
@@ -36,7 +36,6 @@ std::vector<LightningGenerator::Segment> LightningGenerator::genBolt(glm::vec3 s
 			Segment s2{ midpoint, seg.endpoint };
 
 			newSegments.push_back(s1);
-			newSegments.push_back(s2);
 
 			// generate offshoots
 			if (Common::randomFloat() < offshotChance) {
@@ -47,7 +46,12 @@ std::vector<LightningGenerator::Segment> LightningGenerator::genBolt(glm::vec3 s
 				Segment s3{ midpoint, offshootEnd };
 				newSegments.push_back(s3);
 			}
+			
+			newSegments.push_back(s2);
 		}
+
+		offsetAmount /= 2.0f;
+		offshootOffsetAmount /= 2.0f;	
 
 		segmentList = newSegments;
 	}
