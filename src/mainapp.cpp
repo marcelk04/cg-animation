@@ -33,19 +33,32 @@ MainApp::MainApp()
     normalCube->setPositionAndSize(glm::vec3(-1.0f, 0.0f, 0.0f), 0.5f);
     normalCube->setMaterial(material);
 
-    lightCube = std::make_shared<RenderObject>(cube);
-    lightCube->setPositionAndSize(glm::vec3(2.0f, 3.0f, -3.0f), 0.2f);
-    lightCube->setColor(glm::vec3(1.0f));
+    lightingshader.load("lightingshader.vert", "lightingshader.frag");
+    lightingshader.set("uWorldToClip", cam.projection() * cam.view());
+
+    lightingshader.set("uDirLight.direction", glm::vec3(0.1f, 1.0f, 0.5f));
+    lightingshader.set("uDirLight.ambient", glm::vec3(0.2f));
+    lightingshader.set("uDirLight.diffuse", glm::vec3(0.5f));
+    lightingshader.set("uDirLight.specular", glm::vec3(1.0f));
+
+    for (int i = 0; i < 4; i++) {
+        RenderObject light(cube);
+        light.setPositionAndSize(lightPositions[i], 0.2f);
+        light.setColor(glm::vec3(1.0f));
+
+        lightCubes.push_back(std::move(light));
+
+        lightingshader.set("uPointLights[" + std::to_string(i) + "].position", lightPositions[i]);
+        lightingshader.set("uPointLights[" + std::to_string(i) + "].ambient", glm::vec3(0.2f));
+        lightingshader.set("uPointLights[" + std::to_string(i) + "].diffuse", glm::vec3(0.5f));
+        lightingshader.set("uPointLights[" + std::to_string(i) + "].specular", glm::vec3(1.0f));
+        lightingshader.set("uPointLights[" + std::to_string(i) + "].constant", 1.0f);
+        lightingshader.set("uPointLights[" + std::to_string(i) + "].linear", 0.09f);
+        lightingshader.set("uPointLights[" + std::to_string(i) + "].quadratic", 0.032f);
+    }
 
     meshshader.load("meshshader.vert", "meshshader.frag");
     meshshader.set("uWorldToClip", cam.projection() * cam.view());
-
-    lightingshader.load("lightingshader.vert", "lightingshader.frag");
-    lightingshader.set("uWorldToClip", cam.projection() * cam.view());
-    lightingshader.set("uLight.position", glm::vec3(2.0f, 3.0f, -3.0f));
-    lightingshader.set("uLight.ambient", glm::vec3(0.2f));
-    lightingshader.set("uLight.diffuse", glm::vec3(0.5f));
-    lightingshader.set("uLight.specular", glm::vec3(1.0f));
 
     colorshader.load("colorshader.vert", "colorshader.frag");
     colorshader.set("uWorldToClip", cam.projection() * cam.view());
@@ -70,7 +83,10 @@ void MainApp::render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     normalCube->draw(lightingshader, cam);
-    lightCube->draw(colorshader, cam);
+
+    for (RenderObject& lightCube : lightCubes) {
+        lightCube.draw(colorshader, cam);
+    }
 }
 
 void MainApp::keyCallback(Key key, Action action) {
