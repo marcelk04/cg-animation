@@ -22,16 +22,30 @@ MainApp::MainApp()
 
     cube.load("meshes/cube.obj");
 
-    normalCube = std::make_shared<RenderObject>(cube, glm::vec3(1.0f, 0.5f, 0.31f), glm::vec3(-1.0f, 0.0f, 0.0f), 0.5f);
-    lightCube = std::make_shared<RenderObject>(cube, glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(2.0f, 3.0f, -3.0f), 0.2f);
+    Material material {
+        glm::vec3(1.0f, 0.5f, 0.31f),
+        glm::vec3(1.0f, 0.5f, 0.31f),
+        glm::vec3(0.5f, 0.5f, 0.5f),
+        32.0f
+    };
+
+    normalCube = std::make_shared<RenderObject>(cube);
+    normalCube->setPositionAndSize(glm::vec3(-1.0f, 0.0f, 0.0f), 0.5f);
+    normalCube->setMaterial(material);
+
+    lightCube = std::make_shared<RenderObject>(cube);
+    lightCube->setPositionAndSize(glm::vec3(2.0f, 3.0f, -3.0f), 0.2f);
+    lightCube->setColor(glm::vec3(1.0f));
 
     meshshader.load("meshshader.vert", "meshshader.frag");
     meshshader.set("uWorldToClip", cam.projection() * cam.view());
 
     lightingshader.load("lightingshader.vert", "lightingshader.frag");
     lightingshader.set("uWorldToClip", cam.projection() * cam.view());
-    lightingshader.set("uLightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-    lightingshader.set("uLightPos", glm::vec3(2.0f, 3.0f, -3.0f));
+    lightingshader.set("uLight.position", glm::vec3(2.0f, 3.0f, -3.0f));
+    lightingshader.set("uLight.ambient", glm::vec3(0.2f));
+    lightingshader.set("uLight.diffuse", glm::vec3(0.5f));
+    lightingshader.set("uLight.specular", glm::vec3(1.0f));
 
     colorshader.load("colorshader.vert", "colorshader.frag");
     colorshader.set("uWorldToClip", cam.projection() * cam.view());
