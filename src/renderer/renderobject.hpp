@@ -30,7 +30,7 @@ public:
 	void setMaterial(const Material& material);
 	void setColor(const glm::vec3& color);
 
-	void draw(Program& program, MovingCamera& cam);
+	void draw(Program& program);
 
 private:
 	Mesh& m_Mesh;

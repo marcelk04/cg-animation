@@ -13,55 +13,74 @@ using namespace glm;
 #include <iostream>
 #include <memory>
 
-MainApp::MainApp() 
-    : App(800, 600) {
+inline std::ostream& operator<<(std::ostream& os, const glm::vec3& vec) {
+    return os << '[' << vec.x << ", " << vec.y << ", " << vec.z << ']';
+}
+
+MainApp::MainApp()
+    : App(800, 600), renderer(std::make_shared<MovingCamera>(cam)) {
     App::setTitle("cgintro"); // set title
     App::setVSync(true); // Limit framerate
 
     cam.setResolution(resolution);
 
+    lightingshader = std::make_shared<Program>();
+    lightingshader->load("lightingshader.vert", "lightingshader.frag");
+    lightingshader->set("uWorldToClip", cam.projection() * cam.view());
+    size_t lightingshaderId = renderer.addProgram(lightingshader);
+
+    meshshader = std::make_shared<Program>();
+    meshshader->load("meshshader.vert", "meshshader.frag");
+    meshshader->set("uWorldToClip", cam.projection() * cam.view());
+    size_t meshshaderId = renderer.addProgram(meshshader);
+
+    colorshader = std::make_shared<Program>();
+    colorshader->load("colorshader.vert", "colorshader.frag");
+    colorshader->set("uWorldToClip", cam.projection() * cam.view());
+    size_t colorshaderId = renderer.addProgram(colorshader);
+
     cube.load("meshes/cube.obj");
 
-    Material material {
+    Material material{
         glm::vec3(1.0f, 0.5f, 0.31f),
         glm::vec3(1.0f, 0.5f, 0.31f),
         glm::vec3(0.5f, 0.5f, 0.5f),
         32.0f
     };
 
-    normalCube = std::make_shared<RenderObject>(cube);
-    normalCube->setPositionAndSize(glm::vec3(-1.0f, 0.0f, 0.0f), 0.5f);
-    normalCube->setMaterial(material);
+    RenderObject normalCube(cube);
+    normalCube.setPositionAndSize(glm::vec3(-1.0f, 0.0f, 0.0f), 0.5f);
+    normalCube.setMaterial(material);
+    //normalCube.setColor(glm::vec3(1.0f, 0.5f, 0.31f));
+    renderer.addObject(std::move(normalCube), lightingshaderId);
 
-    lightingshader.load("lightingshader.vert", "lightingshader.frag");
-    lightingshader.set("uWorldToClip", cam.projection() * cam.view());
+    DirLight dirLight;
+    dirLight.direction = glm::vec3(0.1f, 1.0f, 0.5f);
+    dirLight.ambient = glm::vec3(0.2f);
+    dirLight.diffuse = glm::vec3(0.5f);
+    dirLight.specular = glm::vec3(1.0f);
 
-    lightingshader.set("uDirLight.direction", glm::vec3(0.1f, 1.0f, 0.5f));
-    lightingshader.set("uDirLight.ambient", glm::vec3(0.2f));
-    lightingshader.set("uDirLight.diffuse", glm::vec3(0.5f));
-    lightingshader.set("uDirLight.specular", glm::vec3(1.0f));
+    renderer.setDirLight(dirLight);
 
-    for (int i = 0; i < 4; i++) {
-        RenderObject light(cube);
-        light.setPositionAndSize(lightPositions[i], 0.2f);
-        light.setColor(glm::vec3(1.0f));
+    for (size_t i = 0; i < 4; i++) {
+        PointLight pointLight;
+        pointLight.position = lightPositions[i];
+        pointLight.ambient = glm::vec3(0.2f);
+        pointLight.diffuse = glm::vec3(0.5f);
+        pointLight.specular = glm::vec3(1.0f);
+        pointLight.constant = 1.0f;
+        pointLight.linear = 0.09f;
+        pointLight.quadratic = 0.032f;
 
-        lightCubes.push_back(std::move(light));
+        renderer.setPointLight(pointLight, i);
 
-        lightingshader.set("uPointLights[" + std::to_string(i) + "].position", lightPositions[i]);
-        lightingshader.set("uPointLights[" + std::to_string(i) + "].ambient", glm::vec3(0.2f));
-        lightingshader.set("uPointLights[" + std::to_string(i) + "].diffuse", glm::vec3(0.5f));
-        lightingshader.set("uPointLights[" + std::to_string(i) + "].specular", glm::vec3(1.0f));
-        lightingshader.set("uPointLights[" + std::to_string(i) + "].constant", 1.0f);
-        lightingshader.set("uPointLights[" + std::to_string(i) + "].linear", 0.09f);
-        lightingshader.set("uPointLights[" + std::to_string(i) + "].quadratic", 0.032f);
+        RenderObject lightCube(cube);
+        lightCube.setPositionAndSize(lightPositions[i], 0.2f);
+        lightCube.setColor(glm::vec3(1.0f));
+        renderer.addObject(std::move(lightCube), colorshaderId);
     }
 
-    meshshader.load("meshshader.vert", "meshshader.frag");
-    meshshader.set("uWorldToClip", cam.projection() * cam.view());
-
-    colorshader.load("colorshader.vert", "colorshader.frag");
-    colorshader.set("uWorldToClip", cam.projection() * cam.view());
+    renderer.updateProgramUniforms();
 }
 
 void MainApp::init() {
@@ -75,18 +94,14 @@ void MainApp::buildImGui() {
 
 void MainApp::render() {
     if (cam.updateIfChanged()) {
-        meshshader.set("uWorldToClip", cam.projection() * cam.view());
-        lightingshader.set("uWorldToClip", cam.projection() * cam.view());
-        colorshader.set("uWorldToClip", cam.projection() * cam.view());
+        meshshader->set("uWorldToClip", cam.projection() * cam.view());
+        lightingshader->set("uWorldToClip", cam.projection() * cam.view());
+        colorshader->set("uWorldToClip", cam.projection() * cam.view());
     }
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    normalCube->draw(lightingshader, cam);
-
-    for (RenderObject& lightCube : lightCubes) {
-        lightCube.draw(colorshader, cam);
-    }
+    renderer.draw();
 }
 
 void MainApp::keyCallback(Key key, Action action) {

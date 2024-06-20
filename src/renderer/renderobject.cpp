@@ -30,11 +30,10 @@ void RenderObject::setColor(const glm::vec3& color) {
 	m_Color = std::make_optional<glm::vec3>(color);
 }
 
-void RenderObject::draw(Program& program, MovingCamera& cam) {
+void RenderObject::draw(Program& program) {
 	program.bind();
 	program.set("uLocalToWorld", m_Model);
 	program.set("uNormalMatrix", m_NormalMatrix);
-	program.set("uCamPos", cam.m_Position);
 
 	if (m_Material.has_value()) {
 		program.set("uMaterial.ambient", m_Material->ambient);
@@ -46,6 +45,6 @@ void RenderObject::draw(Program& program, MovingCamera& cam) {
 	if (m_Color.has_value()) {
 		program.set("uObjectColor", m_Color.value());
 	}
-	
+
 	m_Mesh.draw();
 }
