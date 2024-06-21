@@ -5,7 +5,10 @@
 
 #include "movingcamera.hpp"
 
+#include "framework/mesh.hpp"
 #include "framework/gl/program.hpp"
+#include "framework/gl/texture.hpp"
+#include "framework/gl/framebuffer.hpp"
 
 #include <vector>
 #include <array>
@@ -15,7 +18,7 @@
 
 class Renderer {
 public:
-	Renderer(std::shared_ptr<MovingCamera> cam);
+	Renderer(std::shared_ptr<MovingCamera> cam, const glm::vec2& resolution);
 
 	size_t addProgram(std::shared_ptr<Program> program);
 	void addObject(RenderObject&& object, size_t programId);
@@ -36,8 +39,8 @@ public:
 	void updateCamUniforms(size_t programId);
 
 public:
-
 	std::shared_ptr<MovingCamera> m_Cam;
+	glm::vec2 m_Resolution;
 
 	std::vector<std::shared_ptr<Program>> m_Programs;
 
@@ -45,4 +48,13 @@ public:
 
 	DirLight m_DirLight;
 	std::array<PointLight, NR_POINT_LIGHTS> m_PointLights;
+
+	// hdr
+	Texture m_ColorTexture;
+	Texture m_DepthTexture;
+	Framebuffer m_HdrBuffer;
+
+	Program m_HdrShader;
+
+	Mesh m_Quad;
 };

@@ -6,8 +6,34 @@ inline std::ostream& operator<<(std::ostream& os, const glm::vec3& vec) {
 	return os << '[' << vec.x << ", " << vec.y << ", " << vec.z << ']';
 }
 
-Renderer::Renderer(std::shared_ptr<MovingCamera> cam)
-	: m_Cam(cam) {
+Renderer::Renderer(std::shared_ptr<MovingCamera> cam, const glm::vec2& resolution)
+	: m_Cam(cam), m_Resolution(resolution) {
+	m_ColorTexture.bind(Texture::Type::TEX2D);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_Resolution.x, m_Resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	m_DepthTexture.bind(Texture::Type::TEX2D);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH32F_STENCIL8, m_Resolution.x, m_Resolution.y, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	m_HdrBuffer.attach(Framebuffer::Type::DRAW, Framebuffer::Attachment::COLOR0, m_ColorTexture.handle);
+	m_HdrBuffer.attach(Framebuffer::Type::DRAW, Framebuffer::Attachment::DEPTH, m_DepthTexture.handle);
+
+	m_HdrShader.load("hdrshader.vert", "hdrshader.frag");
+	m_HdrShader.bindTextureUnit("uHdrBuffer", 0);
+
+	const std::vector<Mesh::VertexPCN> vertices = {
+		{ glm::vec3(-1.0f, 1.0f, 0.0f), glm::vec2(0.0f, 1.0f), glm::vec3(1.0f) },
+		{ glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec2(0.0f, 0.0f), glm::vec3(1.0f) },
+		{ glm::vec3(1.0f, 1.0f, 0.0f), glm::vec2(1.0f, 1.0f), glm::vec3(1.0f) },
+		{ glm::vec3(1.0f, -1.0f, 0.0f), glm::vec2(1.0f, 0.0f), glm::vec3(1.0f) }
+	};
+
+	const std::vector<unsigned int> indices = { 0, 1, 2, 3, 2, 1 };
+
+	m_Quad.load(vertices, indices);
 }
 
 size_t Renderer::addProgram(std::shared_ptr<Program> program) {
@@ -32,6 +58,11 @@ void Renderer::setPointLight(PointLight&& pointLight, size_t idx) {
 }
 
 void Renderer::draw() {
+	// Geometry pass
+	m_HdrBuffer.bind();
+	glEnable(GL_DEPTH_TEST);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	for (size_t i = 0; i < m_Objects.size(); i++) {
 		std::shared_ptr<Program> program = m_Programs[i];
 
@@ -41,6 +72,14 @@ void Renderer::draw() {
 			object.draw(*program);
 		}
 	}
+
+	// HDR pass
+	Framebuffer::bindDefault();
+	glDisable(GL_DEPTH_TEST);
+
+	m_ColorTexture.bind(Texture::Type::TEX2D, 0);
+	m_HdrShader.bind();
+	m_Quad.draw();
 }
 
 void Renderer::updateLightingUniforms() {
