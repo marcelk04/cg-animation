@@ -46,7 +46,7 @@ MainApp::MainApp()
     cube.load("meshes/cube.obj");
 
     RenderObject normalCube(cube);
-    normalCube.setPositionAndSize(glm::vec3(-1.0f, 0.0f, 0.0f), 0.5f);
+    normalCube.setPositionAndSize(glm::vec3(-1.0f, 0.0f, 0.0f), 1.0f);
     normalCube.setMaterial(material0);
     renderer.addObject(std::move(normalCube), lightingshaderId);
 
@@ -76,8 +76,8 @@ MainApp::MainApp()
         PointLight pointLight;
         pointLight.position = lightPositions[i];
         pointLight.ambient = glm::vec3(0.2f);
-        pointLight.diffuse = glm::vec3(0.5f);
-        pointLight.specular = glm::vec3(1.0f);
+        pointLight.diffuse = glm::vec3(1.0f);
+        pointLight.specular = glm::vec3(2.0f);
         pointLight.constant = 1.0f;
         pointLight.linear = 0.09f;
         pointLight.quadratic = 0.032f;
@@ -86,18 +86,10 @@ MainApp::MainApp()
 
         RenderObject lightCube(cube);
         lightCube.setPositionAndSize(lightPositions[i], 0.2f);
-        lightCube.setColor(glm::vec3(1.0f));
-
-        if (i == 3) lightCube.setColor(glm::vec3(10.0f)); // i dont like this
+        lightCube.setColor(glm::vec3(5.0f));
 
         renderer.addObject(std::move(lightCube), colorshaderId);
     }
-
-    float factor = 4.0f;
-    PointLight& pl = renderer.getPointLights()[3];
-    //pl.ambient *= factor;
-    pl.diffuse *= factor;
-    pl.specular *= factor;
 
     renderer.updateLightingUniforms();
     renderer.updateCamUniforms();
