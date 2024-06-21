@@ -8,7 +8,6 @@ inline std::ostream& operator<<(std::ostream& os, const glm::vec3& vec) {
 
 Renderer::Renderer(std::shared_ptr<MovingCamera> cam)
 	: m_Cam(cam) {
-
 }
 
 size_t Renderer::addProgram(std::shared_ptr<Program> program) {
@@ -24,11 +23,11 @@ void Renderer::addObject(RenderObject&& object, size_t programId) {
 	m_Objects[programId].push_back(object);
 }
 
-void Renderer::setDirLight(const DirLight& dirLight) {
+void Renderer::setDirLight(DirLight&& dirLight) {
 	m_DirLight = dirLight;
 }
 
-void Renderer::setPointLight(const PointLight& pointLight, size_t idx) {
+void Renderer::setPointLight(PointLight&& pointLight, size_t idx) {
 	m_PointLights[idx] = pointLight;
 }
 
@@ -36,7 +35,7 @@ void Renderer::draw() {
 	for (size_t i = 0; i < m_Objects.size(); i++) {
 		std::shared_ptr<Program> program = m_Programs[i];
 
-		program->set("uCamPos", m_Cam->m_Position);
+		program->set("uCamPos", m_Cam->getPosition());
 
 		for (RenderObject& object : m_Objects[i]) {
 			object.draw(*program);
@@ -44,13 +43,13 @@ void Renderer::draw() {
 	}
 }
 
-void Renderer::updateProgramUniforms() {
+void Renderer::updateLightingUniforms() {
 	for (size_t i = 0; i < m_Programs.size(); i++) {
-		updateProgramUniforms(i);
+		updateLightingUniforms(i);
 	}
 }
 
-void Renderer::updateProgramUniforms(size_t programId) {
+void Renderer::updateLightingUniforms(size_t programId) {
 	std::shared_ptr<Program> program = m_Programs[programId];
 
 	// directional light
@@ -71,4 +70,16 @@ void Renderer::updateProgramUniforms(size_t programId) {
 		program->set("uPointLights[" + std::to_string(i) + "].linear", pointLight.linear);
 		program->set("uPointLights[" + std::to_string(i) + "].quadratic", pointLight.quadratic);
 	}
+}
+
+void Renderer::updateCamUniforms() {
+	for (size_t i = 0; i < m_Programs.size(); i++) {
+		updateCamUniforms(i);
+	}
+}
+
+void Renderer::updateCamUniforms(size_t programId) {
+	std::shared_ptr<Program> program = m_Programs[programId];
+
+	program->set("uWorldToClip", m_Cam->projection() * m_Cam->view());
 }

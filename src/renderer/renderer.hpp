@@ -19,13 +19,21 @@ public:
 
 	size_t addProgram(std::shared_ptr<Program> program);
 	void addObject(RenderObject&& object, size_t programId);
-	void setDirLight(const DirLight& dirLight);
-	void setPointLight(const PointLight& pointLight, size_t idx);
+	void setDirLight(DirLight&& dirLight);
+	void setPointLight(PointLight&& pointLight, size_t idx);
+
+	std::shared_ptr<Program> getProgram(size_t programId) { return m_Programs[programId]; }
+	std::vector<RenderObject>& getRenderObjects(size_t programId) { return m_Objects[programId]; }
+	DirLight& getDirLight() { return m_DirLight; }
+	std::array<PointLight, NR_POINT_LIGHTS>& getPointLights() { return m_PointLights; }
 
 	void draw();
 
-	void updateProgramUniforms();
-	void updateProgramUniforms(size_t programId);
+	void updateLightingUniforms();
+	void updateLightingUniforms(size_t programId);
+
+	void updateCamUniforms();
+	void updateCamUniforms(size_t programId);
 
 public:
 

@@ -18,25 +18,22 @@ inline std::ostream& operator<<(std::ostream& os, const glm::vec3& vec) {
 }
 
 MainApp::MainApp()
-    : App(800, 600), renderer(std::make_shared<MovingCamera>(cam)) {
+    : App(800, 600), cam(std::make_shared<MovingCamera>(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f))), renderer(cam) {
     App::setTitle("cgintro"); // set title
     App::setVSync(true); // Limit framerate
 
-    cam.setResolution(resolution);
+    cam->setResolution(resolution);
 
     lightingshader = std::make_shared<Program>();
     lightingshader->load("lightingshader.vert", "lightingshader.frag");
-    lightingshader->set("uWorldToClip", cam.projection() * cam.view());
     size_t lightingshaderId = renderer.addProgram(lightingshader);
 
     meshshader = std::make_shared<Program>();
     meshshader->load("meshshader.vert", "meshshader.frag");
-    meshshader->set("uWorldToClip", cam.projection() * cam.view());
     size_t meshshaderId = renderer.addProgram(meshshader);
 
     colorshader = std::make_shared<Program>();
     colorshader->load("colorshader.vert", "colorshader.frag");
-    colorshader->set("uWorldToClip", cam.projection() * cam.view());
     size_t colorshaderId = renderer.addProgram(colorshader);
 
     cube.load("meshes/cube.obj");
@@ -51,7 +48,6 @@ MainApp::MainApp()
     RenderObject normalCube(cube);
     normalCube.setPositionAndSize(glm::vec3(-1.0f, 0.0f, 0.0f), 0.5f);
     normalCube.setMaterial(material);
-    //normalCube.setColor(glm::vec3(1.0f, 0.5f, 0.31f));
     renderer.addObject(std::move(normalCube), lightingshaderId);
 
     DirLight dirLight;
@@ -60,7 +56,7 @@ MainApp::MainApp()
     dirLight.diffuse = glm::vec3(0.5f);
     dirLight.specular = glm::vec3(1.0f);
 
-    renderer.setDirLight(dirLight);
+    renderer.setDirLight(std::move(dirLight));
 
     for (size_t i = 0; i < 4; i++) {
         PointLight pointLight;
@@ -72,7 +68,7 @@ MainApp::MainApp()
         pointLight.linear = 0.09f;
         pointLight.quadratic = 0.032f;
 
-        renderer.setPointLight(pointLight, i);
+        renderer.setPointLight(std::move(pointLight), i);
 
         RenderObject lightCube(cube);
         lightCube.setPositionAndSize(lightPositions[i], 0.2f);
@@ -80,7 +76,8 @@ MainApp::MainApp()
         renderer.addObject(std::move(lightCube), colorshaderId);
     }
 
-    renderer.updateProgramUniforms();
+    renderer.updateLightingUniforms();
+    renderer.updateCamUniforms();
 }
 
 void MainApp::init() {
@@ -93,10 +90,8 @@ void MainApp::buildImGui() {
 }
 
 void MainApp::render() {
-    if (cam.updateIfChanged()) {
-        meshshader->set("uWorldToClip", cam.projection() * cam.view());
-        lightingshader->set("uWorldToClip", cam.projection() * cam.view());
-        colorshader->set("uWorldToClip", cam.projection() * cam.view());
+    if (cam->updateIfChanged()) {
+        renderer.updateCamUniforms();
     }
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -110,36 +105,36 @@ void MainApp::keyCallback(Key key, Action action) {
     if (action != Action::REPEAT) return;
 
     if (key == Key::W) {
-        cam.move(delta * cameraSpeed * cam.m_Direction);
+        cam->move(delta * cameraSpeed * cam->getDirection());
     }
     else if (key == Key::S) {
-        cam.move(-delta * cameraSpeed * cam.m_Direction);
+        cam->move(-delta * cameraSpeed * cam->getDirection());
     }
     else if (key == Key::A) {
-        cam.move(-delta * cameraSpeed * cam.m_Right);
+        cam->move(-delta * cameraSpeed * cam->getRight());
     }
     else if (key == Key::D) {
-        cam.move(delta * cameraSpeed * cam.m_Right);
+        cam->move(delta * cameraSpeed * cam->getRight());
     }
     else if (key == Key::SPACE) {
-        cam.move(delta * cameraSpeed * cam.m_Up);
+        cam->move(delta * cameraSpeed * cam->getUp());
     }
     else if (key == Key::LEFT_SHIFT) {
-        cam.move(-delta * cameraSpeed * cam.m_Up);
+        cam->move(-delta * cameraSpeed * cam->getUp());
     }
 }
 
 void MainApp::scrollCallback(float amount) {
-    cam.zoom(0.1f * amount);
+    cam->zoom(0.1f * amount);
 }
 
 void MainApp::moveCallback(const vec2& movement, bool leftButton, bool rightButton, bool middleButton) {
     if (leftButton || rightButton || middleButton) {
-        cam.rotate(0.002f * movement);
+        cam->rotate(0.002f * movement);
     }
 }
 
 void MainApp::resizeCallback(const glm::vec2& resolution) {
-    cam.setResolution(resolution);
+    cam->setResolution(resolution);
 }
 

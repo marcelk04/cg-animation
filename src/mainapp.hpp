@@ -33,7 +33,7 @@ protected:
     void resizeCallback(const vec2& resolution) override;
 
 private:
-    MovingCamera cam{ glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f) };
+    std::shared_ptr<MovingCamera> cam;
 
     Renderer renderer;
 
