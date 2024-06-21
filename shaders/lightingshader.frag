@@ -41,14 +41,14 @@ uniform vec3 uCamPos;
 
 vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
 	vec3 lightDir = normalize(light.direction);
-	vec3 reflectDir = reflect(-lightDir, normal);
+	vec3 halfwayDir = normalize(lightDir + viewDir);
 
 	vec3 ambient = light.ambient * uMaterial.ambient;
 
 	float diff = max(dot(normal, lightDir), 0.0);
 	vec3 diffuse = light.diffuse * (diff * uMaterial.diffuse);
 
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), uMaterial.shininess);
+	float spec = pow(max(dot(normal, halfwayDir), 0.0), uMaterial.shininess);
 	vec3 specular = light.specular * (spec * uMaterial.specular);
 
 	return ambient + diffuse + specular;
@@ -56,14 +56,14 @@ vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
 
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 viewDir) {
 	vec3 lightDir = normalize(light.position - sFragPos);
-	vec3 reflectDir = reflect(-lightDir, normal);
+	vec3 halfwayDir = normalize(lightDir + viewDir);
 
 	vec3 ambient = light.ambient * uMaterial.ambient;
 
 	float diff = max(dot(normal, lightDir), 0.0);
 	vec3 diffuse = light.diffuse * (diff * uMaterial.diffuse);
 
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), uMaterial.shininess);
+	float spec = pow(max(dot(normal, halfwayDir), 0.0), uMaterial.shininess);
 	vec3 specular = light.specular * (spec * uMaterial.specular);
 
 	float distance = length(light.position - sFragPos);

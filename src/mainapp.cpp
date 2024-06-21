@@ -36,13 +36,17 @@ MainApp::MainApp()
     colorshader->load("colorshader.vert", "colorshader.frag");
     size_t colorshaderId = renderer.addProgram(colorshader);
 
+    hdrshader = std::make_shared<Program>();
+    hdrshader->load("hdrshader.vert", "hdrshader.frag");
+    
+
     cube.load("meshes/cube.obj");
 
     Material material{
         glm::vec3(1.0f, 0.5f, 0.31f),
         glm::vec3(1.0f, 0.5f, 0.31f),
         glm::vec3(0.5f, 0.5f, 0.5f),
-        32.0f
+        64.0f
     };
 
     RenderObject normalCube(cube);
@@ -82,7 +86,12 @@ MainApp::MainApp()
 
 void MainApp::init() {
     glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
     glEnable(GL_CULL_FACE);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void MainApp::buildImGui() {
