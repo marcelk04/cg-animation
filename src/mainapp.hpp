@@ -14,6 +14,7 @@ using namespace glm;
 #include "framework/camera.hpp"
 #include "framework/gl/program.hpp"
 #include "framework/gl/texture.hpp"
+#include "framework/gl/framebuffer.hpp"
 
 #include <vector>
 #include <memory>
@@ -33,6 +34,16 @@ protected:
     void resizeCallback(const vec2& resolution) override;
 
 private:
+    std::vector<Mesh::VertexPCN> vertices = {
+        { glm::vec3(-1.0f, 1.0f, 0.0f), glm::vec2(0.0f, 1.0f), glm::vec3(1.0f) },
+        { glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec2(0.0f, 0.0f), glm::vec3(1.0f) },
+        { glm::vec3(1.0f, 1.0f, 0.0f), glm::vec2(1.0f, 1.0f), glm::vec3(1.0f) },
+        { glm::vec3(1.0f, -1.0f, 0.0f), glm::vec2(1.0f, 0.0f), glm::vec3(1.0f) }
+    };
+
+    std::vector<unsigned int> indices = { 0, 1, 2, 3, 2, 1 };
+    Mesh quad;
+
     std::shared_ptr<MovingCamera> cam;
 
     Renderer renderer;
@@ -42,6 +53,10 @@ private:
     std::shared_ptr<Program> lightingshader;
     std::shared_ptr<Program> colorshader;
     std::shared_ptr<Program> hdrshader;
+
+    Texture colorBuffer;
+    Texture depthBuffer;
+    Framebuffer hdrBuffer;
 
     std::vector<glm::vec3> lightPositions{ glm::vec3(0.7f, 0.2f, 2.0f), glm::vec3(2.3f, -3.3f, -4.0f), glm::vec3(-4.0f, 2.0f, -12.0f), glm::vec3(0.0f, 0.0f, -3.0f) };
 };

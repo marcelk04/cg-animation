@@ -38,7 +38,7 @@ MainApp::MainApp()
 
     hdrshader = std::make_shared<Program>();
     hdrshader->load("hdrshader.vert", "hdrshader.frag");
-    
+    hdrshader->bindTextureUnit("uHdrBuffer", 0);
 
     cube.load("meshes/cube.obj");
 
@@ -80,8 +80,29 @@ MainApp::MainApp()
         renderer.addObject(std::move(lightCube), colorshaderId);
     }
 
+    float factor = 10.0f;
+    PointLight& pl = renderer.getPointLights()[3];
+    //pl.ambient *= factor;
+    pl.diffuse *= factor;
+    pl.specular *= factor;
+
     renderer.updateLightingUniforms();
     renderer.updateCamUniforms();
+
+    colorBuffer.bind(Texture::Type::TEX2D);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, resolution.x, resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    depthBuffer.bind(Texture::Type::TEX2D);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH32F_STENCIL8, resolution.x, resolution.y, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    hdrBuffer.attach(Framebuffer::Type::DRAW, Framebuffer::Attachment::COLOR0, colorBuffer.handle);
+    hdrBuffer.attach(Framebuffer::Type::DRAW, Framebuffer::Attachment::DEPTH_STENCIL, depthBuffer.handle);
+
+    quad.load(vertices, indices);
 }
 
 void MainApp::init() {
@@ -103,9 +124,19 @@ void MainApp::render() {
         renderer.updateCamUniforms();
     }
 
+    // Geometry pass
+    hdrBuffer.bind();
+    glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     renderer.draw();
+
+    // HDR pass
+    Framebuffer::bindDefault();
+    glDisable(GL_DEPTH_TEST);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    colorBuffer.bind(Texture::Type::TEX2D, 0);
+    hdrshader->bind();
+    quad.draw();
 }
 
 void MainApp::keyCallback(Key key, Action action) {
