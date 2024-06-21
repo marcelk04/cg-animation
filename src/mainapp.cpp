@@ -36,19 +36,33 @@ MainApp::MainApp()
     colorshader->load("colorshader.vert", "colorshader.frag");
     size_t colorshaderId = renderer.addProgram(colorshader);
 
-    cube.load("meshes/cube.obj");
-
-    Material material{
+    Material material0 {
         glm::vec3(1.0f, 0.5f, 0.31f),
         glm::vec3(1.0f, 0.5f, 0.31f),
         glm::vec3(0.5f, 0.5f, 0.5f),
         64.0f
     };
 
+    cube.load("meshes/cube.obj");
+
     RenderObject normalCube(cube);
     normalCube.setPositionAndSize(glm::vec3(-1.0f, 0.0f, 0.0f), 0.5f);
-    normalCube.setMaterial(material);
+    normalCube.setMaterial(material0);
     renderer.addObject(std::move(normalCube), lightingshaderId);
+
+    Material material1 {
+        glm::vec3(0.6f, 0.2f, 0.4f),
+        glm::vec3(0.6f, 0.2f, 0.4f),
+        glm::vec3(0.5f, 0.5f, 0.5f),
+        64.0f
+    };
+
+    plane.load("meshes/plane.obj");
+
+    RenderObject planeObj(plane);
+    planeObj.setPositionAndSize(glm::vec3(0.0f, -1.0f, 0.0f), 5.0f);
+    planeObj.setMaterial(material1);
+    renderer.addObject(std::move(planeObj), lightingshaderId);
 
     DirLight dirLight;
     dirLight.direction = glm::vec3(0.1f, 1.0f, 0.5f);
@@ -73,10 +87,13 @@ MainApp::MainApp()
         RenderObject lightCube(cube);
         lightCube.setPositionAndSize(lightPositions[i], 0.2f);
         lightCube.setColor(glm::vec3(1.0f));
+
+        if (i == 3) lightCube.setColor(glm::vec3(10.0f)); // i dont like this
+
         renderer.addObject(std::move(lightCube), colorshaderId);
     }
 
-    float factor = 10.0f;
+    float factor = 4.0f;
     PointLight& pl = renderer.getPointLights()[3];
     //pl.ambient *= factor;
     pl.diffuse *= factor;

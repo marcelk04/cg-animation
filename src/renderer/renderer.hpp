@@ -44,17 +44,24 @@ public:
 
 	std::vector<std::shared_ptr<Program>> m_Programs;
 
+	// scene info
 	std::vector<std::vector<RenderObject>> m_Objects;
 
 	DirLight m_DirLight;
 	std::array<PointLight, NR_POINT_LIGHTS> m_PointLights;
 
-	// hdr
+	// hdr effects
 	Texture m_ColorTexture;
+	Texture m_BrightColorTexture; // required for bloom
 	Texture m_DepthTexture;
 	Framebuffer m_HdrBuffer;
 
 	Program m_HdrShader;
+
+	std::array<Framebuffer, 2> m_BlurFramebuffers;
+	std::array<Texture, 2> m_BlurTextures;
+
+	Program m_BlurShader;
 
 	Mesh m_Quad;
 };

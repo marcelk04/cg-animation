@@ -7,22 +7,49 @@ inline std::ostream& operator<<(std::ostream& os, const glm::vec3& vec) {
 }
 
 Renderer::Renderer(std::shared_ptr<MovingCamera> cam, const glm::vec2& resolution)
-	: m_Cam(cam), m_Resolution(resolution) {
+	: m_Cam(cam), m_Resolution(resolution) { // pls dont change the window size :(
 	m_ColorTexture.bind(Texture::Type::TEX2D);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_Resolution.x, m_Resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	m_HdrBuffer.attach(Framebuffer::Type::DRAW, Framebuffer::Attachment::COLOR0, m_ColorTexture.handle);
+
+	m_BrightColorTexture.bind(Texture::Type::TEX2D);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_Resolution.x, m_Resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	m_HdrBuffer.attach(Framebuffer::Type::DRAW, Framebuffer::Attachment::COLOR1, m_BrightColorTexture.handle);
 
 	m_DepthTexture.bind(Texture::Type::TEX2D);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH32F_STENCIL8, m_Resolution.x, m_Resolution.y, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	m_HdrBuffer.attach(Framebuffer::Type::DRAW, Framebuffer::Attachment::COLOR0, m_ColorTexture.handle);
 	m_HdrBuffer.attach(Framebuffer::Type::DRAW, Framebuffer::Attachment::DEPTH, m_DepthTexture.handle);
+
+	std::array<GLenum, 2> drawBuffers = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+	m_HdrBuffer.bind();
+	glDrawBuffers(drawBuffers.size(), drawBuffers.data());
 
 	m_HdrShader.load("hdrshader.vert", "hdrshader.frag");
 	m_HdrShader.bindTextureUnit("uHdrBuffer", 0);
+	m_HdrShader.bindTextureUnit("uBloomBuffer", 1);
+
+	m_BlurShader.load("blurshader.vert", "blurshader.frag");
+	m_BlurShader.bindTextureUnit("uColorBuffer", 1);
+
+	// generate blur framebuffers and textures
+	for (size_t i = 0; i < 2; i++) {
+		m_BlurFramebuffers[i].bind();
+		m_BlurTextures[i].bind(Texture::Type::TEX2D);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_Resolution.x, m_Resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		m_BlurFramebuffers[i].attach(Framebuffer::Type::DRAW, Framebuffer::Attachment::COLOR0, m_BlurTextures[i].handle);
+	}
 
 	const std::vector<Mesh::VertexPCN> vertices = {
 		{ glm::vec3(-1.0f, 1.0f, 0.0f), glm::vec2(0.0f, 1.0f), glm::vec3(1.0f) },
@@ -73,11 +100,36 @@ void Renderer::draw() {
 		}
 	}
 
+	// Blur pass
+	bool horizontal = true, firstIteration = true;
+	size_t amount = 10;
+
+	m_BlurShader.bind();
+
+	for (size_t i = 0; i < amount; i++) {
+		int framebufferIdx = static_cast<int>(horizontal);
+
+		m_BlurFramebuffers[framebufferIdx].bind();
+		m_BlurShader.set("uHorizontal", horizontal);
+
+		if (firstIteration) {
+			m_BrightColorTexture.bind(Texture::Type::TEX2D, 1);
+		} else {
+			m_BlurTextures[1 - framebufferIdx].bind(Texture::Type::TEX2D, 1);
+		}
+
+		m_Quad.draw();
+
+		horizontal = !horizontal;
+		firstIteration = false;
+	}
+
 	// HDR pass
 	Framebuffer::bindDefault();
 	glDisable(GL_DEPTH_TEST);
 
 	m_ColorTexture.bind(Texture::Type::TEX2D, 0);
+	m_BlurTextures[0].bind(Texture::Type::TEX2D, 1);
 	m_HdrShader.bind();
 	m_Quad.draw();
 }
