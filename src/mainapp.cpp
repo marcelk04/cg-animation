@@ -60,32 +60,37 @@ MainApp::MainApp()
     plane.load("meshes/plane.obj");
 
     RenderObject planeObj(plane);
-    planeObj.setPositionAndSize(glm::vec3(0.0f, -1.0f, 0.0f), 5.0f);
+    planeObj.setPositionAndSize(glm::vec3(0.0f, -1.0f, 0.0f), 20.0f);
     planeObj.setMaterial(material1);
     renderer.addObject(std::move(planeObj), lightingshaderId);
 
     DirLight dirLight;
     dirLight.direction = glm::vec3(0.1f, 1.0f, 0.5f);
-    dirLight.ambient = glm::vec3(0.2f);
-    dirLight.diffuse = glm::vec3(0.5f);
-    dirLight.specular = glm::vec3(1.0f);
+    //dirLight.ambient = glm::vec3(0.2f);
+    //dirLight.diffuse = glm::vec3(0.5f);
+    //dirLight.specular = glm::vec3(1.0f);
+    dirLight.ambient = glm::vec3(0.0f);
+    dirLight.diffuse = glm::vec3(0.0f);
+    dirLight.specular = glm::vec3(0.0f);
 
     renderer.setDirLight(std::move(dirLight));
+
+    sphere.load("meshes/highpolysphere.obj");
 
     for (size_t i = 0; i < 4; i++) {
         PointLight pointLight;
         pointLight.position = lightPositions[i];
-        pointLight.ambient = glm::vec3(0.2f);
+        pointLight.ambient = glm::vec3(0.0f);
         pointLight.diffuse = glm::vec3(1.0f);
         pointLight.specular = glm::vec3(2.0f);
         pointLight.constant = 1.0f;
-        pointLight.linear = 0.09f;
-        pointLight.quadratic = 0.032f;
+        pointLight.linear = 0.14f;
+        pointLight.quadratic = 0.07f;
 
-        renderer.setPointLight(std::move(pointLight), i);
+        renderer.addPointLight(std::move(pointLight));
 
-        RenderObject lightCube(cube);
-        lightCube.setPositionAndSize(lightPositions[i], 0.2f);
+        RenderObject lightCube(sphere);
+        lightCube.setPositionAndSize(lightPositions[i], 0.1f);
         lightCube.setColor(glm::vec3(5.0f));
 
         renderer.addObject(std::move(lightCube), colorshaderId);
@@ -154,5 +159,6 @@ void MainApp::moveCallback(const vec2& movement, bool leftButton, bool rightButt
 
 void MainApp::resizeCallback(const glm::vec2& resolution) {
     cam->setResolution(resolution);
+    renderer.resizeCallback(resolution);
 }
 

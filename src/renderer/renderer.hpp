@@ -10,6 +10,8 @@
 #include "framework/gl/texture.hpp"
 #include "framework/gl/framebuffer.hpp"
 
+#include <glm/glm.hpp>
+
 #include <vector>
 #include <array>
 #include <memory>
@@ -23,12 +25,12 @@ public:
 	size_t addProgram(std::shared_ptr<Program> program);
 	void addObject(RenderObject&& object, size_t programId);
 	void setDirLight(DirLight&& dirLight);
-	void setPointLight(PointLight&& pointLight, size_t idx);
+	bool addPointLight(PointLight&& pointLight);
 
 	std::shared_ptr<Program> getProgram(size_t programId) { return m_Programs[programId]; }
 	std::vector<RenderObject>& getRenderObjects(size_t programId) { return m_Objects[programId]; }
 	DirLight& getDirLight() { return m_DirLight; }
-	std::array<PointLight, NR_POINT_LIGHTS>& getPointLights() { return m_PointLights; }
+	std::vector<PointLight>& getPointLights() { return m_PointLights; }
 
 	void draw();
 
@@ -37,6 +39,11 @@ public:
 
 	void updateCamUniforms();
 	void updateCamUniforms(size_t programId);
+
+	void resizeCallback(const glm::vec2& resolution);
+
+private:
+	void generateTextures();
 
 public:
 	std::shared_ptr<MovingCamera> m_Cam;
@@ -48,7 +55,7 @@ public:
 	std::vector<std::vector<RenderObject>> m_Objects;
 
 	DirLight m_DirLight;
-	std::array<PointLight, NR_POINT_LIGHTS> m_PointLights;
+	std::vector<PointLight> m_PointLights;
 
 	// hdr effects
 	Texture m_ColorTexture;

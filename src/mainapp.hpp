@@ -40,6 +40,7 @@ private:
 
     Mesh cube;
     Mesh plane;
+    Mesh sphere;
 
     std::shared_ptr<Program> meshshader;
     std::shared_ptr<Program> lightingshader;
