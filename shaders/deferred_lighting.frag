@@ -43,7 +43,7 @@ vec3 calcDirLight(DirLight light, vec3 albedo, float specular, vec3 normal, vec3
 	return diffuse + specularRes;
 }
 
-vec3 calcPointLight(PointLight light, vec3 fragPos, vec3 albedo, float specular, vec3 normal, vec3 viewDir) {
+vec3 calcPointLight(PointLight light, vec3 fragPos, vec3 albedo, float specular, float dist, vec3 normal, vec3 viewDir) {
 	vec3 lightDir = normalize(light.position - fragPos);
 	vec3 halfwayDir = normalize(lightDir + viewDir);
 
@@ -53,8 +53,8 @@ vec3 calcPointLight(PointLight light, vec3 fragPos, vec3 albedo, float specular,
 	float spec = pow(max(dot(normal, halfwayDir), 0.0), 16);
 	vec3 specularRes = light.color * spec * specular;
 
-	float distance = length(light.position - fragPos);
-	float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * distance * distance);
+	float attenuation = 1.0 / (light.constant + light.linear * dist + light.quadratic * dist * dist);
+
 	diffuse *= attenuation;
 	specularRes *= attenuation;
 
@@ -77,7 +77,7 @@ void main() {
 		float dist = length(uPointLights[i].position - fragPos);
 
 		if (dist < uPointLights[i].radius) {
-			result += calcPointLight(uPointLights[i], fragPos, albedo, specular, normal, viewDir);
+			result += calcPointLight(uPointLights[i], fragPos, albedo, specular, dist, normal, viewDir);
 		}
 	}
 

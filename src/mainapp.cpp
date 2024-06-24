@@ -30,12 +30,12 @@ MainApp::MainApp()
 
     Material material0 {
         glm::vec3(1.0f, 0.5f, 0.31f),
-        0.5f
+        0.4f
     };
 
     Material material1 {
         glm::vec3(0.6f, 0.2f, 0.4f),
-        0.5f
+        0.4f
     };
 
     Material lightMaterial {

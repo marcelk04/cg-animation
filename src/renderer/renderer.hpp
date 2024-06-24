@@ -57,7 +57,7 @@ public:
 	DirLight m_DirLight;
 	std::vector<PointLight> m_PointLights;
 
-	Program m_TextureShader;
+	Mesh m_Quad;
 
 	// deferred shading
 	Texture m_GPosition;
@@ -79,6 +79,4 @@ public:
 	std::array<Texture, 2> m_BlurTextures;
 
 	Program m_BlurShader;
-
-	Mesh m_Quad;
 };

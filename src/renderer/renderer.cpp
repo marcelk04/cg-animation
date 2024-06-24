@@ -10,20 +10,17 @@ Renderer::Renderer(std::shared_ptr<MovingCamera> cam, const glm::vec2& resolutio
 	: m_Cam(cam), m_Resolution(resolution) {
 	generateTextures();
 
-	m_TextureShader.load("textureshader.vert", "textureshader.frag");
-	m_TextureShader.bindTextureUnit("uTexture", 0);
-
-	m_LightingShader.load("lightingshader.vert", "lightingshader.frag");
+	m_LightingShader.load("deferred_lighting.vert", "deferred_lighting.frag");
 	m_LightingShader.bindTextureUnit("uPosition", 0);
 	m_LightingShader.bindTextureUnit("uNormal", 1);
 	m_LightingShader.bindTextureUnit("uAlbedoSpec", 2);
 
+	m_BlurShader.load("blurshader.vert", "blurshader.frag");
+	m_BlurShader.bindTextureUnit("uColorBuffer", 1);
+
 	m_HdrShader.load("hdrshader.vert", "hdrshader.frag");
 	m_HdrShader.bindTextureUnit("uHdrBuffer", 0);
 	m_HdrShader.bindTextureUnit("uBloomBuffer", 1);
-
-	m_BlurShader.load("blurshader.vert", "blurshader.frag");
-	m_BlurShader.bindTextureUnit("uColorBuffer", 1);
 
 	const std::vector<Mesh::VertexPCN> vertices = {
 		{ glm::vec3(-1.0f, 1.0f, 0.0f), glm::vec2(0.0f, 1.0f), glm::vec3(1.0f) },
