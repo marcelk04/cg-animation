@@ -24,76 +24,58 @@ MainApp::MainApp()
 
     cam->setResolution(resolution);
 
-    lightingshader = std::make_shared<Program>();
-    lightingshader->load("lightingshader.vert", "lightingshader.frag");
-    size_t lightingshaderId = renderer.addProgram(lightingshader);
-
-    meshshader = std::make_shared<Program>();
-    meshshader->load("meshshader.vert", "meshshader.frag");
-    size_t meshshaderId = renderer.addProgram(meshshader);
-
-    colorshader = std::make_shared<Program>();
-    colorshader->load("colorshader.vert", "colorshader.frag");
-    size_t colorshaderId = renderer.addProgram(colorshader);
+    geometryshader = std::make_shared<Program>();
+    geometryshader->load("deferred_geometry.vert", "deferred_geometry.frag");
+    size_t geometryshaderId = renderer.addProgram(geometryshader);
 
     Material material0 {
         glm::vec3(1.0f, 0.5f, 0.31f),
-        glm::vec3(1.0f, 0.5f, 0.31f),
-        glm::vec3(0.5f, 0.5f, 0.5f),
-        64.0f
+        0.5f
     };
-
-    cube.load("meshes/cube.obj");
-
-    RenderObject normalCube(cube);
-    normalCube.setPositionAndSize(glm::vec3(-1.0f, 0.0f, 0.0f), 1.0f);
-    normalCube.setMaterial(material0);
-    renderer.addObject(std::move(normalCube), lightingshaderId);
 
     Material material1 {
         glm::vec3(0.6f, 0.2f, 0.4f),
-        glm::vec3(0.6f, 0.2f, 0.4f),
-        glm::vec3(0.5f, 0.5f, 0.5f),
-        64.0f
+        0.5f
     };
 
+    Material lightMaterial {
+        glm::vec3(100.0f),
+        0.0f
+    };
+
+    cube.load("meshes/cube.obj");
     plane.load("meshes/plane.obj");
+    sphere.load("meshes/highpolysphere.obj");
+
+    RenderObject normalCube(cube);
+    normalCube.setPositionAndSize(glm::vec3(-1.0f, 0.0f, 0.0f), 1.0f);
+    normalCube.setMaterial(material1);
+    renderer.addObject(std::move(normalCube), geometryshaderId);
 
     RenderObject planeObj(plane);
     planeObj.setPositionAndSize(glm::vec3(0.0f, -1.0f, 0.0f), 20.0f);
-    planeObj.setMaterial(material1);
-    renderer.addObject(std::move(planeObj), lightingshaderId);
+    planeObj.setMaterial(material0);
+    renderer.addObject(std::move(planeObj), geometryshaderId);
 
     DirLight dirLight;
     dirLight.direction = glm::vec3(0.1f, 1.0f, 0.5f);
-    //dirLight.ambient = glm::vec3(0.2f);
-    //dirLight.diffuse = glm::vec3(0.5f);
-    //dirLight.specular = glm::vec3(1.0f);
-    dirLight.ambient = glm::vec3(0.0f);
-    dirLight.diffuse = glm::vec3(0.0f);
-    dirLight.specular = glm::vec3(0.0f);
-
+    dirLight.color = glm::vec3(0.2f);
     renderer.setDirLight(std::move(dirLight));
-
-    sphere.load("meshes/highpolysphere.obj");
 
     for (size_t i = 0; i < 4; i++) {
         PointLight pointLight;
         pointLight.position = lightPositions[i];
-        pointLight.ambient = glm::vec3(0.0f);
-        pointLight.diffuse = glm::vec3(1.0f);
-        pointLight.specular = glm::vec3(2.0f);
+        pointLight.color = glm::vec3(1.5f);
         pointLight.constant = 1.0f;
         pointLight.linear = 0.14f;
         pointLight.quadratic = 0.07f;
-
+        pointLight.calculateRadius();
         renderer.addPointLight(std::move(pointLight));
 
         RenderObject lightCube(sphere);
         lightCube.setPositionAndSize(lightPositions[i], 0.1f);
-        lightCube.setColor(glm::vec3(5.0f));
-
-        renderer.addObject(std::move(lightCube), colorshaderId);
+        lightCube.setMaterial(lightMaterial);
+        renderer.addObject(std::move(lightCube), geometryshaderId);
     }
 
     renderer.updateLightingUniforms();
@@ -105,9 +87,6 @@ void MainApp::init() {
     glDepthFunc(GL_LESS);
 
     glEnable(GL_CULL_FACE);
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void MainApp::buildImGui() {
@@ -159,6 +138,6 @@ void MainApp::moveCallback(const vec2& movement, bool leftButton, bool rightButt
 
 void MainApp::resizeCallback(const glm::vec2& resolution) {
     cam->setResolution(resolution);
-    renderer.resizeCallback(resolution);
+    renderer.setResolution(resolution);
 }
 

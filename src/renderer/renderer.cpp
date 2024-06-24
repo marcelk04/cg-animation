@@ -10,6 +10,14 @@ Renderer::Renderer(std::shared_ptr<MovingCamera> cam, const glm::vec2& resolutio
 	: m_Cam(cam), m_Resolution(resolution) {
 	generateTextures();
 
+	m_TextureShader.load("textureshader.vert", "textureshader.frag");
+	m_TextureShader.bindTextureUnit("uTexture", 0);
+
+	m_LightingShader.load("lightingshader.vert", "lightingshader.frag");
+	m_LightingShader.bindTextureUnit("uPosition", 0);
+	m_LightingShader.bindTextureUnit("uNormal", 1);
+	m_LightingShader.bindTextureUnit("uAlbedoSpec", 2);
+
 	m_HdrShader.load("hdrshader.vert", "hdrshader.frag");
 	m_HdrShader.bindTextureUnit("uHdrBuffer", 0);
 	m_HdrShader.bindTextureUnit("uBloomBuffer", 1);
@@ -58,31 +66,43 @@ bool Renderer::addPointLight(PointLight&& pointLight) {
 
 void Renderer::draw() {
 	// Geometry pass
-	m_HdrBuffer.bind();
+	m_GBuffer.bind();
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	for (size_t i = 0; i < m_Objects.size(); i++) {
 		std::shared_ptr<Program> program = m_Programs[i];
 
-		program->set("uCamPos", m_Cam->getPosition());
-
 		for (RenderObject& object : m_Objects[i]) {
 			object.draw(*program);
 		}
 	}
+
+	// Lighting pass
+	m_ColorBuffer.bind();
+	glDisable(GL_DEPTH_TEST);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	m_GPosition.bind(Texture::Type::TEX2D, 0);
+	m_GNormal.bind(Texture::Type::TEX2D, 1);
+	m_GAlbdedoSpec.bind(Texture::Type::TEX2D, 2);
+
+	m_LightingShader.set("uCamPos", m_Cam->getPosition());
+	m_LightingShader.bind();
+	m_Quad.draw();
 
 	// Blur pass
 	bool horizontal = true, firstIteration = true;
 	size_t amount = 10;
 
 	m_BlurShader.bind();
-	glDisable(GL_DEPTH_TEST);
 
 	for (size_t i = 0; i < amount; i++) {
 		int framebufferIdx = static_cast<int>(horizontal);
 
 		m_BlurFramebuffers[framebufferIdx].bind();
+		glClear(GL_COLOR_BUFFER_BIT);
+		
 		m_BlurShader.set("uHorizontal", horizontal);
 
 		if (firstIteration) {
@@ -99,6 +119,7 @@ void Renderer::draw() {
 
 	// HDR pass
 	Framebuffer::bindDefault();
+	glClear(GL_COLOR_BUFFER_BIT);
 
 	m_ColorTexture.bind(Texture::Type::TEX2D, 0);
 	m_BlurTextures[0].bind(Texture::Type::TEX2D, 1);
@@ -107,41 +128,29 @@ void Renderer::draw() {
 }
 
 void Renderer::updateLightingUniforms() {
-	for (size_t i = 0; i < m_Programs.size(); i++) {
-		updateLightingUniforms(i);
-	}
-}
-
-void Renderer::updateLightingUniforms(size_t programId) {
-	std::shared_ptr<Program> program = m_Programs[programId];
-
 	// directional light
-	program->set("uDirLight.direction", m_DirLight.direction);
-	program->set("uDirLight.ambient", m_DirLight.ambient);
-	program->set("uDirLight.diffuse", m_DirLight.diffuse);
-	program->set("uDirLight.specular", m_DirLight.specular);
+	m_LightingShader.set("uDirLight.direction", m_DirLight.direction);
+	m_LightingShader.set("uDirLight.color", m_DirLight.color);
 
 	// point lights
 	for (size_t i = 0; i < m_PointLights.size(); i++) {
 		PointLight pointLight = m_PointLights[i];
 
-		program->set("uPointLights[" + std::to_string(i) + "].position", pointLight.position);
-		program->set("uPointLights[" + std::to_string(i) + "].ambient", pointLight.ambient);
-		program->set("uPointLights[" + std::to_string(i) + "].diffuse", pointLight.diffuse);
-		program->set("uPointLights[" + std::to_string(i) + "].specular", pointLight.specular);
-		program->set("uPointLights[" + std::to_string(i) + "].constant", pointLight.constant);
-		program->set("uPointLights[" + std::to_string(i) + "].linear", pointLight.linear);
-		program->set("uPointLights[" + std::to_string(i) + "].quadratic", pointLight.quadratic);
+		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].position", pointLight.position);
+		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].color", pointLight.color);
+		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].radius", pointLight.radius);
+		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].constant", pointLight.constant);
+		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].linear", pointLight.linear);
+		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].quadratic", pointLight.quadratic);
 	}
 
 	for (size_t i = m_PointLights.size(); i < NR_POINT_LIGHTS; i++) {
-		program->set("uPointLights[" + std::to_string(i) + "].position", glm::vec3(0.0f));
-		program->set("uPointLights[" + std::to_string(i) + "].ambient", glm::vec3(0.0f));
-		program->set("uPointLights[" + std::to_string(i) + "].diffuse", glm::vec3(0.0f));
-		program->set("uPointLights[" + std::to_string(i) + "].specular", glm::vec3(0.0f));
-		program->set("uPointLights[" + std::to_string(i) + "].constant", 1.0f);
-		program->set("uPointLights[" + std::to_string(i) + "].linear", 0.0f);
-		program->set("uPointLights[" + std::to_string(i) + "].quadratic", 0.0f);
+		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].position", glm::vec3(0.0f));
+		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].color", glm::vec3(0.0f));
+		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].radius", 0.0f);
+		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].constant", 1.0f);
+		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].linear", 0.0f);
+		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].quadratic", 0.0f);
 	}
 }
 
@@ -157,54 +166,55 @@ void Renderer::updateCamUniforms(size_t programId) {
 	program->set("uWorldToClip", m_Cam->projection() * m_Cam->view());
 }
 
-void Renderer::resizeCallback(const glm::vec2& resolution) {
+void Renderer::setResolution(const glm::vec2& resolution) {
 	m_Resolution = resolution;
 	generateTextures();
 }
 
 void Renderer::generateTextures() {
+	generateTexture(m_GPosition, GL_RGBA16F, GL_RGBA, GL_FLOAT);
+	m_GBuffer.attach(Framebuffer::Type::READ_AND_DRAW, Framebuffer::Attachment::COLOR0, m_GPosition.handle);
+
+	generateTexture(m_GNormal, GL_RGBA16_SNORM, GL_RGBA, GL_FLOAT);
+	m_GBuffer.attach(Framebuffer::Type::READ_AND_DRAW, Framebuffer::Attachment::COLOR1, m_GNormal.handle);
+
+	generateTexture(m_GAlbdedoSpec, GL_RGBA16F, GL_RGBA, GL_FLOAT);
+	m_GBuffer.attach(Framebuffer::Type::READ_AND_DRAW, Framebuffer::Attachment::COLOR2, m_GAlbdedoSpec.handle);
+
+	generateTexture(m_GDepth, GL_DEPTH32F_STENCIL8, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV);
+	m_GBuffer.attach(Framebuffer::Type::DRAW, Framebuffer::Attachment::DEPTH, m_GDepth.handle);
+
+	m_GBuffer.bind();
+	std::array<GLenum, 3> drawGeomBuffers = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+	glDrawBuffers(drawGeomBuffers.size(), drawGeomBuffers.data());
+
 	// fragment colors
-	m_ColorTexture.bind(Texture::Type::TEX2D);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_Resolution.x, m_Resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	m_HdrBuffer.attach(Framebuffer::Type::DRAW, Framebuffer::Attachment::COLOR0, m_ColorTexture.handle);
+	generateTexture(m_ColorTexture, GL_RGBA16F, GL_RGBA, GL_FLOAT);
+	m_ColorBuffer.attach(Framebuffer::Type::READ_AND_DRAW, Framebuffer::Attachment::COLOR0, m_ColorTexture.handle);
 
 	// only bright fragment colors
-	m_BrightColorTexture.bind(Texture::Type::TEX2D);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_Resolution.x, m_Resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	m_HdrBuffer.attach(Framebuffer::Type::DRAW, Framebuffer::Attachment::COLOR1, m_BrightColorTexture.handle);
+	generateTexture(m_BrightColorTexture, GL_RGBA16F, GL_RGBA, GL_FLOAT);
+	m_ColorBuffer.attach(Framebuffer::Type::READ_AND_DRAW, Framebuffer::Attachment::COLOR1, m_BrightColorTexture.handle);
 
-	// depth texture for depth testing
-	m_DepthTexture.bind(Texture::Type::TEX2D);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH32F_STENCIL8, m_Resolution.x, m_Resolution.y, 0, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	m_HdrBuffer.attach(Framebuffer::Type::DRAW, Framebuffer::Attachment::DEPTH, m_DepthTexture.handle);
-
-	// blur textures
+	m_ColorBuffer.bind();
 	std::array<GLenum, 2> drawBuffers = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-	m_HdrBuffer.bind();
 	glDrawBuffers(drawBuffers.size(), drawBuffers.data());
 
+	// blur textures
 	for (size_t i = 0; i < 2; i++) {
 		m_BlurFramebuffers[i].bind();
-		m_BlurTextures[i].bind(Texture::Type::TEX2D);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_Resolution.x, m_Resolution.y, 0, GL_RGBA, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		generateTexture(m_BlurTextures[i], GL_RGBA16F, GL_RGBA, GL_FLOAT);
 
-		m_BlurFramebuffers[i].attach(Framebuffer::Type::DRAW, Framebuffer::Attachment::COLOR0, m_BlurTextures[i].handle);
+		m_BlurFramebuffers[i].attach(Framebuffer::Type::READ_AND_DRAW, Framebuffer::Attachment::COLOR0, m_BlurTextures[i].handle);
 	}
+}
+
+void Renderer::generateTexture(Texture& texture, GLint internalformat, GLenum format, GLenum type) const {
+	texture.bind(Texture::Type::TEX2D);
+	glTexImage2D(GL_TEXTURE_2D, 0, internalformat, m_Resolution.x, m_Resolution.y, 0, format, type, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }

@@ -35,15 +35,15 @@ public:
 	void draw();
 
 	void updateLightingUniforms();
-	void updateLightingUniforms(size_t programId);
 
 	void updateCamUniforms();
 	void updateCamUniforms(size_t programId);
 
-	void resizeCallback(const glm::vec2& resolution);
+	void setResolution(const glm::vec2& resolution);
 
 private:
 	void generateTextures();
+	void generateTexture(Texture& texture, GLint internalformat, GLenum format, GLenum type) const;
 
 public:
 	std::shared_ptr<MovingCamera> m_Cam;
@@ -57,11 +57,21 @@ public:
 	DirLight m_DirLight;
 	std::vector<PointLight> m_PointLights;
 
+	Program m_TextureShader;
+
+	// deferred shading
+	Texture m_GPosition;
+	Texture m_GNormal;
+	Texture m_GAlbdedoSpec;
+	Texture m_GDepth;
+	Framebuffer m_GBuffer;
+
+	Program m_LightingShader;
+
 	// hdr effects
 	Texture m_ColorTexture;
 	Texture m_BrightColorTexture; // required for bloom
-	Texture m_DepthTexture;
-	Framebuffer m_HdrBuffer;
+	Framebuffer m_ColorBuffer;
 
 	Program m_HdrShader;
 
