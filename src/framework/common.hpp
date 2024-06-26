@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 
+#include <glm/glm.hpp>
+
 namespace Common {
 
     std::string readFile(const std::string& filepath);
@@ -12,6 +14,7 @@ namespace Common {
     template <class T, typename... Rest>
     void hash_combine(std::size_t& seed, const T& v, const Rest&... rest);
 
+    glm::vec3 deCasteljau(std::vector<glm::vec3> points, float t);
 }
 
 /**

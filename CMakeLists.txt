@@ -8,6 +8,7 @@ set(SRC
     src/movingcamera.cpp
     src/renderer/renderobject.cpp
     src/renderer/renderer.cpp
+    src/renderer/scene.cpp
     src/framework/app.cpp
     src/framework/camera.cpp
     src/framework/common.cpp

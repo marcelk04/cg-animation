@@ -38,39 +38,20 @@ size_t Renderer::addProgram(std::shared_ptr<Program> program) {
 	size_t id = m_Programs.size();
 
 	m_Programs.push_back(program);
-	m_Objects.push_back(std::vector<RenderObject>());
 
 	return id;
 }
 
-void Renderer::addObject(RenderObject&& object, size_t programId) {
-	m_Objects[programId].push_back(object);
-}
-
-void Renderer::setDirLight(DirLight&& dirLight) {
-	m_DirLight = dirLight;
-}
-
-bool Renderer::addPointLight(PointLight&& pointLight) {
-	if (m_PointLights.size() >= NR_POINT_LIGHTS) {
-		return false;
-	}
-
-	m_PointLights.push_back(pointLight);
-
-	return true;
-}
-
-void Renderer::draw() {
+void Renderer::draw(Scene& scene) {
 	// Geometry pass
 	m_GBuffer.bind();
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	for (size_t i = 0; i < m_Objects.size(); i++) {
+	for (size_t i = 0; i < m_Programs.size(); i++) {
 		std::shared_ptr<Program> program = m_Programs[i];
 
-		for (RenderObject& object : m_Objects[i]) {
+		for (RenderObject& object : scene.getRenderObjects(i)) {
 			object.draw(*program);
 		}
 	}
@@ -124,14 +105,19 @@ void Renderer::draw() {
 	m_Quad.draw();
 }
 
-void Renderer::updateLightingUniforms() {
+void Renderer::updateLightingUniforms(Scene& scene) {
 	// directional light
-	m_LightingShader.set("uDirLight.direction", m_DirLight.direction);
-	m_LightingShader.set("uDirLight.color", m_DirLight.color);
+	if (scene.getDirLight().has_value()) {
+		m_LightingShader.set("uDirLight.direction", scene.getDirLight().value().direction);
+		m_LightingShader.set("uDirLight.color", scene.getDirLight().value().color);
+	} else {
+		m_LightingShader.set("uDirLight.direction", glm::vec3(1.0f));
+		m_LightingShader.set("uDirLight.color", glm::vec3(0.0f));
+	}
 
 	// point lights
-	for (size_t i = 0; i < m_PointLights.size(); i++) {
-		PointLight pointLight = m_PointLights[i];
+	for (size_t i = 0; i < scene.getPointLights().size(); i++) {
+		PointLight& pointLight = scene.getPointLight(i);
 
 		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].position", pointLight.position);
 		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].color", pointLight.color);
@@ -141,7 +127,7 @@ void Renderer::updateLightingUniforms() {
 		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].quadratic", pointLight.quadratic);
 	}
 
-	for (size_t i = m_PointLights.size(); i < NR_POINT_LIGHTS; i++) {
+	for (size_t i = scene.getPointLights().size(); i < scene.MAX_NR_LIGHTS; i++) {
 		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].position", glm::vec3(0.0f));
 		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].color", glm::vec3(0.0f));
 		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].radius", 0.0f);

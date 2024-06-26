@@ -50,17 +50,17 @@ MainApp::MainApp()
     RenderObject normalCube(cube);
     normalCube.setPositionAndSize(glm::vec3(-1.0f, 0.0f, 0.0f), 1.0f);
     normalCube.setMaterial(material1);
-    renderer.addObject(std::move(normalCube), geometryshaderId);
+    scene.addRenderObject(std::move(normalCube), geometryshaderId);
 
     RenderObject planeObj(plane);
     planeObj.setPositionAndSize(glm::vec3(0.0f, -1.0f, 0.0f), 20.0f);
     planeObj.setMaterial(material0);
-    renderer.addObject(std::move(planeObj), geometryshaderId);
+    scene.addRenderObject(std::move(planeObj), geometryshaderId);
 
     DirLight dirLight;
     dirLight.direction = glm::vec3(0.1f, 1.0f, 0.5f);
     dirLight.color = glm::vec3(0.2f);
-    renderer.setDirLight(std::move(dirLight));
+    scene.setDirLight(std::move(dirLight));
 
     for (size_t i = 0; i < 4; i++) {
         PointLight pointLight;
@@ -70,15 +70,15 @@ MainApp::MainApp()
         pointLight.linear = 0.14f;
         pointLight.quadratic = 0.07f;
         pointLight.calculateRadius();
-        renderer.addPointLight(std::move(pointLight));
+        scene.addPointLight(std::move(pointLight));
 
         RenderObject lightCube(sphere);
         lightCube.setPositionAndSize(lightPositions[i], 0.1f);
         lightCube.setMaterial(lightMaterial);
-        renderer.addObject(std::move(lightCube), geometryshaderId);
+        scene.addRenderObject(std::move(lightCube), geometryshaderId);
     }
 
-    renderer.updateLightingUniforms();
+    renderer.updateLightingUniforms(scene);
     renderer.updateCamUniforms();
 }
 
@@ -98,7 +98,7 @@ void MainApp::render() {
         renderer.updateCamUniforms();
     }
 
-    renderer.draw();
+    renderer.draw(scene);
 }
 
 void MainApp::keyCallback(Key key, Action action) {

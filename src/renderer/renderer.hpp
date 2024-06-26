@@ -2,6 +2,7 @@
 
 #include "renderer/renderobject.hpp"
 #include "renderer/light.hpp"
+#include "renderer/scene.hpp"
 
 #include "movingcamera.hpp"
 
@@ -16,25 +17,17 @@
 #include <array>
 #include <memory>
 
-#define NR_POINT_LIGHTS 4
-
 class Renderer {
 public:
 	Renderer(std::shared_ptr<MovingCamera> cam, const glm::vec2& resolution);
 
 	size_t addProgram(std::shared_ptr<Program> program);
-	void addObject(RenderObject&& object, size_t programId);
-	void setDirLight(DirLight&& dirLight);
-	bool addPointLight(PointLight&& pointLight);
 
 	std::shared_ptr<Program> getProgram(size_t programId) { return m_Programs[programId]; }
-	std::vector<RenderObject>& getRenderObjects(size_t programId) { return m_Objects[programId]; }
-	DirLight& getDirLight() { return m_DirLight; }
-	std::vector<PointLight>& getPointLights() { return m_PointLights; }
 
-	void draw();
+	void draw(Scene& scene);
 
-	void updateLightingUniforms();
+	void updateLightingUniforms(Scene& scene);
 
 	void updateCamUniforms();
 	void updateCamUniforms(size_t programId);
@@ -45,17 +38,11 @@ private:
 	void generateTextures();
 	void generateTexture(Texture& texture, GLint internalformat, GLenum format, GLenum type) const;
 
-public:
+private:
 	std::shared_ptr<MovingCamera> m_Cam;
 	glm::vec2 m_Resolution;
 
 	std::vector<std::shared_ptr<Program>> m_Programs;
-
-	// scene info
-	std::vector<std::vector<RenderObject>> m_Objects;
-
-	DirLight m_DirLight;
-	std::vector<PointLight> m_PointLights;
 
 	Mesh m_Quad;
 
