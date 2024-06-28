@@ -1,24 +1,19 @@
 #include "mainapp.hpp"
-
 #include <glad/glad.h>
 #include <imgui.h>
-#include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-using namespace glm;
-
-#include "framework/app.hpp"
-
-#include "framework/imguiutil.hpp"
-
 #include <iostream>
 
 MainApp::MainApp() : App(800, 600) {
-    App::setTitle("cgintro"); // set title
+    App::setTitle("cgintro"); // Set title
     App::setVSync(true); // Limit framerate
 
-    mesh.load("meshes/bunny.obj");
-    meshshader.load("meshshader.vert", "meshshader.frag");
-    meshshader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
+    // Load the FBX mesh
+    mesh.load("/home/timnogga/CLionProjects/cg-animation/rigged_model/rigged.dae"); // Replace with your FBX model path
+
+    // Load shaders
+    shaderProgram.load("assimpshader.vert", "assimpshader.frag");
+    shaderProgram.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
 
     lightDir = glm::vec3(1.0f);
 }
@@ -27,16 +22,18 @@ void MainApp::init() {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 }
-
+/*
 void MainApp::buildImGui() {
+    // Custom ImGui statistics window
     ImGui::StatisticsWindow(delta, resolution);
 
+    // Custom ImGui spherical slider
     if (ImGui::SphericalSlider("Light Direction", lightDir)) {
-        meshshader.set("uLightDir", lightDir);
+        shaderProgram.set("uLightDir", lightDir);
     }
 
     ImGui::SliderFloat("t", &t, 0.0f, 1.0f);
-}
+}*/
 
 void MainApp::render() {
     glm::vec3 pos = deCasteljau(spline, t);
@@ -45,12 +42,12 @@ void MainApp::render() {
     coolCamera.lookAt(glm::vec3(0.0f));
 
     if (coolCamera.updateIfChanged()) {
-        meshshader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
+        shaderProgram.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
     }
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    meshshader.bind();
+    shaderProgram.bind();
     mesh.draw();
 }
 
