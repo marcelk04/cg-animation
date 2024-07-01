@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <cmath>
 
 #include <glm/glm.hpp>
 
@@ -14,6 +15,11 @@ namespace Common {
     template <class T, typename... Rest>
     void hash_combine(std::size_t& seed, const T& v, const Rest&... rest);
 
+    void randomSeed();
+    int randomInt(int first, int last);
+    float randomFloat();
+    float randomFloat(float first, float last);
+  
     glm::vec3 deCasteljau(std::vector<glm::vec3> points, float t);
 }
 

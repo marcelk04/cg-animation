@@ -9,12 +9,15 @@ using namespace glm;
 #include "framework/app.hpp"
 
 #include "framework/imguiutil.hpp"
+#include "framework/common.hpp"
+
+#include "lightninggenerator.hpp"
 
 #include <iostream>
 #include <memory>
 
 inline std::ostream& operator<<(std::ostream& os, const glm::vec3& vec) {
-    return os << '[' << vec.x << ", " << vec.y << ", " << vec.z << ']';
+  return os << '[' << vec.x << ", " << vec.y << ", " << vec.z << ']';
 }
 
 MainApp::MainApp()
@@ -46,6 +49,11 @@ MainApp::MainApp()
     cube.load("meshes/cube.obj");
     plane.load("meshes/plane.obj");
     sphere.load("meshes/highpolysphere.obj");
+
+    auto segments = LightningGenerator::genBolt(glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 5, coolCamera.m_Direction);
+    auto meshdata = LightningGenerator::genMeshData(segments, coolCamera.m_Direction);
+
+    lightningMesh.load(meshdata.first, meshdata.second);
 
     RenderObject normalCube(cube);
     normalCube.setPositionAndSize(glm::vec3(-1.0f, 0.0f, 0.0f), 1.0f);
@@ -86,6 +94,11 @@ void MainApp::init() {
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
 
+    Common::randomSeed();
+
+    //glEnable(GL_BLEND);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  
     glEnable(GL_CULL_FACE);
 }
 
@@ -104,7 +117,7 @@ void MainApp::render() {
 void MainApp::keyCallback(Key key, Action action) {
     float cameraSpeed = 2.5f;
 
-    if (action != Action::REPEAT) return;
+    if (action == Action::RELEASE) return;
 
     if (key == Key::W) {
         cam->move(delta * cameraSpeed * cam->getDirection());
@@ -124,6 +137,12 @@ void MainApp::keyCallback(Key key, Action action) {
     else if (key == Key::LEFT_SHIFT) {
         cam->move(-delta * cameraSpeed * cam->getUp());
     }
+    else if (key == Key::G) {
+        auto segments = LightningGenerator::genBolt(glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 5, coolCamera.m_Direction);
+        auto meshdata = LightningGenerator::genMeshData(segments, coolCamera.m_Direction);
+
+        lightningMesh.load(meshdata.first, meshdata.second);
+    }
 }
 
 void MainApp::scrollCallback(float amount) {
@@ -140,4 +159,3 @@ void MainApp::resizeCallback(const glm::vec2& resolution) {
     cam->setResolution(resolution);
     renderer.setResolution(resolution);
 }
-

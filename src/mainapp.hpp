@@ -12,6 +12,7 @@ using namespace glm;
 
 #include "framework/mesh.hpp"
 #include "framework/camera.hpp"
+#include "lightninggenerator.hpp"
 #include "framework/gl/program.hpp"
 #include "framework/gl/texture.hpp"
 #include "framework/gl/framebuffer.hpp"
@@ -33,6 +34,7 @@ protected:
     void moveCallback(const vec2& movement, bool leftButton, bool rightButton, bool middleButton) override;
     void resizeCallback(const vec2& resolution) override;
 
+
 private:
     std::shared_ptr<MovingCamera> cam;
 
@@ -42,6 +44,7 @@ private:
     Mesh cube;
     Mesh plane;
     Mesh sphere;
+    Mesh lightningMesh;
 
     std::shared_ptr<Program> geometryshader;
 
