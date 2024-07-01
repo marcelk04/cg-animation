@@ -6,10 +6,6 @@
 #include <cstdlib>
 #include <iostream>
 
-inline std::ostream& operator<<(std::ostream& os, const glm::vec3& vec) {
-	return os << '[' << vec.x << ", " << vec.y << ", " << vec.z << ']';
-}
-
 std::vector<LightningGenerator::Segment> LightningGenerator::genBolt(glm::vec3 startpoint, glm::vec3 endpoint, int generations, const glm::vec3& camDir) {
 	std::list<Segment> segmentList;
 	Segment s{ startpoint, endpoint };
@@ -56,6 +52,8 @@ std::vector<LightningGenerator::Segment> LightningGenerator::genBolt(glm::vec3 s
 		segmentList = newSegments;
 	}
 
+	std::cout << "Generated lightning bolt from " << startpoint << " to " << endpoint << " (" << segmentList.size() << " segments)\n";
+
 	return std::vector<Segment>(segmentList.begin(), segmentList.end());
 }
 
@@ -63,11 +61,11 @@ LightningGenerator::MeshData LightningGenerator::genMeshData(const std::vector<S
 	float halfwidth = 0.02f;
 
 	std::vector<Mesh::VertexPCN> vertices(segments.size() * 4);
-	std::vector<unsigned int> indices(segments.size() * 6);
+	std::vector<uint32_t> indices(segments.size() * 6);
 
-	glm::vec3 startpoint = segments[0].startpoint;
-	glm::vec3 endpoint = segments[segments.size()-1].endpoint;
-	glm::vec3 offsetVec = glm::normalize(glm::cross(endpoint - startpoint, camDir));
+	const glm::vec3& startpoint = segments[0].startpoint;
+	const glm::vec3& endpoint = segments[segments.size() - 1].endpoint;
+	const glm::vec3 offsetVec = glm::normalize(glm::cross(endpoint - startpoint, camDir));
 
 	int vIdx = 0;
 	int iIdx = 0;
@@ -98,6 +96,8 @@ LightningGenerator::MeshData LightningGenerator::genMeshData(const std::vector<S
 
 		vCount += 4;
 	}
+
+	std::cout << "Generated mesh for lightning bolt (" << vertices.size() << " vertices, " << indices.size() << " indices)\n";
 
 	return MeshData(vertices, indices);
 }

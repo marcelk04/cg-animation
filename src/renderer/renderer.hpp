@@ -35,6 +35,11 @@ public:
 	void setResolution(const glm::vec2& resolution);
 
 private:
+	void geometryPass(Scene& scene);
+	void lightingPass();
+	void blurPass(int amount);
+	void hdrPass(float exposure, float gamma);
+
 	void generateTextures();
 	void generateTexture(Texture& texture, GLint internalformat, GLenum format, GLenum type) const;
 

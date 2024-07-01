@@ -7,7 +7,7 @@
 #include <vector>
 
 namespace LightningGenerator {
-	using MeshData = std::pair<std::vector<Mesh::VertexPCN>, std::vector<unsigned int>>;
+	using MeshData = std::pair<std::vector<Mesh::VertexPCN>, std::vector<uint32_t>>;
 
 	struct Segment {
 		glm::vec3 startpoint;

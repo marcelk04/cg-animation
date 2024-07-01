@@ -6,27 +6,47 @@
 
 class Light {
 public:
-	glm::vec3 color;
+	Light();
+
+	glm::vec3 getColor() const;
+
+	void setColor(const glm::vec3& color);
+
+protected:
+	glm::vec3 m_Color;
 };
 
 class DirLight : public Light {
 public:
-	glm::vec3 direction;
+	DirLight();
+	
+	glm::vec3 getDirection() const;
+
+	void setDirection(const glm::vec3& direction);
+
+protected:
+	glm::vec3 m_Direction; // normalized direction toward light source
 };
 
 class PointLight : public Light {
 public:
-	glm::vec3 position;
-	float radius;
+	PointLight();
+
+	glm::vec3 getPosition() const;
+	float getRadius() const;
+	float getConstant() const;
+	float getLinear() const;
+	float getQuadratic() const;
+
+	void setPosition(const glm::vec3& position);
+	void setAttenuationFactors(float constant, float linear, float quadratic);
+
+protected:
+	glm::vec3 m_Position;
+	float m_Radius;
 
 	// attenuation
-	float constant;
-	float linear;
-	float quadratic;
-
-	void calculateRadius() {
-		float lightMax = std::fmaxf(std::fmaxf(color.r, color.g), color.b);
-
-		radius = (-linear + std::sqrt(linear * linear - 4 * quadratic * (constant - (256.0 / 5.0) * lightMax))) / (2 * quadratic);
-	}
+	float m_Constant;
+	float m_Linear;
+	float m_Quadratic;
 };

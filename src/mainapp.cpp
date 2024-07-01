@@ -16,10 +16,6 @@ using namespace glm;
 #include <iostream>
 #include <memory>
 
-inline std::ostream& operator<<(std::ostream& os, const glm::vec3& vec) {
-  return os << '[' << vec.x << ", " << vec.y << ", " << vec.z << ']';
-}
-
 MainApp::MainApp()
     : App(800, 600), cam(std::make_shared<MovingCamera>(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f))), renderer(cam, resolution) {
     App::setTitle("cgintro"); // set title
@@ -64,6 +60,11 @@ MainApp::MainApp()
     lightningBolt.setMaterial(lightningMaterial);
     scene.addRenderObject(std::move(lightningBolt), geometryshaderId);
 
+    PointLight lightningLight;
+    lightningLight.setPosition(glm::vec3(1.0f, -0.9f, 0.0f));
+    lightningLight.setColor(glm::vec3(1.0f));
+    scene.addPointLight(std::move(lightningLight));
+
     RenderObject normalCube(cube);
     normalCube.setPositionAndSize(glm::vec3(-1.0f, 0.0f, 0.0f), 1.0f);
     normalCube.setMaterial(material1);
@@ -75,18 +76,14 @@ MainApp::MainApp()
     scene.addRenderObject(std::move(planeObj), geometryshaderId);
 
     DirLight dirLight;
-    dirLight.direction = glm::vec3(0.1f, 1.0f, 0.5f);
-    dirLight.color = glm::vec3(0.2f);
+    dirLight.setDirection(glm::vec3(0.1f, 1.0f, 0.5f));
+    dirLight.setColor(glm::vec3(0.2f));
     scene.setDirLight(std::move(dirLight));
 
     for (size_t i = 0; i < 4; i++) {
         PointLight pointLight;
-        pointLight.position = lightPositions[i];
-        pointLight.color = glm::vec3(1.5f);
-        pointLight.constant = 1.0f;
-        pointLight.linear = 0.14f;
-        pointLight.quadratic = 0.07f;
-        pointLight.calculateRadius();
+        pointLight.setPosition(lightPositions[i]);
+        pointLight.setColor(glm::vec3(1.5f));
         scene.addPointLight(std::move(pointLight));
 
         RenderObject lightCube(sphere);
@@ -100,15 +97,10 @@ MainApp::MainApp()
 }
 
 void MainApp::init() {
-    glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
+    glEnable(GL_CULL_FACE);
 
     Common::randomSeed();
-
-    //glEnable(GL_BLEND);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glEnable(GL_CULL_FACE);
 }
 
 void MainApp::buildImGui() {

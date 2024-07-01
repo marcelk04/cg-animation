@@ -1,13 +1,15 @@
 #include "renderer/scene.hpp"
 
-#include <unordered_set>
-
-void Scene::addRenderObject(RenderObject&& renderObject, size_t programId) {
+size_t Scene::addRenderObject(RenderObject&& renderObject, size_t programId) {
 	while (programId >= m_RenderObjects.size()) {
 		m_RenderObjects.push_back(std::vector<RenderObject>());
 	}
 
+	size_t id = m_RenderObjects[programId].size();
+
 	m_RenderObjects[programId].push_back(renderObject);
+
+	return id;
 }
 
 void Scene::setDirLight(DirLight&& dirLight) {
@@ -30,6 +32,10 @@ std::vector<std::vector<RenderObject>>& Scene::getRenderObjects() {
 
 std::vector<RenderObject>& Scene::getRenderObjects(size_t programId) {
 	return m_RenderObjects[programId];
+}
+
+RenderObject& Scene::getRenderObject(size_t programId, size_t objectId) {
+	return m_RenderObjects[programId][objectId];
 }
 
 std::optional<DirLight>& Scene::getDirLight() {

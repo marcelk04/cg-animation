@@ -2,10 +2,6 @@
 
 #include <iostream>
 
-inline std::ostream& operator<<(std::ostream& os, const glm::vec3& vec) {
-	return os << '[' << vec.x << ", " << vec.y << ", " << vec.z << ']';
-}
-
 Renderer::Renderer(std::shared_ptr<MovingCamera> cam, const glm::vec2& resolution)
 	: m_Cam(cam), m_Resolution(resolution) {
 	generateTextures();
@@ -22,6 +18,7 @@ Renderer::Renderer(std::shared_ptr<MovingCamera> cam, const glm::vec2& resolutio
 	m_HdrShader.bindTextureUnit("uHdrBuffer", 0);
 	m_HdrShader.bindTextureUnit("uBloomBuffer", 1);
 
+	// screen size quad
 	const std::vector<Mesh::VertexPCN> vertices = {
 		{ glm::vec3(-1.0f, 1.0f, 0.0f), glm::vec2(0.0f, 1.0f), glm::vec3(1.0f) },
 		{ glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec2(0.0f, 0.0f), glm::vec3(1.0f) },
@@ -43,73 +40,20 @@ size_t Renderer::addProgram(std::shared_ptr<Program> program) {
 }
 
 void Renderer::draw(Scene& scene) {
-	// Geometry pass
-	m_GBuffer.bind();
-	glEnable(GL_DEPTH_TEST);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	geometryPass(scene);
 
-	for (size_t i = 0; i < m_Programs.size(); i++) {
-		std::shared_ptr<Program> program = m_Programs[i];
+	lightingPass();
 
-		for (RenderObject& object : scene.getRenderObjects(i)) {
-			object.draw(*program);
-		}
-	}
+	blurPass(10);
 
-	// Lighting pass
-	m_ColorBuffer.bind();
-	glDisable(GL_DEPTH_TEST);
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	m_GPosition.bind(Texture::Type::TEX2D, 0);
-	m_GNormal.bind(Texture::Type::TEX2D, 1);
-	m_GAlbdedoSpec.bind(Texture::Type::TEX2D, 2);
-
-	m_LightingShader.set("uCamPos", m_Cam->getPosition());
-	m_LightingShader.bind();
-	m_Quad.draw();
-
-	// Blur pass
-	bool horizontal = true, firstIteration = true;
-	size_t amount = 10;
-
-	m_BlurShader.bind();
-
-	for (size_t i = 0; i < amount; i++) {
-		int framebufferIdx = static_cast<int>(horizontal);
-
-		m_BlurFramebuffers[framebufferIdx].bind();
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		m_BlurShader.set("uHorizontal", horizontal);
-
-		if (firstIteration) {
-			m_BrightColorTexture.bind(Texture::Type::TEX2D, 1);
-		} else {
-			m_BlurTextures[1 - framebufferIdx].bind(Texture::Type::TEX2D, 1);
-		}
-
-		m_Quad.draw();
-
-		horizontal = !horizontal;
-		firstIteration = false;
-	}
-
-	// HDR pass
-	Framebuffer::bindDefault();
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	m_ColorTexture.bind(Texture::Type::TEX2D, 0);
-	m_BlurTextures[0].bind(Texture::Type::TEX2D, 1);
-	m_HdrShader.bind();
-	m_Quad.draw();
+	hdrPass(1.0f, 2.2f);
 }
 
 void Renderer::updateLightingUniforms(Scene& scene) {
 	// directional light
 	if (scene.getDirLight().has_value()) {
-		m_LightingShader.set("uDirLight.direction", scene.getDirLight().value().direction);
-		m_LightingShader.set("uDirLight.color", scene.getDirLight().value().color);
+		m_LightingShader.set("uDirLight.direction", scene.getDirLight().value().getDirection());
+		m_LightingShader.set("uDirLight.color", scene.getDirLight().value().getColor());
 	} else {
 		m_LightingShader.set("uDirLight.direction", glm::vec3(1.0f));
 		m_LightingShader.set("uDirLight.color", glm::vec3(0.0f));
@@ -119,12 +63,12 @@ void Renderer::updateLightingUniforms(Scene& scene) {
 	for (size_t i = 0; i < scene.getPointLights().size(); i++) {
 		PointLight& pointLight = scene.getPointLight(i);
 
-		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].position", pointLight.position);
-		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].color", pointLight.color);
-		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].radius", pointLight.radius);
-		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].constant", pointLight.constant);
-		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].linear", pointLight.linear);
-		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].quadratic", pointLight.quadratic);
+		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].position", pointLight.getPosition());
+		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].color", pointLight.getColor());
+		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].radius", pointLight.getRadius());
+		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].constant", pointLight.getConstant());
+		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].linear", pointLight.getLinear());
+		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].quadratic", pointLight.getQuadratic());
 	}
 
 	for (size_t i = scene.getPointLights().size(); i < scene.MAX_NR_LIGHTS; i++) {
@@ -152,6 +96,78 @@ void Renderer::updateCamUniforms(size_t programId) {
 void Renderer::setResolution(const glm::vec2& resolution) {
 	m_Resolution = resolution;
 	generateTextures();
+}
+
+
+void Renderer::geometryPass(Scene& scene) {
+	m_GBuffer.bind();
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	for (size_t i = 0; i < m_Programs.size(); i++) {
+		std::shared_ptr<Program> program = m_Programs[i];
+
+		for (RenderObject& object : scene.getRenderObjects(i)) {
+			object.draw(*program);
+		}
+	}
+}
+
+void Renderer::lightingPass() {
+	m_ColorBuffer.bind();
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	m_GPosition.bind(Texture::Type::TEX2D, 0);
+	m_GNormal.bind(Texture::Type::TEX2D, 1);
+	m_GAlbdedoSpec.bind(Texture::Type::TEX2D, 2);
+
+	m_LightingShader.set("uCamPos", m_Cam->getPosition());
+	m_LightingShader.bind();
+
+	m_Quad.draw();
+}
+
+void Renderer::blurPass(int amount) {
+	bool horizontal = true, firstIteration = true;
+
+	m_BlurShader.bind();
+
+	for (size_t i = 0; i < amount; i++) {
+		int framebufferIdx = static_cast<int>(horizontal);
+
+		m_BlurFramebuffers[framebufferIdx].bind();
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		m_BlurShader.set("uHorizontal", horizontal);
+
+		if (firstIteration) {
+			m_BrightColorTexture.bind(Texture::Type::TEX2D, 1);
+		} else {
+			m_BlurTextures[1 - framebufferIdx].bind(Texture::Type::TEX2D, 1);
+		}
+
+		m_Quad.draw();
+
+		horizontal = !horizontal;
+		firstIteration = false;
+	}
+}
+
+void Renderer::hdrPass(float exposure, float gamma) {
+	Framebuffer::bindDefault();
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	m_ColorTexture.bind(Texture::Type::TEX2D, 0);
+	m_BlurTextures[0].bind(Texture::Type::TEX2D, 1);
+
+	m_HdrShader.set("uExposure", exposure);
+	m_HdrShader.set("uGamma", gamma);
+	m_HdrShader.bind();
+
+	m_Quad.draw();
 }
 
 void Renderer::generateTextures() {

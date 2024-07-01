@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include <iostream>
 
 #include <glm/glm.hpp>
 
@@ -32,4 +33,8 @@ inline void Common::hash_combine(std::size_t& seed, const T& v, const Rest&... r
     std::hash<T> hasher;
     seed ^= hasher(v) + 0x9e3779b9 + (seed<<6) + (seed>>2);
     (hash_combine(seed, rest), ...);
+}
+
+inline std::ostream& operator<<(std::ostream& os, const glm::vec3& vec) {
+	return os << '[' << vec.x << ", " << vec.y << ", " << vec.z << ']';
 }

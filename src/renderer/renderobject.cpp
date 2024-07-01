@@ -8,7 +8,6 @@ RenderObject::RenderObject(Mesh& mesh)
 	setModelMatrix(glm::mat4(1.0f));
 }
 
-
 void RenderObject::setPosition(const glm::vec3& position) {
 	setPositionAndSize(position, 1.0f);
 }
