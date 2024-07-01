@@ -4,6 +4,9 @@
 using namespace glm;
 
 #include "movingcamera.hpp"
+#include "renderer/renderobject.hpp"
+#include "renderer/renderer.hpp"
+#include "renderer/light.hpp"
 
 #include "framework/app.hpp"
 
@@ -12,8 +15,10 @@ using namespace glm;
 #include "lightninggenerator.hpp"
 #include "framework/gl/program.hpp"
 #include "framework/gl/texture.hpp"
+#include "framework/gl/framebuffer.hpp"
 
 #include <vector>
+#include <memory>
 
 class MainApp : public App {
 public:
@@ -27,17 +32,21 @@ protected:
     // void clickCallback(Button button, Action action, Modifier modifier) override;
     void scrollCallback(float amount) override;
     void moveCallback(const vec2& movement, bool leftButton, bool rightButton, bool middleButton) override;
-    // void resizeCallback(const vec2& resolution) override;
+    void resizeCallback(const vec2& resolution) override;
 
 
 private:
-    MovingCamera coolCamera{ glm::vec3(0.0f, 1.0f, 3.0f), glm::vec3(0.0f, 1.0f, 0.0f) };
+    std::shared_ptr<MovingCamera> cam;
 
-    Program textureshader;
-    Program meshshader;
-    Mesh lightningMesh;
+    Renderer renderer;
+    Scene scene;
+
+    Mesh cube;
     Mesh plane;
-    Texture texChecker;
+    Mesh sphere;
+    Mesh lightningMesh;
 
-    glm::vec3 lightDir{ glm::vec3(1.0f) };
+    std::shared_ptr<Program> geometryshader;
+
+    std::vector<glm::vec3> lightPositions{ glm::vec3(0.7f, 0.2f, 2.0f), glm::vec3(2.3f, 3.3f, -4.0f), glm::vec3(-4.0f, 2.0f, -12.0f), glm::vec3(0.0f, 0.0f, -3.0f) };
 };

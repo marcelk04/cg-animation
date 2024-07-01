@@ -59,3 +59,14 @@ float Common::randomFloat(float first, float last) {
 
     return randomFloat() * interval + first;
 }
+
+glm::vec3 Common::deCasteljau(std::vector<glm::vec3> points, float t) {
+    int n = points.size();
+    for (int j = 1; j < n; j++) {
+        for (int i = 0; i < n - j; i++) {
+            points[i] = (1 - t) * points[i] + t * points[i + 1];
+        }
+    }
+
+    return points[0];
+}

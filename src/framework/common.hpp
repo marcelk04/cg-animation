@@ -4,6 +4,8 @@
 #include <vector>
 #include <cmath>
 
+#include <glm/glm.hpp>
+
 namespace Common {
 
     std::string readFile(const std::string& filepath);
@@ -17,7 +19,8 @@ namespace Common {
     int randomInt(int first, int last);
     float randomFloat();
     float randomFloat(float first, float last);
-
+  
+    glm::vec3 deCasteljau(std::vector<glm::vec3> points, float t);
 }
 
 /**

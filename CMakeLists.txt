@@ -7,6 +7,9 @@ set(SRC
     src/mainapp.cpp
     src/movingcamera.cpp
     src/lightninggenerator.cpp
+    src/renderer/renderobject.cpp
+    src/renderer/renderer.cpp
+    src/renderer/scene.cpp
     src/framework/app.cpp
     src/framework/camera.cpp
     src/framework/common.cpp

@@ -14,68 +14,104 @@ using namespace glm;
 #include "lightninggenerator.hpp"
 
 #include <iostream>
+#include <memory>
 
 inline std::ostream& operator<<(std::ostream& os, const glm::vec3& vec) {
-	return os << '[' << vec.x << ", " << vec.y << ", " << vec.z << ']';
+  return os << '[' << vec.x << ", " << vec.y << ", " << vec.z << ']';
 }
 
-MainApp::MainApp() : App(800, 600) {
+MainApp::MainApp()
+    : App(800, 600), cam(std::make_shared<MovingCamera>(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f))), renderer(cam, resolution) {
     App::setTitle("cgintro"); // set title
     App::setVSync(true); // Limit framerate
 
-    texChecker.load(Texture::Format::SRGB8, "textures/checker.png", 0);
-    texChecker.bind(Texture::Type::TEX2D);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    cam->setResolution(resolution);
 
-    textureshader.load("textureshader.vert", "textureshader.frag");
-    textureshader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
-    textureshader.bindTextureUnit("uTexture", 0);
+    geometryshader = std::make_shared<Program>();
+    geometryshader->load("deferred_geometry.vert", "deferred_geometry.frag");
+    size_t geometryshaderId = renderer.addProgram(geometryshader);
 
-    meshshader.load("meshshader.vert", "meshshader.frag");
-    meshshader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
+    Material material0 {
+        glm::vec3(1.0f, 0.5f, 0.31f),
+        0.4f
+    };
 
+    Material material1 {
+        glm::vec3(0.6f, 0.2f, 0.4f),
+        0.4f
+    };
+
+    Material lightMaterial {
+        glm::vec3(100.0f),
+        0.0f
+    };
+
+    cube.load("meshes/cube.obj");
     plane.load("meshes/plane.obj");
+    sphere.load("meshes/highpolysphere.obj");
 
     auto segments = LightningGenerator::genBolt(glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 5, coolCamera.m_Direction);
     auto meshdata = LightningGenerator::genMeshData(segments, coolCamera.m_Direction);
 
     lightningMesh.load(meshdata.first, meshdata.second);
+
+    RenderObject normalCube(cube);
+    normalCube.setPositionAndSize(glm::vec3(-1.0f, 0.0f, 0.0f), 1.0f);
+    normalCube.setMaterial(material1);
+    scene.addRenderObject(std::move(normalCube), geometryshaderId);
+
+    RenderObject planeObj(plane);
+    planeObj.setPositionAndSize(glm::vec3(0.0f, -1.0f, 0.0f), 20.0f);
+    planeObj.setMaterial(material0);
+    scene.addRenderObject(std::move(planeObj), geometryshaderId);
+
+    DirLight dirLight;
+    dirLight.direction = glm::vec3(0.1f, 1.0f, 0.5f);
+    dirLight.color = glm::vec3(0.2f);
+    scene.setDirLight(std::move(dirLight));
+
+    for (size_t i = 0; i < 4; i++) {
+        PointLight pointLight;
+        pointLight.position = lightPositions[i];
+        pointLight.color = glm::vec3(1.5f);
+        pointLight.constant = 1.0f;
+        pointLight.linear = 0.14f;
+        pointLight.quadratic = 0.07f;
+        pointLight.calculateRadius();
+        scene.addPointLight(std::move(pointLight));
+
+        RenderObject lightCube(sphere);
+        lightCube.setPositionAndSize(lightPositions[i], 0.1f);
+        lightCube.setMaterial(lightMaterial);
+        scene.addRenderObject(std::move(lightCube), geometryshaderId);
+    }
+
+    renderer.updateLightingUniforms(scene);
+    renderer.updateCamUniforms();
 }
 
 void MainApp::init() {
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
+    glDepthFunc(GL_LESS);
 
     Common::randomSeed();
 
     //glEnable(GL_BLEND);
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  
+    glEnable(GL_CULL_FACE);
 }
 
 void MainApp::buildImGui() {
     ImGui::StatisticsWindow(delta, resolution);
-
-    if (ImGui::SphericalSlider("Light Direction", lightDir)) {
-        textureshader.set("uLightDir", lightDir);
-        meshshader.set("uLightDir", lightDir);
-    }
 }
 
 void MainApp::render() {
-    if (coolCamera.updateIfChanged()) {
-        textureshader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
-        meshshader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
+    if (cam->updateIfChanged()) {
+        renderer.updateCamUniforms();
     }
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    texChecker.bind(Texture::Type::TEX2D);
-    textureshader.bind();
-    plane.draw();
-
-    meshshader.bind();
-    lightningMesh.draw();
+    renderer.draw(scene);
 }
 
 void MainApp::keyCallback(Key key, Action action) {
@@ -84,22 +120,22 @@ void MainApp::keyCallback(Key key, Action action) {
     if (action == Action::RELEASE) return;
 
     if (key == Key::W) {
-        coolCamera.move(delta * cameraSpeed * coolCamera.m_Direction);
+        cam->move(delta * cameraSpeed * cam->getDirection());
     }
     else if (key == Key::S) {
-        coolCamera.move(-delta * cameraSpeed * coolCamera.m_Direction);
+        cam->move(-delta * cameraSpeed * cam->getDirection());
     }
     else if (key == Key::A) {
-        coolCamera.move(-delta * cameraSpeed * coolCamera.m_Right);
+        cam->move(-delta * cameraSpeed * cam->getRight());
     }
     else if (key == Key::D) {
-        coolCamera.move(delta * cameraSpeed * coolCamera.m_Right);
+        cam->move(delta * cameraSpeed * cam->getRight());
     }
     else if (key == Key::SPACE) {
-        coolCamera.move(delta * cameraSpeed * coolCamera.m_Up);
+        cam->move(delta * cameraSpeed * cam->getUp());
     }
     else if (key == Key::LEFT_SHIFT) {
-        coolCamera.move(-delta * cameraSpeed * coolCamera.m_Up);
+        cam->move(-delta * cameraSpeed * cam->getUp());
     }
     else if (key == Key::G) {
         auto segments = LightningGenerator::genBolt(glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 5, coolCamera.m_Direction);
@@ -110,11 +146,16 @@ void MainApp::keyCallback(Key key, Action action) {
 }
 
 void MainApp::scrollCallback(float amount) {
-    coolCamera.zoom(0.1f * amount);
+    cam->zoom(0.1f * amount);
 }
 
 void MainApp::moveCallback(const vec2& movement, bool leftButton, bool rightButton, bool middleButton) {
     if (leftButton || rightButton || middleButton) {
-        coolCamera.rotate(0.002f * movement);
+        cam->rotate(0.002f * movement);
     }
+}
+
+void MainApp::resizeCallback(const glm::vec2& resolution) {
+    cam->setResolution(resolution);
+    renderer.setResolution(resolution);
 }
