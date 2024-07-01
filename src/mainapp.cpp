@@ -29,7 +29,7 @@ MainApp::MainApp()
 
     geometryshader = std::make_shared<Program>();
     geometryshader->load("deferred_geometry.vert", "deferred_geometry.frag");
-    size_t geometryshaderId = renderer.addProgram(geometryshader);
+    geometryshaderId = renderer.addProgram(geometryshader);
 
     Material material0 {
         glm::vec3(1.0f, 0.5f, 0.31f),
@@ -46,14 +46,23 @@ MainApp::MainApp()
         0.0f
     };
 
+    Material lightningMaterial{
+        glm::vec3(5.0f, 5.0f, 10.0f),
+        0.0f
+    };
+
     cube.load("meshes/cube.obj");
     plane.load("meshes/plane.obj");
     sphere.load("meshes/highpolysphere.obj");
 
-    auto segments = LightningGenerator::genBolt(glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 5, coolCamera.m_Direction);
-    auto meshdata = LightningGenerator::genMeshData(segments, coolCamera.m_Direction);
+    auto segments = LightningGenerator::genBolt(glm::vec3(1.0f, 4.0f, 0.0f), glm::vec3(1.0f, -1.0f, 0.0f), 5, cam->getDirection());
+    auto meshdata = LightningGenerator::genMeshData(segments, cam->getDirection());
 
     lightningMesh.load(meshdata.first, meshdata.second);
+
+    RenderObject lightningBolt(lightningMesh);
+    lightningBolt.setMaterial(lightningMaterial);
+    scene.addRenderObject(std::move(lightningBolt), geometryshaderId);
 
     RenderObject normalCube(cube);
     normalCube.setPositionAndSize(glm::vec3(-1.0f, 0.0f, 0.0f), 1.0f);
@@ -98,7 +107,7 @@ void MainApp::init() {
 
     //glEnable(GL_BLEND);
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  
+
     glEnable(GL_CULL_FACE);
 }
 
@@ -138,8 +147,8 @@ void MainApp::keyCallback(Key key, Action action) {
         cam->move(-delta * cameraSpeed * cam->getUp());
     }
     else if (key == Key::G) {
-        auto segments = LightningGenerator::genBolt(glm::vec3(0.0f, 2.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 5, coolCamera.m_Direction);
-        auto meshdata = LightningGenerator::genMeshData(segments, coolCamera.m_Direction);
+        auto segments = LightningGenerator::genBolt(glm::vec3(1.0f, 4.0f, 0.0f), glm::vec3(1.0f, -1.0f, 0.0f), 5, cam->getDirection());
+        auto meshdata = LightningGenerator::genMeshData(segments, cam->getDirection());
 
         lightningMesh.load(meshdata.first, meshdata.second);
     }

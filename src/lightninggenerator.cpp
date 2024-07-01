@@ -16,14 +16,14 @@ std::vector<LightningGenerator::Segment> LightningGenerator::genBolt(glm::vec3 s
 	segmentList.push_back(s);
 
 	float offsetAmount = 0.2f;
-	float offshootOffsetAmount = 0.75f * offsetAmount;
+	float offshootOffsetAmount = 1.25f * offsetAmount;
 	float lengthScale = 0.7f;
 	float offshotChance = 0.3f;
 
 	for (int g = 0; g < generations; g++) {
 		std::list<Segment> newSegments;
 
-		for (Segment seg : segmentList) {
+		for (const Segment& seg : segmentList) {
 			glm::vec3 midpoint = 0.5f * (seg.startpoint + seg.endpoint);
 			glm::vec3 direction = seg.endpoint - seg.startpoint;
 			glm::vec3 offsetDir = glm::normalize(glm::cross(direction, camDir));
@@ -46,12 +46,12 @@ std::vector<LightningGenerator::Segment> LightningGenerator::genBolt(glm::vec3 s
 				Segment s3{ midpoint, offshootEnd };
 				newSegments.push_back(s3);
 			}
-			
+
 			newSegments.push_back(s2);
 		}
 
 		offsetAmount /= 2.0f;
-		offshootOffsetAmount /= 2.0f;	
+		offshootOffsetAmount /= 2.0f;
 
 		segmentList = newSegments;
 	}
@@ -60,7 +60,7 @@ std::vector<LightningGenerator::Segment> LightningGenerator::genBolt(glm::vec3 s
 }
 
 LightningGenerator::MeshData LightningGenerator::genMeshData(const std::vector<Segment>& segments, const glm::vec3& camDir) {
-	float halfwidth = 0.005f;
+	float halfwidth = 0.02f;
 
 	std::vector<Mesh::VertexPCN> vertices(segments.size() * 4);
 	std::vector<unsigned int> indices(segments.size() * 6);

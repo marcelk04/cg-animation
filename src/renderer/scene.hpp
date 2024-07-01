@@ -12,7 +12,7 @@
 class Scene {
 public:
 	const size_t MAX_NR_LIGHTS = 4;
-	
+
 public:
 	Scene() = default;
 
