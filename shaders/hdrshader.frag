@@ -15,9 +15,6 @@ void main() {
 
 	hdrColor += bloomColor; // additive blending
 
-	// reinhard tone mapping
-	//vec3 mapped = hdrColor / (hdrColor + vec3(1.0));
-
 	// exposure tone mapping
 	vec3 mapped = vec3(1.0) - exp(-hdrColor * exposure);
 

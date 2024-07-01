@@ -37,7 +37,7 @@ vec3 calcDirLight(DirLight light, vec3 albedo, float specular, vec3 normal, vec3
 	float diff = max(dot(normal, lightDir), 0.0);
 	vec3 diffuse = diff * albedo * light.color;
 
-	float spec = pow(max(dot(normal, halfwayDir), 0.0), 16);
+	float spec = pow(max(dot(normal, halfwayDir), 0.0), 32);
 	vec3 specularRes = light.color * spec * specular;
 
 	return diffuse + specularRes;
@@ -50,7 +50,7 @@ vec3 calcPointLight(PointLight light, vec3 fragPos, vec3 albedo, float specular,
 	float diff = max(dot(normal, lightDir), 0.0);
 	vec3 diffuse = diff * albedo * light.color;
 
-	float spec = pow(max(dot(normal, halfwayDir), 0.0), 16);
+	float spec = pow(max(dot(normal, halfwayDir), 0.0), 32);
 	vec3 specularRes = light.color * spec * specular;
 
 	float attenuation = 1.0 / (light.constant + light.linear * dist + light.quadratic * dist * dist);
@@ -69,6 +69,7 @@ void main() {
 
 	vec3 viewDir = normalize(uCamPos - fragPos);
 
+	// ambient lighting
 	vec3 result = albedo * 0.1;
 
 	result += calcDirLight(uDirLight, albedo, specular, normal, viewDir);
@@ -83,8 +84,8 @@ void main() {
 
 	outColor = vec4(result, 1.0);
 
-	float brightness = dot(outColor.rgb, vec3(0.2126, 0.7152, 0.0722));
-	if (brightness > 1.0) {
+	float luminance = dot(outColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+	if (luminance > 1.0) {
 		outBrightColor = vec4(outColor.rgb, 1.0);
 	} else {
 		outBrightColor = vec4(0.0, 0.0, 0.0, 1.0);

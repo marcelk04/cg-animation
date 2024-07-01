@@ -80,7 +80,7 @@ void Renderer::draw(Scene& scene) {
 
 		m_BlurFramebuffers[framebufferIdx].bind();
 		glClear(GL_COLOR_BUFFER_BIT);
-		
+
 		m_BlurShader.set("uHorizontal", horizontal);
 
 		if (firstIteration) {
