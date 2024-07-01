@@ -3,7 +3,7 @@
 #define NR_POINT_LIGHTS 5
 
 struct DirLight {
-	vec3 direction; // points toward light source
+	vec3 direction; // points toward light source, normalized
 	vec3 color;
 };
 
@@ -27,10 +27,29 @@ layout (location = 1) out vec4 outBrightColor;
 uniform sampler2D uPosition;
 uniform sampler2D uNormal;
 uniform sampler2D uAlbedoSpec;
+uniform sampler2D uShadow;
 
 uniform DirLight uDirLight;
 uniform PointLight uPointLights[NR_POINT_LIGHTS];
 uniform vec3 uCamPos;
+uniform mat4 uLightSpaceMatrix;
+
+float shadowCalculation(vec4 lightSpaceFragPos, float bias) {
+	vec3 projCoords = lightSpaceFragPos.xyz / lightSpaceFragPos.w;
+
+	if (projCoords.z > 1.0) {
+		return 0.0;
+	}
+
+	projCoords = projCoords * 0.5 + 0.5;
+
+	float closestDepth = texture(uShadow, projCoords.xy).r;
+	float currentDepth = projCoords.z;
+
+	float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+
+	return shadow;
+}
 
 vec3 calcLight(vec3 lightDir, vec3 viewDir, vec3 normal, vec3 albedo, float specular, vec3 lightColor) {
 	vec3 halfwayDir = normalize(lightDir + viewDir);
@@ -46,7 +65,7 @@ vec3 calcLight(vec3 lightDir, vec3 viewDir, vec3 normal, vec3 albedo, float spec
 
 vec3 calcDirLight(DirLight light, vec3 viewDir, vec3 normal, vec3 albedo, float specular) {
 	return calcLight(
-		normalize(light.direction),
+		light.direction,
 		viewDir,
 		normal,
 		albedo,
@@ -70,14 +89,17 @@ vec3 calcPointLight(PointLight light, vec3 viewDir, vec3 normal, vec3 fragPos, v
 
 void main() {
 	vec3 fragPos = texture(uPosition, sTexCoord).xyz;
+	vec4 lightSpaceFragPos = uLightSpaceMatrix * vec4(fragPos, 1.0);
 	vec3 normal = texture(uNormal, sTexCoord).xyz;
 	vec3 albedo = texture(uAlbedoSpec, sTexCoord).rbg;
 	float specular = texture(uAlbedoSpec, sTexCoord).a;
 
 	vec3 viewDir = normalize(uCamPos - fragPos);
 
-	// ambient lighting
-	vec3 result = albedo * 0.1;
+	float bias = max(0.05 * (1.0 - dot(normal, uDirLight.direction)), 0.005);
+	float shadow = shadowCalculation(lightSpaceFragPos, bias);
+
+	vec3 result = vec3(0.0);
 
 	result += calcDirLight(uDirLight, viewDir, normal, albedo, specular);
 
@@ -88,6 +110,13 @@ void main() {
 			result += calcPointLight(uPointLights[i], viewDir, normal, fragPos, albedo, specular, dist);
 		}
 	}
+
+	result = (1 - shadow) * result;
+
+	// ambient lighting
+	result += albedo * 0.1;
+
+	//result = vec3(shadow);
 
 	outColor = vec4(result, 1.0);
 

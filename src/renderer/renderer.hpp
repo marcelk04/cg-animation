@@ -19,11 +19,21 @@
 
 class Renderer {
 public:
+	const int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+
+public:
 	Renderer(std::shared_ptr<MovingCamera> cam, const glm::vec2& resolution);
 
 	size_t addProgram(std::shared_ptr<Program> program);
 
 	std::shared_ptr<Program> getProgram(size_t programId) { return m_Programs[programId]; }
+	float getExposure() const { return m_Exposure; }
+	float getGamma() const { return m_Gamma; }
+	int getBlurAmount() const { return m_BlurAmount; }
+
+	void setExposure(float exposure) { m_Exposure = exposure; }
+	void setGamma(float gamma) { m_Gamma = gamma; }
+	void setBlurAmount(int blurAmount) { m_BlurAmount = blurAmount; }
 
 	void draw(Scene& scene);
 
@@ -35,13 +45,15 @@ public:
 	void setResolution(const glm::vec2& resolution);
 
 private:
+	void shadowPass(Scene& scene);
 	void geometryPass(Scene& scene);
 	void lightingPass();
-	void blurPass(int amount);
-	void hdrPass(float exposure, float gamma);
+	int blurPass(int amount);
+	void hdrPass(int blurBuffer, float exposure, float gamma);
 
 	void generateTextures();
 	void generateTexture(Texture& texture, GLint internalformat, GLenum format, GLenum type) const;
+	void generateTexture(Texture& texture, GLint internalformat, GLenum format, GLenum type, const glm::vec2& resolution) const;
 
 private:
 	std::shared_ptr<MovingCamera> m_Cam;
@@ -50,6 +62,13 @@ private:
 	std::vector<std::shared_ptr<Program>> m_Programs;
 
 	Mesh m_Quad;
+
+	// shadox mapping
+	Texture m_ShadowDepth;
+	Framebuffer m_ShaderBuffer;
+	glm::mat4 m_LightSpaceMatrix;
+
+	Program m_DepthShader;
 
 	// deferred shading
 	Texture m_GPosition;
@@ -71,4 +90,8 @@ private:
 	std::array<Texture, 2> m_BlurTextures;
 
 	Program m_BlurShader;
+
+	float m_Exposure = 1.0f;
+	float m_Gamma = 2.2f;
+	int m_BlurAmount = 10;
 };

@@ -1,15 +1,20 @@
 #include "renderer/renderer.hpp"
 
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <iostream>
 
 Renderer::Renderer(std::shared_ptr<MovingCamera> cam, const glm::vec2& resolution)
 	: m_Cam(cam), m_Resolution(resolution) {
 	generateTextures();
 
+	m_DepthShader.load("depthshader.vert", "depthshader.frag");
+
 	m_LightingShader.load("deferred_lighting.vert", "deferred_lighting.frag");
 	m_LightingShader.bindTextureUnit("uPosition", 0);
 	m_LightingShader.bindTextureUnit("uNormal", 1);
 	m_LightingShader.bindTextureUnit("uAlbedoSpec", 2);
+	m_LightingShader.bindTextureUnit("uShadow", 3);
 
 	m_BlurShader.load("blurshader.vert", "blurshader.frag");
 	m_BlurShader.bindTextureUnit("uColorBuffer", 1);
@@ -40,20 +45,34 @@ size_t Renderer::addProgram(std::shared_ptr<Program> program) {
 }
 
 void Renderer::draw(Scene& scene) {
+	shadowPass(scene);
+
 	geometryPass(scene);
 
 	lightingPass();
 
-	blurPass(10);
+	int blurBuffer = blurPass(m_BlurAmount);
 
-	hdrPass(1.0f, 2.2f);
+	hdrPass(blurBuffer, m_Exposure, m_Gamma);
 }
 
 void Renderer::updateLightingUniforms(Scene& scene) {
 	// directional light
 	if (scene.getDirLight().has_value()) {
-		m_LightingShader.set("uDirLight.direction", scene.getDirLight().value().getDirection());
-		m_LightingShader.set("uDirLight.color", scene.getDirLight().value().getColor());
+		DirLight& dirLight = scene.getDirLight().value();
+
+		m_LightingShader.set("uDirLight.direction", dirLight.getDirection());
+		m_LightingShader.set("uDirLight.color", dirLight.getColor());
+
+		float nearPlane = 1.0f, farPlane = 7.5f;
+		glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, nearPlane, farPlane);
+		glm::mat4 lightView = glm::lookAt(dirLight.getDirection(), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+		m_LightSpaceMatrix = lightProjection * lightView;
+
+		m_DepthShader.set("uLightSpaceMatrix", m_LightSpaceMatrix);
+		m_LightingShader.set("uLightSpaceMatrix", m_LightSpaceMatrix);
+
 	} else {
 		m_LightingShader.set("uDirLight.direction", glm::vec3(1.0f));
 		m_LightingShader.set("uDirLight.color", glm::vec3(0.0f));
@@ -98,6 +117,22 @@ void Renderer::setResolution(const glm::vec2& resolution) {
 	generateTextures();
 }
 
+void Renderer::shadowPass(Scene& scene) {
+	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+	m_ShaderBuffer.bind();
+	glEnable(GL_DEPTH_TEST);
+	glClear(GL_DEPTH_BUFFER_BIT);
+	glCullFace(GL_FRONT);
+
+	for (size_t i = 0; i < m_Programs.size(); i++) {
+		for (RenderObject& object : scene.getRenderObjects(i)) {
+			object.draw(m_DepthShader);
+		}
+	}
+
+	glViewport(0, 0, m_Resolution.x, m_Resolution.y);
+	glCullFace(GL_BACK);
+}
 
 void Renderer::geometryPass(Scene& scene) {
 	m_GBuffer.bind();
@@ -123,6 +158,7 @@ void Renderer::lightingPass() {
 	m_GPosition.bind(Texture::Type::TEX2D, 0);
 	m_GNormal.bind(Texture::Type::TEX2D, 1);
 	m_GAlbdedoSpec.bind(Texture::Type::TEX2D, 2);
+	m_ShadowDepth.bind(Texture::Type::TEX2D, 3);
 
 	m_LightingShader.set("uCamPos", m_Cam->getPosition());
 	m_LightingShader.bind();
@@ -130,7 +166,7 @@ void Renderer::lightingPass() {
 	m_Quad.draw();
 }
 
-void Renderer::blurPass(int amount) {
+int Renderer::blurPass(int amount) {
 	bool horizontal = true, firstIteration = true;
 
 	m_BlurShader.bind();
@@ -154,14 +190,18 @@ void Renderer::blurPass(int amount) {
 		horizontal = !horizontal;
 		firstIteration = false;
 	}
+
+	int last = static_cast<int>(!horizontal);
+	
+	return last;
 }
 
-void Renderer::hdrPass(float exposure, float gamma) {
+void Renderer::hdrPass(int blurBuffer, float exposure, float gamma) {
 	Framebuffer::bindDefault();
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	m_ColorTexture.bind(Texture::Type::TEX2D, 0);
-	m_BlurTextures[0].bind(Texture::Type::TEX2D, 1);
+	m_BlurTextures[blurBuffer].bind(Texture::Type::TEX2D, 1);
 
 	m_HdrShader.set("uExposure", exposure);
 	m_HdrShader.set("uGamma", gamma);
@@ -171,6 +211,15 @@ void Renderer::hdrPass(float exposure, float gamma) {
 }
 
 void Renderer::generateTextures() {
+	// shadows
+	generateTexture(m_ShadowDepth, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_FLOAT, glm::vec2(SHADOW_WIDTH, SHADOW_HEIGHT));
+	m_ShaderBuffer.bind();
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_ShadowDepth.handle, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	Framebuffer::bindDefault();
+
+	// geometry buffer
 	generateTexture(m_GPosition, GL_RGBA16F, GL_RGBA, GL_FLOAT);
 	m_GBuffer.attach(Framebuffer::Type::READ_AND_DRAW, Framebuffer::Attachment::COLOR0, m_GPosition.handle);
 
@@ -181,7 +230,7 @@ void Renderer::generateTextures() {
 	m_GBuffer.attach(Framebuffer::Type::READ_AND_DRAW, Framebuffer::Attachment::COLOR2, m_GAlbdedoSpec.handle);
 
 	generateTexture(m_GDepth, GL_DEPTH32F_STENCIL8, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV);
-	m_GBuffer.attach(Framebuffer::Type::DRAW, Framebuffer::Attachment::DEPTH, m_GDepth.handle);
+	m_GBuffer.attach(Framebuffer::Type::READ_AND_DRAW, Framebuffer::Attachment::DEPTH, m_GDepth.handle);
 
 	m_GBuffer.bind();
 	std::array<GLenum, 3> drawGeomBuffers = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
@@ -210,8 +259,12 @@ void Renderer::generateTextures() {
 }
 
 void Renderer::generateTexture(Texture& texture, GLint internalformat, GLenum format, GLenum type) const {
+	generateTexture(texture, internalformat, format, type, m_Resolution);
+}
+
+void Renderer::generateTexture(Texture& texture, GLint internalformat, GLenum format, GLenum type, const glm::vec2& resolution) const {
 	texture.bind(Texture::Type::TEX2D);
-	glTexImage2D(GL_TEXTURE_2D, 0, internalformat, m_Resolution.x, m_Resolution.y, 0, format, type, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, internalformat, resolution.x, resolution.y, 0, format, type, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

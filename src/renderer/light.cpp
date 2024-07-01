@@ -14,6 +14,7 @@ void Light::setColor(const glm::vec3& color) {
 	m_Color = color;
 }
 
+
 DirLight::DirLight()
 	: Light(), m_Direction(glm::vec3(1.0f)) {
 
@@ -26,6 +27,7 @@ glm::vec3 DirLight::getDirection() const {
 void DirLight::setDirection(const glm::vec3& direction) {
 	m_Direction = glm::normalize(direction);
 }
+
 
 PointLight::PointLight()
 	: Light(), m_Position(glm::vec3(0.0f)) {
@@ -61,6 +63,7 @@ void PointLight::setAttenuationFactors(float constant, float linear, float quadr
 	m_Linear = linear;
 	m_Quadratic = quadratic;
 
+	// update light radius
 	float lightMax = std::fmaxf(std::fmaxf(m_Color.r, m_Color.g), m_Color.b);
 
 	m_Radius = (-linear + std::sqrt(linear * linear - 4 * quadratic * (constant - (256.0 / 5.0) * lightMax))) / (2 * quadratic);
