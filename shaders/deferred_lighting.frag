@@ -33,6 +33,7 @@ uniform DirLight uDirLight;
 uniform PointLight uPointLights[NR_POINT_LIGHTS];
 uniform vec3 uCamPos;
 uniform mat4 uLightSpaceMatrix;
+uniform bool uEnableShadows;
 
 float shadowCalculation(vec4 lightSpaceFragPos, float bias) {
 	vec3 projCoords = lightSpaceFragPos.xyz / lightSpaceFragPos.w;
@@ -118,8 +119,13 @@ void main() {
 	}
 
 	// shadow casting
-	float bias = max(0.05 * (1.0 - dot(normal, uDirLight.direction)), 0.005);
-	float shadow = shadowCalculation(lightSpaceFragPos, bias);
+	float shadow = 0.0;
+
+	if (uEnableShadows) {
+		float bias = max(0.05 * (1.0 - dot(normal, uDirLight.direction)), 0.005);
+
+		shadow = shadowCalculation(lightSpaceFragPos, bias);
+	}
 
 	result = (1 - shadow) * result;
 

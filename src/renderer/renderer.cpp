@@ -45,11 +45,14 @@ size_t Renderer::addProgram(std::shared_ptr<Program> program) {
 }
 
 void Renderer::draw(Scene& scene) {
-	shadowPass(scene);
+	// only calculate shadow map if scene has a directional light
+	if (scene.getDirLight().has_value()) {
+		shadowPass(scene);
+	}
 
 	geometryPass(scene);
 
-	lightingPass();
+	lightingPass(scene.getDirLight().has_value());
 
 	int blurBuffer = blurPass(m_BlurAmount);
 
@@ -72,7 +75,6 @@ void Renderer::updateLightingUniforms(Scene& scene) {
 
 		m_DepthShader.set("uLightSpaceMatrix", m_LightSpaceMatrix);
 		m_LightingShader.set("uLightSpaceMatrix", m_LightSpaceMatrix);
-
 	} else {
 		m_LightingShader.set("uDirLight.direction", glm::vec3(1.0f));
 		m_LightingShader.set("uDirLight.color", glm::vec3(0.0f));
@@ -149,7 +151,7 @@ void Renderer::geometryPass(Scene& scene) {
 	}
 }
 
-void Renderer::lightingPass() {
+void Renderer::lightingPass(bool enableShadows) {
 	m_ColorBuffer.bind();
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
@@ -161,6 +163,7 @@ void Renderer::lightingPass() {
 	m_ShadowMap.bind(Texture::Type::TEX2D, 3);
 
 	m_LightingShader.set("uCamPos", m_Cam->getPosition());
+	m_LightingShader.set("uEnableShadows", enableShadows);
 	m_LightingShader.bind();
 
 	m_Quad.draw();
@@ -212,14 +215,16 @@ void Renderer::hdrPass(int blurBuffer, float exposure, float gamma) {
 
 void Renderer::generateTextures() {
 	// shadows
-	generateTexture(m_ShadowMap, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_FLOAT, glm::vec2(SHADOW_WIDTH, SHADOW_HEIGHT));
 	m_ShadowBuffer.bind();
+
+	generateTexture(m_ShadowMap, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_FLOAT, glm::vec2(SHADOW_WIDTH, SHADOW_HEIGHT));
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_ShadowMap.handle, 0);
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
-	Framebuffer::bindDefault();
 
 	// geometry buffer
+	m_GBuffer.bind();
+
 	generateTexture(m_GPosition, GL_RGBA16F, GL_RGBA, GL_FLOAT);
 	m_GBuffer.attach(Framebuffer::Type::READ_AND_DRAW, Framebuffer::Attachment::COLOR0, m_GPosition.handle);
 
@@ -232,11 +237,12 @@ void Renderer::generateTextures() {
 	generateTexture(m_GDepth, GL_DEPTH32F_STENCIL8, GL_DEPTH_STENCIL, GL_FLOAT_32_UNSIGNED_INT_24_8_REV);
 	m_GBuffer.attach(Framebuffer::Type::READ_AND_DRAW, Framebuffer::Attachment::DEPTH, m_GDepth.handle);
 
-	m_GBuffer.bind();
 	std::array<GLenum, 3> drawGeomBuffers = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
 	glDrawBuffers(drawGeomBuffers.size(), drawGeomBuffers.data());
 
 	// fragment colors
+	m_ColorBuffer.bind();
+
 	generateTexture(m_ColorTexture, GL_RGBA16F, GL_RGBA, GL_FLOAT);
 	m_ColorBuffer.attach(Framebuffer::Type::READ_AND_DRAW, Framebuffer::Attachment::COLOR0, m_ColorTexture.handle);
 
@@ -244,7 +250,6 @@ void Renderer::generateTextures() {
 	generateTexture(m_BrightColorTexture, GL_RGBA16F, GL_RGBA, GL_FLOAT);
 	m_ColorBuffer.attach(Framebuffer::Type::READ_AND_DRAW, Framebuffer::Attachment::COLOR1, m_BrightColorTexture.handle);
 
-	m_ColorBuffer.bind();
 	std::array<GLenum, 2> drawBuffers = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 	glDrawBuffers(drawBuffers.size(), drawBuffers.data());
 
@@ -253,7 +258,6 @@ void Renderer::generateTextures() {
 		m_BlurFramebuffers[i].bind();
 
 		generateTexture(m_BlurTextures[i], GL_RGBA16F, GL_RGBA, GL_FLOAT);
-
 		m_BlurFramebuffers[i].attach(Framebuffer::Type::READ_AND_DRAW, Framebuffer::Attachment::COLOR0, m_BlurTextures[i].handle);
 	}
 }

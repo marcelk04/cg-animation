@@ -61,15 +61,9 @@ MainApp::MainApp()
 
     std::shared_ptr<Texture> houseDiffuse = std::make_shared<Texture>();
     houseDiffuse->load(Texture::Format::SRGB8, "textures/cottage_diffuse.png", 0);
-    houseDiffuse->bind(Texture::Type::TEX2D);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     std::shared_ptr<Texture> houseNormal = std::make_shared<Texture>();
     houseNormal->load(Texture::Format::SRGB8, "textures/cottage_normal.png", 0);
-    houseNormal->bind(Texture::Type::TEX2D);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     RenderObject houseObj(house);
     houseObj.setPositionAndSize(glm::vec3(0.0f, 0.0f, -5.0f), 0.2f);
@@ -108,9 +102,11 @@ void MainApp::init() {
 void MainApp::buildImGui() {
     ImGui::StatisticsWindow(delta, resolution);
 
-    if (ImGui::SphericalSlider("Light direction", lightDir)) {
-        scene.getDirLight().value().setDirection(lightDir);
-        renderer.updateLightingUniforms(scene);
+    if (scene.getDirLight().has_value()) {
+        if (ImGui::SphericalSlider("Light direction", lightDir)) {
+            scene.getDirLight().value().setDirection(lightDir);
+            renderer.updateLightingUniforms(scene);
+        }
     }
 
     float exposure = renderer.getExposure();

@@ -13,9 +13,7 @@ uniform sampler2D uNormalTexture;
 
 void main() {
 	outPosition = sPosition;
-	//outNormal = normalize(sNormal);
-	outNormal = texture(uNormalTexture, sTexCoord).rgb;
+	outNormal = normalize(texture(uNormalTexture, sTexCoord).rgb);
 	outAlbedoSpec.rgb = texture(uDiffuseTexture, sTexCoord).rgb;
 	outAlbedoSpec.a = 0.0;
-	//outAlbedoSpec = texture(uDiffuseTexture, sTexCoord);
 }

@@ -34,6 +34,7 @@ public:
 	void setExposure(float exposure) { m_Exposure = exposure; }
 	void setGamma(float gamma) { m_Gamma = gamma; }
 	void setBlurAmount(int blurAmount) { m_BlurAmount = blurAmount; }
+	void setResolution(const glm::vec2& resolution);
 
 	void draw(Scene& scene);
 
@@ -42,12 +43,10 @@ public:
 	void updateCamUniforms();
 	void updateCamUniforms(size_t programId);
 
-	void setResolution(const glm::vec2& resolution);
-
 private:
 	void shadowPass(Scene& scene);
 	void geometryPass(Scene& scene);
-	void lightingPass();
+	void lightingPass(bool enableShadows);
 	int blurPass(int amount);
 	void hdrPass(int blurBuffer, float exposure, float gamma);
 
@@ -63,9 +62,10 @@ private:
 
 	Mesh m_Quad;
 
-	// shadox mapping
+	// shadow mapping
 	Texture m_ShadowMap;
 	Framebuffer m_ShadowBuffer;
+
 	glm::mat4 m_LightSpaceMatrix;
 
 	Program m_DepthShader;

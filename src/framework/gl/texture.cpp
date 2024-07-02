@@ -172,6 +172,9 @@ void Texture::load(Format format, const std::string& filename, GLsizei mipmaps) 
     // glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, baseformat, type, data);
     glTexImage2D(GL_TEXTURE_2D, 0, internalformat, width, height, 0, baseformat, type, data);
 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
     // Free image data
     stbi_image_free(data);
 
