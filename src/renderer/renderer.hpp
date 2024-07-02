@@ -64,8 +64,8 @@ private:
 	Mesh m_Quad;
 
 	// shadox mapping
-	Texture m_ShadowDepth;
-	Framebuffer m_ShaderBuffer;
+	Texture m_ShadowMap;
+	Framebuffer m_ShadowBuffer;
 	glm::mat4 m_LightSpaceMatrix;
 
 	Program m_DepthShader;

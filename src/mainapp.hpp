@@ -45,9 +45,13 @@ private:
     Mesh plane;
     Mesh sphere;
     Mesh bunny;
+    Mesh house;
 
     glm::vec3 lightDir;
 
-    std::shared_ptr<Program> geometryshader;
-    size_t geometryshaderId;
+    std::shared_ptr<Program> simpleGeom;
+    size_t simpleGeomId;
+
+    std::shared_ptr<Program> texturedGeom;
+    size_t texturedGeomId;
 };

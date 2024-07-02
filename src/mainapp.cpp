@@ -23,9 +23,15 @@ MainApp::MainApp()
 
     cam->setResolution(resolution);
 
-    geometryshader = std::make_shared<Program>();
-    geometryshader->load("deferred_geometry.vert", "deferred_geometry.frag");
-    geometryshaderId = renderer.addProgram(geometryshader);
+    simpleGeom = std::make_shared<Program>();
+    simpleGeom->load("simple_geometry.vert", "simple_geometry.frag");
+    simpleGeomId = renderer.addProgram(simpleGeom);
+
+    texturedGeom = std::make_shared<Program>();
+    texturedGeom->load("textured_geometry.vert", "textured_geometry.frag");
+    texturedGeom->bindTextureUnit("uDiffuseTexture", 0);
+    texturedGeom->bindTextureUnit("uNormalTexture", 1);
+    texturedGeomId = renderer.addProgram(texturedGeom);
 
     Material floorMaterial {
         glm::vec3(1.0f, 0.5f, 0.31f),
@@ -51,18 +57,27 @@ MainApp::MainApp()
     plane.load("meshes/plane.obj");
     sphere.load("meshes/highpolysphere.obj");
     bunny.load("meshes/bunny.obj");
+    house.load("meshes/cottage.obj");
 
-    RenderObject planeObj(plane);
-    planeObj.setPositionAndSize(glm::vec3(0.0f, -1.0f, 0.0f), 20.0f);
-    planeObj.setMaterial(floorMaterial);
-    scene.addRenderObject(std::move(planeObj), geometryshaderId);
+    std::shared_ptr<Texture> houseDiffuse = std::make_shared<Texture>();
+    houseDiffuse->load(Texture::Format::SRGB8, "textures/cottage_diffuse.png", 0);
+    houseDiffuse->bind(Texture::Type::TEX2D);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    RenderObject bunnyObj(bunny);
-    bunnyObj.setPosition(glm::vec3(0.0f, -0.36, 0.0f));
-    bunnyObj.setMaterial(bunnyMaterial);
-    scene.addRenderObject(std::move(bunnyObj), geometryshaderId);
+    std::shared_ptr<Texture> houseNormal = std::make_shared<Texture>();
+    houseNormal->load(Texture::Format::SRGB8, "textures/cottage_normal.png", 0);
+    houseNormal->bind(Texture::Type::TEX2D);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    lightDir =  glm::vec3(0.1f, 1.0f, 0.5f);
+    RenderObject houseObj(house);
+    houseObj.setPositionAndSize(glm::vec3(0.0f, 0.0f, -5.0f), 0.2f);
+    houseObj.setDiffuseTexture(houseDiffuse);
+    houseObj.setNormalTexture(houseNormal);
+    scene.addRenderObject(std::move(houseObj), texturedGeomId);
+
+    lightDir = glm::vec3(0.1f, 1.0f, 0.5f);
 
     DirLight dirLight;
     dirLight.setDirection(lightDir);
@@ -77,7 +92,7 @@ MainApp::MainApp()
     RenderObject lightSphere0(sphere);
     lightSphere0.setPositionAndSize(glm::vec3(-2.0f, 3.0f, -1.0f), 0.1f);
     lightSphere0.setMaterial(lightMaterial);
-    scene.addRenderObject(std::move(lightSphere0), geometryshaderId);
+    scene.addRenderObject(std::move(lightSphere0), simpleGeomId);
 
     renderer.updateLightingUniforms(scene);
     renderer.updateCamUniforms();

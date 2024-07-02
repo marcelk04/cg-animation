@@ -25,6 +25,14 @@ void RenderObject::setMaterial(const Material& material) {
 	m_Material = std::make_optional<Material>(material);
 }
 
+void RenderObject::setDiffuseTexture(std::shared_ptr<Texture> diffuseTexture) {
+	m_DiffuseTexture = diffuseTexture;
+}
+
+void RenderObject::setNormalTexture(std::shared_ptr<Texture> normalTexture) {
+	m_NormalTexture = normalTexture;
+}
+
 void RenderObject::draw(Program& program) {
 	program.bind();
 	program.set("uLocalToWorld", m_Model);
@@ -33,6 +41,14 @@ void RenderObject::draw(Program& program) {
 	if (m_Material.has_value()) {
 		program.set("uMaterial.diffuse", m_Material->diffuse);
 		program.set("uMaterial.specular", m_Material->specular);
+	}
+
+	if (m_DiffuseTexture != nullptr) {
+		m_DiffuseTexture->bind(Texture::Type::TEX2D, 0);
+	}
+
+	if (m_NormalTexture != nullptr) {
+		m_NormalTexture->bind(Texture::Type::TEX2D, 1);
 	}
 
 	m_Mesh.draw();

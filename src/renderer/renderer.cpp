@@ -14,7 +14,7 @@ Renderer::Renderer(std::shared_ptr<MovingCamera> cam, const glm::vec2& resolutio
 	m_LightingShader.bindTextureUnit("uPosition", 0);
 	m_LightingShader.bindTextureUnit("uNormal", 1);
 	m_LightingShader.bindTextureUnit("uAlbedoSpec", 2);
-	m_LightingShader.bindTextureUnit("uShadow", 3);
+	m_LightingShader.bindTextureUnit("uShadowMap", 3);
 
 	m_BlurShader.load("blurshader.vert", "blurshader.frag");
 	m_BlurShader.bindTextureUnit("uColorBuffer", 1);
@@ -66,7 +66,7 @@ void Renderer::updateLightingUniforms(Scene& scene) {
 
 		float nearPlane = 1.0f, farPlane = 7.5f;
 		glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, nearPlane, farPlane);
-		glm::mat4 lightView = glm::lookAt(dirLight.getDirection(), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::mat4 lightView = glm::lookAt(5.0f * dirLight.getDirection(), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
 		m_LightSpaceMatrix = lightProjection * lightView;
 
@@ -119,7 +119,7 @@ void Renderer::setResolution(const glm::vec2& resolution) {
 
 void Renderer::shadowPass(Scene& scene) {
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-	m_ShaderBuffer.bind();
+	m_ShadowBuffer.bind();
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glCullFace(GL_FRONT);
@@ -158,7 +158,7 @@ void Renderer::lightingPass() {
 	m_GPosition.bind(Texture::Type::TEX2D, 0);
 	m_GNormal.bind(Texture::Type::TEX2D, 1);
 	m_GAlbdedoSpec.bind(Texture::Type::TEX2D, 2);
-	m_ShadowDepth.bind(Texture::Type::TEX2D, 3);
+	m_ShadowMap.bind(Texture::Type::TEX2D, 3);
 
 	m_LightingShader.set("uCamPos", m_Cam->getPosition());
 	m_LightingShader.bind();
@@ -192,7 +192,7 @@ int Renderer::blurPass(int amount) {
 	}
 
 	int last = static_cast<int>(!horizontal);
-	
+
 	return last;
 }
 
@@ -212,9 +212,9 @@ void Renderer::hdrPass(int blurBuffer, float exposure, float gamma) {
 
 void Renderer::generateTextures() {
 	// shadows
-	generateTexture(m_ShadowDepth, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_FLOAT, glm::vec2(SHADOW_WIDTH, SHADOW_HEIGHT));
-	m_ShaderBuffer.bind();
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_ShadowDepth.handle, 0);
+	generateTexture(m_ShadowMap, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_FLOAT, glm::vec2(SHADOW_WIDTH, SHADOW_HEIGHT));
+	m_ShadowBuffer.bind();
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_ShadowMap.handle, 0);
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	Framebuffer::bindDefault();

@@ -27,7 +27,7 @@ layout (location = 1) out vec4 outBrightColor;
 uniform sampler2D uPosition;
 uniform sampler2D uNormal;
 uniform sampler2D uAlbedoSpec;
-uniform sampler2D uShadow;
+uniform sampler2D uShadowMap;
 
 uniform DirLight uDirLight;
 uniform PointLight uPointLights[NR_POINT_LIGHTS];
@@ -37,18 +37,25 @@ uniform mat4 uLightSpaceMatrix;
 float shadowCalculation(vec4 lightSpaceFragPos, float bias) {
 	vec3 projCoords = lightSpaceFragPos.xyz / lightSpaceFragPos.w;
 
+	projCoords = projCoords * 0.5 + 0.5;
+
 	if (projCoords.z > 1.0) {
 		return 0.0;
 	}
 
-	projCoords = projCoords * 0.5 + 0.5;
-
-	float closestDepth = texture(uShadow, projCoords.xy).r;
 	float currentDepth = projCoords.z;
 
-	float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+	float shadow = 0.0;
+	vec2 texelSize = 1.0 / textureSize(uShadowMap, 0);
+	for (int x = -1; x <= 1; x++) {
+		for (int y = -1; y <= 1; y++) {
+			float pcfDepth = texture(uShadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
 
-	return shadow;
+			shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
+		}
+	}
+
+	return shadow / 9.0;
 }
 
 vec3 calcLight(vec3 lightDir, vec3 viewDir, vec3 normal, vec3 albedo, float specular, vec3 lightColor) {
@@ -89,20 +96,19 @@ vec3 calcPointLight(PointLight light, vec3 viewDir, vec3 normal, vec3 fragPos, v
 
 void main() {
 	vec3 fragPos = texture(uPosition, sTexCoord).xyz;
-	vec4 lightSpaceFragPos = uLightSpaceMatrix * vec4(fragPos, 1.0);
 	vec3 normal = texture(uNormal, sTexCoord).xyz;
 	vec3 albedo = texture(uAlbedoSpec, sTexCoord).rbg;
 	float specular = texture(uAlbedoSpec, sTexCoord).a;
 
+	vec4 lightSpaceFragPos = uLightSpaceMatrix * vec4(fragPos, 1.0);
 	vec3 viewDir = normalize(uCamPos - fragPos);
-
-	float bias = max(0.05 * (1.0 - dot(normal, uDirLight.direction)), 0.005);
-	float shadow = shadowCalculation(lightSpaceFragPos, bias);
 
 	vec3 result = vec3(0.0);
 
+	// add directional light
 	result += calcDirLight(uDirLight, viewDir, normal, albedo, specular);
 
+	// add point lights
 	for (int i = 0; i < NR_POINT_LIGHTS; i++) {
 		float dist = length(uPointLights[i].position - fragPos);
 
@@ -111,15 +117,18 @@ void main() {
 		}
 	}
 
+	// shadow casting
+	float bias = max(0.05 * (1.0 - dot(normal, uDirLight.direction)), 0.005);
+	float shadow = shadowCalculation(lightSpaceFragPos, bias);
+
 	result = (1 - shadow) * result;
 
 	// ambient lighting
 	result += albedo * 0.1;
 
-	//result = vec3(shadow);
-
 	outColor = vec4(result, 1.0);
 
+	// extract bright areas for bloom effect
 	float luminance = dot(outColor.rgb, vec3(0.2126, 0.7152, 0.0722));
 	if (luminance > 1.0) {
 		outBrightColor = vec4(outColor.rgb, 1.0);
