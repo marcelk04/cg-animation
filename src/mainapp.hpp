@@ -4,14 +4,21 @@
 using namespace glm;
 
 #include "movingcamera.hpp"
+#include "renderer/renderobject.hpp"
+#include "renderer/renderer.hpp"
+#include "renderer/light.hpp"
 
 #include "framework/app.hpp"
 
 #include "framework/mesh.hpp"
 #include "framework/camera.hpp"
+#include "lightninggenerator.hpp"
 #include "framework/gl/program.hpp"
+#include "framework/gl/texture.hpp"
+#include "framework/gl/framebuffer.hpp"
 
 #include <vector>
+#include <memory>
 
 class MainApp : public App {
 public:
@@ -25,19 +32,26 @@ protected:
     // void clickCallback(Button button, Action action, Modifier modifier) override;
     void scrollCallback(float amount) override;
     void moveCallback(const vec2& movement, bool leftButton, bool rightButton, bool middleButton) override;
-    // void resizeCallback(const vec2& resolution) override;
+    void resizeCallback(const vec2& resolution) override;
+
 
 private:
-    glm::vec3 deCasteljau(const std::vector<glm::vec3>& spline, float t);
+    std::shared_ptr<MovingCamera> cam;
 
-private:
-    Mesh mesh;
-    Program meshshader;
-    MovingCamera coolCamera{ glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f) };
-    //std::vector<glm::vec3> spline{ glm::vec3(-2.0f, -1.0f, 3.0f), glm::vec3(-1.0f, -1.0f, 3.0f), glm::vec3(1.0f, 1.0f, 3.0f), glm::vec3(2.0f, 1.0f, 3.0f)};
-    //std::vector<glm::vec3> spline{ glm::vec3(-2.0f, -1.0f, 3.0f), glm::vec3(0.0f, 3.0f, 2.0f), glm::vec3(2.0f, -1.0f, 3.0f) };
-    std::vector<glm::vec3> spline{ glm::vec3(-2.0f, -1.0f, 3.0f), glm::vec3(0.0f, 3.0f, 2.0f), glm::vec3(2.0f, 2.0f, 0.0f), glm::vec3(3.0f, 1.5f, 0.0f) };
-    float t = 0;
+    Renderer renderer;
+    Scene scene;
+
+    Mesh cube;
+    Mesh plane;
+    Mesh sphere;
+    Mesh bunny;
+    Mesh house;
 
     glm::vec3 lightDir;
+
+    std::shared_ptr<Program> simpleGeom;
+    size_t simpleGeomId;
+
+    std::shared_ptr<Program> texturedGeom;
+    size_t texturedGeomId;
 };

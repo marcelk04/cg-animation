@@ -19,6 +19,12 @@ MovingCamera::MovingCamera(const glm::vec3& position, const glm::vec3& target) {
 	update();
 }
 
+void MovingCamera::setResolution(const glm::vec2& resolution) {
+	m_AspectRatio = resolution.x / resolution.y;
+
+	m_UpToDate = false;
+}
+
 void MovingCamera::moveTo(const glm::vec3& position) {
 	m_Position = position;
 
@@ -43,6 +49,13 @@ void MovingCamera::move(const glm::vec3& delta) {
 void MovingCamera::rotate(const glm::vec2& delta) {
 	m_Yaw -= delta.x;
 	m_Pitch -= delta.y;
+
+	if (glm::degrees(m_Pitch) > 89.0f) {
+		m_Pitch = glm::radians(89.0f);
+	}
+	else if (glm::degrees(m_Pitch) < -89.0f) {
+		m_Pitch = glm::radians(-89.0f);
+	}
 
 	m_Direction.x = glm::cos(m_Yaw) * glm::cos(m_Pitch);
 	m_Direction.y = -glm::sin(m_Pitch);

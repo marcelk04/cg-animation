@@ -156,7 +156,7 @@ const std::string glErrorToString(GLenum error) {
         case GL_INVALID_FRAMEBUFFER_OPERATION: return "Invalid framebuffer operation";
         case GL_CONTEXT_LOST: return "Context lost";
         default: return "Unknown error";
-    
+
     }
 }
 
@@ -170,7 +170,7 @@ void App::collectGLErrors(const std::string& context) {
 void App::initGL() {
     int gladLoadGLStatus = gladLoadGL();
     assert(gladLoadGLStatus);
-    glEnable(GL_FRAMEBUFFER_SRGB); // Enables SRGB rendering
+    // glEnable(GL_FRAMEBUFFER_SRGB); // Enables SRGB rendering
     // glEnable(GL_DEBUG_OUTPUT); // Enables debug output
     // glDebugMessageCallback(debugCallback, 0); // Only supported for OpenGL 4.3+
 }

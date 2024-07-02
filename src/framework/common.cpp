@@ -41,3 +41,32 @@ void Common::filesInDirectory(const std::string& directoryPath, const std::strin
         }
     }
 }
+
+void Common::randomSeed() {
+    std::srand(std::time(0));
+}
+
+int Common::randomInt(int first, int last) {
+    return static_cast<int>(randomFloat(first, last));
+}
+
+float Common::randomFloat() {
+    return static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+}
+
+float Common::randomFloat(float first, float last) {
+    float interval = last - first;
+
+    return randomFloat() * interval + first;
+}
+
+glm::vec3 Common::deCasteljau(std::vector<glm::vec3> points, float t) {
+    int n = points.size();
+    for (int j = 1; j < n; j++) {
+        for (int i = 0; i < n - j; i++) {
+            points[i] = (1 - t) * points[i] + t * points[i + 1];
+        }
+    }
+
+    return points[0];
+}
