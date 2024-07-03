@@ -5,7 +5,8 @@ cmake_minimum_required(VERSION 3.26)
 set(SRC
     src/main.cpp
     src/mainapp.cpp
-    src/movingcamera.cpp
+    src/cinematic_engine/movingcamera.cpp
+    src/cinematic_engine/spline.cpp
     src/lightninggenerator.cpp
     src/renderer/renderobject.cpp
     src/renderer/renderer.cpp

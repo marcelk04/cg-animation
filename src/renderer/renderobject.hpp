@@ -1,6 +1,6 @@
 #pragma once
 
-#include "movingcamera.hpp"
+#include "cinematic_engine/movingcamera.hpp"
 #include "framework/mesh.hpp"
 #include "framework/gl/program.hpp"
 #include "framework/gl/texture.hpp"

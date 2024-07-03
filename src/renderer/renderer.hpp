@@ -4,7 +4,7 @@
 #include "renderer/light.hpp"
 #include "renderer/scene.hpp"
 
-#include "movingcamera.hpp"
+#include "cinematic_engine/movingcamera.hpp"
 
 #include "framework/mesh.hpp"
 #include "framework/gl/program.hpp"
