@@ -59,7 +59,7 @@ MainApp::MainApp()
     plane.load("meshes/plane.obj");
     sphere.load("meshes/highpolysphere.obj");
     bunny.load("meshes/bunny.obj");
-    house.load("meshes/cottage.obj");
+    house.loadWithTangents("meshes/cottage.obj");
 
     std::shared_ptr<Texture> houseDiffuse = std::make_shared<Texture>();
     houseDiffuse->load(Texture::Format::SRGB8, "textures/cottage_diffuse.png", 0);
@@ -82,7 +82,7 @@ MainApp::MainApp()
 
     PointLight light0;
     light0.setPosition(glm::vec3(-2.0f, 3.0f, -1.0f));
-    light0.setColor(glm::vec3(1.5f));
+    light0.setColor(glm::vec3(5.0f));
     scene->addPointLight(std::move(light0));
 
     RenderObject lightSphere0(sphere);
