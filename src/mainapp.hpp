@@ -16,7 +16,7 @@ public:
 
 protected:
     void init() override;
-    //void buildImGui() override;
+    void buildImGui() override;
     void render() override;
     void keyCallback(Key key, Action action) override;
     void scrollCallback(float amount) override;

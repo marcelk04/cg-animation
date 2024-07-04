@@ -5,8 +5,8 @@
       <author>Blender User</author>
       <authoring_tool>Blender 4.1.1 commit date:2024-04-15, commit time:15:11, hash:e1743a0317bc</authoring_tool>
     </contributor>
-    <created>2024-06-28T13:12:16</created>
-    <modified>2024-06-28T13:12:16</modified>
+    <created>2024-06-28T14:35:56</created>
+    <modified>2024-06-28T14:35:56</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -279,43 +279,11 @@
         </triangles>
       </mesh>
     </geometry>
-    <geometry id="Plane_002-mesh" name="Plane.002">
-      <mesh>
-        <source id="Plane_002-mesh-positions">
-          <float_array id="Plane_002-mesh-positions-array" count="12">-1 -1 0 1 -1 0 -1 1 0 1 1 0</float_array>
-          <technique_common>
-            <accessor source="#Plane_002-mesh-positions-array" count="4" stride="3">
-              <param name="X" type="float"/>
-              <param name="Y" type="float"/>
-              <param name="Z" type="float"/>
-            </accessor>
-          </technique_common>
-        </source>
-        <source id="Plane_002-mesh-normals">
-          <float_array id="Plane_002-mesh-normals-array" count="6">0 0 1 0 0 1</float_array>
-          <technique_common>
-            <accessor source="#Plane_002-mesh-normals-array" count="2" stride="3">
-              <param name="X" type="float"/>
-              <param name="Y" type="float"/>
-              <param name="Z" type="float"/>
-            </accessor>
-          </technique_common>
-        </source>
-        <vertices id="Plane_002-mesh-vertices">
-          <input semantic="POSITION" source="#Plane_002-mesh-positions"/>
-        </vertices>
-        <triangles count="2">
-          <input semantic="VERTEX" source="#Plane_002-mesh-vertices" offset="0"/>
-          <input semantic="NORMAL" source="#Plane_002-mesh-normals" offset="1"/>
-          <p>1 0 2 0 0 0 1 1 3 1 2 1</p>
-        </triangles>
-      </mesh>
-    </geometry>
   </library_geometries>
   <library_controllers>
     <controller id="metarig_body-skin" name="metarig">
       <skin source="#Plane-mesh">
-        <bind_shape_matrix>0.2340006 0 0 0 0 0.2340006 0 -0.8443512 0 0 0.2340006 5.869961 0 0 0 1</bind_shape_matrix>
+        <bind_shape_matrix>0.2332523 -0.01869465 4.01221e-4 0 0.01865502 0.2323066 -0.02102221 -0.8443512 0.001281179 0.02098697 0.233054 5.869961 0 0 0 1</bind_shape_matrix>
         <source id="metarig_body-skin-joints">
           <Name_array id="metarig_body-skin-joints-array" count="59">hips spine chest neck head shoulder_L upper_arm_L forearm_L hand_L palm_01_L f_index_01_L f_index_02_L f_index_03_L thumb_01_L thumb_02_L thumb_03_L palm_02_L f_middle_01_L f_middle_02_L f_middle_03_L palm_03_L f_ring_01_L f_ring_02_L f_ring_03_L palm_04_L f_pinky_01_L f_pinky_02_L f_pinky_03_L shoulder_R upper_arm_R forearm_R hand_R palm_01_R f_index_01_R f_index_02_R f_index_03_R thumb_01_R thumb_02_R thumb_03_R palm_02_R f_middle_01_R f_middle_02_R f_middle_03_R palm_03_R f_ring_01_R f_ring_02_R f_ring_03_R palm_04_R f_pinky_01_R f_pinky_02_R f_pinky_03_R thigh_L shin_L foot_L toe_L thigh_R shin_R foot_R toe_R</Name_array>
           <technique_common>
@@ -1084,10 +1052,6 @@ Layer 13
 Layer 16</visible_collections>
           </technique>
         </extra>
-      </node>
-      <node id="Plane" name="Plane" type="NODE">
-        <matrix sid="transform">1.451744 0 0 0 0 1.451744 0 0 0 0 1.451744 0 0 0 0 1</matrix>
-        <instance_geometry url="#Plane_002-mesh" name="Plane"/>
       </node>
     </visual_scene>
   </library_visual_scenes>

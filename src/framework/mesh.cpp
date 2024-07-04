@@ -104,17 +104,19 @@ void Mesh::load(const std::string& filepath) {
     std::vector<VertexPCNT> vertices;
     std::vector<unsigned int> indices;
 
-    for (unsigned int m = 0; m < scene->mNumMeshes; ++m) {
+    std::cout << "Number of meshes: " << scene->mNumMeshes << std::endl;
+    int offset = 0;
+    for (unsigned int m = 2; m < scene->mNumMeshes; ++m) {
         aiMesh* mesh = scene->mMeshes[m];
 
         for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
             VertexPCNT vertex;
             vertex.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
             vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
-            vertex.texCoord = mesh->mTextureCoords[0] ? glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y) : glm::vec2(0.0f, 0.0f);
+            vertex.texCoord = mesh->HasTextureCoords(0) ? glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y) : glm::vec2(0.0f, 0.0f);
             vertex.tangent = mesh->mTangents ? glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z) : glm::vec3(0.0f, 0.0f, 0.0f);
-            std::cout<<mesh->mNumBones<<std::endl;
-            std::cout<<vertex.position.x<<std::endl;
+            std::cout<<vertex.position.x << " " << vertex.position.y << " " << vertex.position.z <<std::endl;
+
             for (int j = 0; j < 4; ++j) {
                 vertex.boneIDs[j] = -1;
                 vertex.weights[j] = 0.0f;
@@ -144,9 +146,11 @@ void Mesh::load(const std::string& filepath) {
         for (unsigned int i = 0; i < mesh->mNumFaces; ++i) {
             aiFace face = mesh->mFaces[i];
             for (unsigned int j = 0; j < face.mNumIndices; ++j) {
-                indices.push_back(face.mIndices[j]);
+                indices.push_back(offset + face.mIndices[j]);
             }
         }
+
+        offset += mesh->mNumVertices;
     }
 
     load(vertices, indices);
@@ -165,11 +169,5 @@ void Mesh::loadWithTangents(const std::string& filepath) {
 void Mesh::draw() {
     vao.bind();
     glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
-    vao.unbind();
-}
-
-void Mesh::draw(GLuint instances) {
-    vao.bind();
-    glDrawElementsInstanced(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0, instances);
     vao.unbind();
 }

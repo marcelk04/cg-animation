@@ -6,7 +6,7 @@ layout(location = 3) in vec3 aTangent;
 layout(location = 4) in ivec4 aBoneIDs;
 layout(location = 5) in vec4 aWeights;
 
-uniform mat4 model;
+uniform mat4 model = mat4(1.0);
 uniform mat4 view;
 uniform mat4 projection;
 uniform mat4 boneMatrices[100];  // Adjust size according to your needs
@@ -22,7 +22,8 @@ void main() {
     aWeights[2] * boneMatrices[aBoneIDs[2]] +
     aWeights[3] * boneMatrices[aBoneIDs[3]];
 
-    vec4 transformedPos = boneTransform * vec4(aPos, 1.0);
+    //vec4 transformedPos = boneTransform * vec4(aPos, 1.0);
+    vec4 transformedPos = vec4(aPos, 1.0);
     FragPos = vec3(model * transformedPos);
     Normal = mat3(transpose(inverse(model))) * aNormal;
     Tangent = mat3(transpose(inverse(model))) * aTangent;

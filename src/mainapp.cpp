@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
+#include "framework/imguiutil.hpp"
 
 MainApp::MainApp() : App(800, 600) {
     App::setTitle("cgintro"); // Set title
@@ -14,6 +15,12 @@ MainApp::MainApp() : App(800, 600) {
     // Load shaders
     shaderProgram.load("assimpshader.vert", "assimpshader.frag");
     shaderProgram.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
+    shaderProgram.set("view", coolCamera.view());
+    shaderProgram.set("projection", coolCamera.projection());
+
+    for (int i = 0; i < 100; i++) {
+        shaderProgram.set("uBones[" + std::to_string(i) + "]", glm::mat4(1.0f));
+    }
 
     lightDir = glm::vec3(1.0f);
 }
@@ -22,27 +29,29 @@ void MainApp::init() {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 }
-/*
 void MainApp::buildImGui() {
     // Custom ImGui statistics window
     ImGui::StatisticsWindow(delta, resolution);
 
     // Custom ImGui spherical slider
-    if (ImGui::SphericalSlider("Light Direction", lightDir)) {
+    /*if (ImGui::SphericalSlider("Light Direction", lightDir)) {
         shaderProgram.set("uLightDir", lightDir);
     }
 
-    ImGui::SliderFloat("t", &t, 0.0f, 1.0f);
-}*/
+    ImGui::SliderFloat("t", &t, 0.0f, 1.0f);*/
+}
 
 void MainApp::render() {
-    glm::vec3 pos = deCasteljau(spline, t);
-
-    coolCamera.moveTo(pos);
-    coolCamera.lookAt(glm::vec3(0.0f));
+//    glm::vec3 pos = deCasteljau(spline, t);
+//
+//    coolCamera.moveTo(pos);
+//    coolCamera.lookAt(glm::vec3(0.0f));
 
     if (coolCamera.updateIfChanged()) {
         shaderProgram.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
+        shaderProgram.set("view", coolCamera.view());
+        shaderProgram.set("projection", coolCamera.projection());
+
     }
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -52,7 +61,7 @@ void MainApp::render() {
 }
 
 void MainApp::keyCallback(Key key, Action action) {
-    float cameraSpeed = 2.5f;
+    float cameraSpeed = 10.0f;
 
     if (action != Action::REPEAT) return;
 
