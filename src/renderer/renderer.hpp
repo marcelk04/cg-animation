@@ -110,5 +110,5 @@ private:
 
 	float m_Exposure = 1.0f;
 	float m_Gamma = 2.2f;
-	int m_BlurAmount = 10;
+	int m_BlurAmount = 6;
 };
