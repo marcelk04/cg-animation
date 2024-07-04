@@ -18,6 +18,15 @@ struct PointLight {
 	float quadratic;
 };
 
+vec3 sampleOffsetDirections[20] = vec3[]
+(
+   vec3( 1,  1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1,  1,  1),
+   vec3( 1,  1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1,  1, -1),
+   vec3( 1,  1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1,  1,  0),
+   vec3( 1,  0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1,  0, -1),
+   vec3( 0,  1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0,  1, -1)
+);
+
 in vec2 sTexCoord;
 
 layout (location = 0) out vec4 outColor;
@@ -67,14 +76,24 @@ float dShadowCalculation(vec4 lightSpaceFragPos, float bias) {
 
 float oShadowCalculation(vec3 fragPos) {
 	vec3 fragToLight = fragPos - uShadowLightPos;
-	float closestDepth = texture(uOShadowMap, fragToLight).r * uFar;
 
 	float currentDepth = length(fragToLight);
 
-	float bias = 0.05;
-	float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+	float shadow = 0.0f;
+	float bias = 0.15;
+	float samples = 20;
+	float viewDistance = length(uCamPos - fragPos);
+	float diskRadius = (1.0 + (viewDistance / uFar)) / 25.0;
 
-	return shadow;
+	for (int i = 0; i < samples; i++) {
+		float closestDepth = texture(uOShadowMap, fragToLight + sampleOffsetDirections[i] * diskRadius).r * uFar;
+
+		if (currentDepth - bias > closestDepth) {
+			shadow += 1.0;
+		}
+	}
+
+	return shadow / float(samples);
 }
 
 vec3 calcLight(vec3 lightDir, vec3 viewDir, vec3 normal, vec3 albedo, float specular, vec3 lightColor) {
@@ -119,7 +138,6 @@ void main() {
 	vec3 albedo = texture(uAlbedoSpec, sTexCoord).rgb;
 	float specular = texture(uAlbedoSpec, sTexCoord).a;
 
-	vec4 lightSpaceFragPos = uLightSpaceMatrix * vec4(fragPos, 1.0);
 	vec3 viewDir = normalize(uCamPos - fragPos);
 
 	vec3 result = vec3(0.0);
@@ -140,10 +158,11 @@ void main() {
 	float shadow = 0.0;
 
 	if (uEnableShadows) {
-		float bias = max(0.05 * (1.0 - dot(normal, uDirLight.direction)), 0.005);
+		float dBias = max(0.05 * (1.0 - dot(normal, uDirLight.direction)), 0.005);
+		vec4 lightSpaceFragPos = uLightSpaceMatrix * vec4(fragPos, 1.0);
 
-		//shadow = dShadowCalculation(lightSpaceFragPos, bias);
-		shadow = oShadowCalculation(fragPos);
+		shadow += 0.5 * dShadowCalculation(lightSpaceFragPos, dBias);
+		shadow += 0.5 * oShadowCalculation(fragPos);
 	}
 
 	result = (1 - shadow) * result;
