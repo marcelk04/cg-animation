@@ -101,7 +101,7 @@ vec3 calcPointLight(PointLight light, vec3 viewDir, vec3 normal, vec3 fragPos, v
 void main() {
 	vec3 fragPos = texture(uPosition, sTexCoord).xyz;
 	vec3 normal = texture(uNormal, sTexCoord).xyz;
-	vec3 albedo = texture(uAlbedoSpec, sTexCoord).rbg;
+	vec3 albedo = texture(uAlbedoSpec, sTexCoord).rgb;
 	float specular = texture(uAlbedoSpec, sTexCoord).a;
 
 	vec4 lightSpaceFragPos = uLightSpaceMatrix * vec4(fragPos, 1.0);

@@ -1,12 +1,16 @@
 #include "renderer/renderer.hpp"
 
+#include "framework/common.hpp"
+
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <iostream>
 
 Renderer::Renderer(std::shared_ptr<MovingCamera> cam, const glm::vec2& resolution)
-	: m_Cam(cam), m_Resolution(resolution), m_Scene(nullptr) {
+	: m_Cam(cam), m_Resolution(resolution), m_Scene(nullptr), m_ShowCameraControlPoints(false) {
 	generateTextures();
+
+	m_SimpleGeometryShader.load("simple_geometry.vert", "simple_geometry.frag");
 
 	m_DepthShader.load("depthshader.vert", "depthshader.frag");
 
@@ -34,6 +38,8 @@ Renderer::Renderer(std::shared_ptr<MovingCamera> cam, const glm::vec2& resolutio
 	const std::vector<unsigned int> indices = { 0, 1, 2, 3, 2, 1 };
 
 	m_Quad.load(vertices, indices);
+
+	m_Sphere.load("meshes/highpolysphere.obj");
 }
 
 void Renderer::update(float dt) {
@@ -74,6 +80,14 @@ void Renderer::setResolution(const glm::vec2& resolution) {
 	generateTextures();
 }
 
+void Renderer::showCameraControlPoints(bool showPoints) {
+	m_ShowCameraControlPoints = showPoints;
+
+	if (showPoints) {
+		regenerateCameraControlRenderObjects();
+	}
+}
+
 void Renderer::updateLightingUniforms() {
 	// directional light
 	if (m_Scene->getDirLight().has_value()) {
@@ -107,6 +121,7 @@ void Renderer::updateLightingUniforms() {
 		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].quadratic", pointLight.getQuadratic());
 	}
 
+	// add dummy lights
 	for (size_t i = m_Scene->getPointLights().size(); i < m_Scene->MAX_NR_LIGHTS; i++) {
 		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].position", glm::vec3(0.0f));
 		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].color", glm::vec3(0.0f));
@@ -118,6 +133,8 @@ void Renderer::updateLightingUniforms() {
 }
 
 void Renderer::updateCamUniforms() {
+	m_SimpleGeometryShader.set("uWorldToClip", m_Cam->projection() * m_Cam->view());
+
 	for (size_t i = 0; i < m_Programs.size(); i++) {
 		updateCamUniforms(i);
 	}
@@ -155,8 +172,17 @@ void Renderer::geometryPass(Scene& scene) {
 	for (size_t i = 0; i < m_Programs.size(); i++) {
 		std::shared_ptr<Program> program = m_Programs[i];
 
+		// draw all objects that use this shader
 		for (RenderObject& object : scene.getRenderObjects(i)) {
 			object.draw(*program);
+		}
+	}
+
+	if (m_ShowCameraControlPoints && m_Scene->getCameraController().has_value()) {
+		CameraController& camController = m_Scene->getCameraController().value();
+
+		for (RenderObject& controlPoint : m_CameraControlRenderObjects) {
+			controlPoint.draw(m_SimpleGeometryShader);
 		}
 	}
 }
@@ -283,4 +309,45 @@ void Renderer::generateTexture(Texture& texture, GLint internalformat, GLenum fo
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+}
+
+void Renderer::regenerateCameraControlRenderObjects() {
+	if (!m_Scene->getCameraController().has_value()) {
+		return;
+	}
+
+	CameraController& camController = m_Scene->getCameraController().value();
+
+	Material movementPointMaterial{
+		glm::vec3(0.1f, 0.9f, 0.2f),
+		0.0f
+	};
+
+	Material targetPointMaterial{
+		glm::vec3(1.0f, 0.1f, 0.2f),
+		0.0f
+	};
+
+	// remove old points
+	m_CameraControlRenderObjects.clear();
+
+	// movement control points
+	for (const auto& curve : camController.getMovementControlPoints()) {
+		for (const auto& point : curve) {
+			RenderObject obj(m_Sphere);
+			obj.setPositionAndSize(point, 0.1f);
+			obj.setMaterial(movementPointMaterial);
+			m_CameraControlRenderObjects.push_back(std::move(obj));
+		}
+	}
+
+	// target control points
+	for (const auto& curve : camController.getTargetControlPoints()) {
+		for (const auto& point : curve) {
+			RenderObject obj(m_Sphere);
+			obj.setPositionAndSize(point, 0.1f);
+			obj.setMaterial(targetPointMaterial);
+			m_CameraControlRenderObjects.push_back(std::move(obj));
+		}
+	}
 }

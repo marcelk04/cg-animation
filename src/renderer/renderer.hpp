@@ -41,6 +41,8 @@ public:
 	void setBlurAmount(int blurAmount) { m_BlurAmount = blurAmount; }
 	void setResolution(const glm::vec2& resolution);
 
+	void showCameraControlPoints(bool showPoints);
+
 	void updateLightingUniforms();
 	void updateCamUniforms();
 	void updateCamUniforms(size_t programId);
@@ -56,6 +58,8 @@ private:
 	void generateTexture(Texture& texture, GLint internalformat, GLenum format, GLenum type) const;
 	void generateTexture(Texture& texture, GLint internalformat, GLenum format, GLenum type, const glm::vec2& resolution) const;
 
+	void regenerateCameraControlRenderObjects();
+
 private:
 	std::shared_ptr<MovingCamera> m_Cam;
 	glm::vec2 m_Resolution;
@@ -64,6 +68,11 @@ private:
 	std::vector<std::shared_ptr<Program>> m_Programs;
 
 	Mesh m_Quad;
+	Mesh m_Sphere;
+
+	bool m_ShowCameraControlPoints;
+	Program m_SimpleGeometryShader;
+	std::vector<RenderObject> m_CameraControlRenderObjects;
 
 	// shadow mapping
 	Texture m_ShadowMap;

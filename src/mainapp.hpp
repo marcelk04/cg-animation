@@ -39,6 +39,7 @@ protected:
 
 private:
     std::shared_ptr<MovingCamera> cam;
+    bool showControlPoints = false;
 
     Renderer renderer;
     std::shared_ptr<Scene> scene;

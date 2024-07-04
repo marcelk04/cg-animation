@@ -35,12 +35,12 @@ MainApp::MainApp()
     texturedGeom->bindTextureUnit("uNormalTexture", 1);
     texturedGeomId = renderer.addProgram(texturedGeom);
 
-    Material floorMaterial {
+    Material bunnyMaterial {
         glm::vec3(1.0f, 0.5f, 0.31f),
         0.4f
     };
 
-    Material bunnyMaterial {
+    Material floorMaterial {
         glm::vec3(0.6f, 0.2f, 0.4f),
         0.4f
     };
@@ -140,6 +140,11 @@ void MainApp::buildImGui() {
 
     if (ImGui::Button("Camera Controller")) {
         scene->getCameraController()->setEnabled(!scene->getCameraController()->isEnabled());
+    }
+
+    if (ImGui::Button("Toggle Cam Control Points")) {
+        showControlPoints = !showControlPoints;
+        renderer.showCameraControlPoints(showControlPoints);
     }
 }
 
