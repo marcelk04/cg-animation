@@ -3,7 +3,9 @@
 #include <glm/glm.hpp>
 using namespace glm;
 
-#include "movingcamera.hpp"
+#include "cinematic_engine/movingcamera.hpp"
+#include "cinematic_engine/spline.hpp"
+#include "cinematic_engine/cameracontroller.hpp"
 #include "renderer/renderobject.hpp"
 #include "renderer/renderer.hpp"
 #include "renderer/light.hpp"
@@ -37,9 +39,10 @@ protected:
 
 private:
     std::shared_ptr<MovingCamera> cam;
+    bool showControlPoints = false;
 
     Renderer renderer;
-    Scene scene;
+    std::shared_ptr<Scene> scene;
 
     Mesh cube;
     Mesh plane;

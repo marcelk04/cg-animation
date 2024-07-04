@@ -40,6 +40,7 @@ float shadowCalculation(vec4 lightSpaceFragPos, float bias) {
 
 	projCoords = projCoords * 0.5 + 0.5;
 
+	// if outside of shadow map, skip fragment
 	if (projCoords.z > 1.0) {
 		return 0.0;
 	}
@@ -48,6 +49,8 @@ float shadowCalculation(vec4 lightSpaceFragPos, float bias) {
 
 	float shadow = 0.0;
 	vec2 texelSize = 1.0 / textureSize(uShadowMap, 0);
+
+	// blur edges
 	for (int x = -1; x <= 1; x++) {
 		for (int y = -1; y <= 1; y++) {
 			float pcfDepth = texture(uShadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
@@ -98,7 +101,7 @@ vec3 calcPointLight(PointLight light, vec3 viewDir, vec3 normal, vec3 fragPos, v
 void main() {
 	vec3 fragPos = texture(uPosition, sTexCoord).xyz;
 	vec3 normal = texture(uNormal, sTexCoord).xyz;
-	vec3 albedo = texture(uAlbedoSpec, sTexCoord).rbg;
+	vec3 albedo = texture(uAlbedoSpec, sTexCoord).rgb;
 	float specular = texture(uAlbedoSpec, sTexCoord).a;
 
 	vec4 lightSpaceFragPos = uLightSpaceMatrix * vec4(fragPos, 1.0);

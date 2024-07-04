@@ -1,6 +1,6 @@
 #pragma once
 
-#include "movingcamera.hpp"
+#include "cinematic_engine/movingcamera.hpp"
 #include "framework/mesh.hpp"
 #include "framework/gl/program.hpp"
 #include "framework/gl/texture.hpp"
@@ -19,8 +19,10 @@ class RenderObject {
 public:
 	RenderObject(Mesh& mesh);
 
+	void draw(Program& program);
+
 	glm::mat4& getModelMatrix() { return m_Model; }
-	std::optional<Material> getMaterial() { return m_Material; }
+	std::optional<Material> getMaterial() const { return m_Material; }
 	std::shared_ptr<Texture> getDiffuseTexture() { return m_DiffuseTexture; }
 	std::shared_ptr<Texture> getNormalTexture() { return m_NormalTexture; }
 
@@ -30,8 +32,6 @@ public:
 	void setMaterial(const Material& material);
 	void setDiffuseTexture(std::shared_ptr<Texture> diffuseTexture);
 	void setNormalTexture(std::shared_ptr<Texture> normalTexture);
-
-	void draw(Program& program);
 
 private:
 	Mesh& m_Mesh;
