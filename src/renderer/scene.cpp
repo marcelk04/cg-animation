@@ -1,5 +1,9 @@
 #include "renderer/scene.hpp"
 
+void Scene::update(float dt) {
+	m_CameraController->update(dt);
+}
+
 size_t Scene::addRenderObject(RenderObject&& renderObject, size_t programId) {
 	while (programId >= m_RenderObjects.size()) {
 		m_RenderObjects.push_back(std::vector<RenderObject>());
@@ -26,6 +30,10 @@ bool Scene::addPointLight(PointLight&& pointLight) {
 	return true;
 }
 
+void Scene::setCameraController(CameraController&& cameraController) {
+	m_CameraController = std::make_optional<CameraController>(cameraController);
+}
+
 std::vector<std::vector<RenderObject>>& Scene::getRenderObjects() {
 	return m_RenderObjects;
 }
@@ -48,4 +56,8 @@ std::vector<PointLight>& Scene::getPointLights() {
 
 PointLight& Scene::getPointLight(size_t i) {
 	return m_PointLights[i];
+}
+
+std::optional<CameraController>& Scene::getCameraController() {
+	return m_CameraController;
 }

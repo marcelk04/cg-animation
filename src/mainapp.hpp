@@ -43,8 +43,6 @@ private:
     Renderer renderer;
     Scene scene;
 
-    CameraController camController;
-
     Mesh cube;
     Mesh plane;
     Mesh sphere;

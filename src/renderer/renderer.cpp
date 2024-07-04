@@ -36,6 +36,10 @@ Renderer::Renderer(std::shared_ptr<MovingCamera> cam, const glm::vec2& resolutio
 	m_Quad.load(vertices, indices);
 }
 
+void Renderer::update(Scene& scene, float dt) {
+	scene.update(dt);
+}
+
 size_t Renderer::addProgram(std::shared_ptr<Program> program) {
 	size_t id = m_Programs.size();
 

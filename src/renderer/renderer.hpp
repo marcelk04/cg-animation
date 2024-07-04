@@ -23,6 +23,8 @@ public:
 
 public:
 	Renderer(std::shared_ptr<MovingCamera> cam, const glm::vec2& resolution);
+	
+	void update(Scene& scene, float dt);
 
 	size_t addProgram(std::shared_ptr<Program> program);
 

@@ -94,11 +94,14 @@ MainApp::MainApp()
     Spline s1;
     s1.addCurve({vec3(0.0f, 2.0f, 0.0f)});
 
+    CameraController camController;
     camController.setCamera(cam);
     camController.setDuration(10.0f);
     camController.setEnabled(false);
     camController.setMovementSpline(std::move(s0));
     camController.setTargetSpline(std::move(s1));
+
+    scene.setCameraController(std::move(camController));
 
     renderer.updateLightingUniforms(scene);
     renderer.updateCamUniforms();
@@ -134,12 +137,12 @@ void MainApp::buildImGui() {
     renderer.setBlurAmount(blurAmount);
 
     if (ImGui::Button("Camera Controller")) {
-        camController.setEnabled(!camController.isEnabled());
+        scene.getCameraController()->setEnabled(!scene.getCameraController()->isEnabled());
     }
 }
 
 void MainApp::render() {
-    camController.update(delta);
+    renderer.update(scene, delta);
 
     if (cam->updateIfChanged()) {
         renderer.updateCamUniforms();
