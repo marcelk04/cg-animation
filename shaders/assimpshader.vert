@@ -10,7 +10,6 @@ uniform mat4 model = mat4(1.0);
 uniform mat4 view;
 uniform mat4 projection;
 uniform mat4 boneMatrices[100];  // Adjust size according to your needs
-
 out vec2 TexCoord;
 out vec3 FragPos;
 out vec3 Normal;
