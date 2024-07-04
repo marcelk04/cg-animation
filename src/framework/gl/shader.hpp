@@ -10,8 +10,9 @@ class Shader {
     enum class Type {
         VERTEX_SHADER = GL_VERTEX_SHADER,
         FRAGMENT_SHADER = GL_FRAGMENT_SHADER,
+        GEOMETRY_SHADER = GL_GEOMETRY_SHADER
     };
-    
+
     Shader(Type type);
     // Disable copying
     Shader(const Shader&) = delete;

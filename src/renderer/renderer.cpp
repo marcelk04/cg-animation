@@ -14,11 +14,14 @@ Renderer::Renderer(std::shared_ptr<MovingCamera> cam, const glm::vec2& resolutio
 
 	m_DepthShader.load("depthshader.vert", "depthshader.frag");
 
+	m_CubeDepthShader.load("cubedepthshader.vert", "cubedepthshader.geom", "cubedepthshader.frag");
+
 	m_LightingShader.load("deferred_lighting.vert", "deferred_lighting.frag");
 	m_LightingShader.bindTextureUnit("uPosition", 0);
 	m_LightingShader.bindTextureUnit("uNormal", 1);
 	m_LightingShader.bindTextureUnit("uAlbedoSpec", 2);
-	m_LightingShader.bindTextureUnit("uShadowMap", 3);
+	m_LightingShader.bindTextureUnit("uDShadowMap", 3);
+	m_LightingShader.bindTextureUnit("uOShadowMap", 4);
 
 	m_BlurShader.load("blurshader.vert", "blurshader.frag");
 	m_BlurShader.bindTextureUnit("uColorBuffer", 1);
@@ -49,7 +52,11 @@ void Renderer::update(float dt) {
 void Renderer::draw() {
 	// only calculate shadow map if scene has a directional light
 	if (m_Scene->getDirLight().has_value()) {
-		shadowPass(*m_Scene);
+		directionalShadowPass(*m_Scene);
+	}
+
+	if (m_Scene->getRenderObjects().size() > 0) {
+		omnidirectionalShadowPass(*m_Scene);
 	}
 
 	geometryPass(*m_Scene);
@@ -100,13 +107,39 @@ void Renderer::updateLightingUniforms() {
 		glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, nearPlane, farPlane);
 		glm::mat4 lightView = glm::lookAt(5.0f * dirLight.getDirection(), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-		m_LightSpaceMatrix = lightProjection * lightView;
+		glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 
-		m_DepthShader.set("uLightSpaceMatrix", m_LightSpaceMatrix);
-		m_LightingShader.set("uLightSpaceMatrix", m_LightSpaceMatrix);
+		m_DepthShader.set("uLightSpaceMatrix", lightSpaceMatrix);
+		m_LightingShader.set("uLightSpaceMatrix", lightSpaceMatrix);
 	} else {
 		m_LightingShader.set("uDirLight.direction", glm::vec3(1.0f));
 		m_LightingShader.set("uDirLight.color", glm::vec3(0.0f));
+	}
+
+	if (m_Scene->getPointLights().size() > 0) {
+		PointLight& light = m_Scene->getPointLight(0);
+
+		float aspectRatio = static_cast<float>(SHADOW_WIDTH) / static_cast<float>(SHADOW_HEIGHT);
+		float near = 1.0f;
+		float far = 25.0f;
+		glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), aspectRatio, near, far);
+
+		std::vector<glm::mat4> shadowTransforms(6);
+		shadowTransforms[0] = shadowProj * glm::lookAt(light.getPosition(), light.getPosition() + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)); // front
+		shadowTransforms[1] = shadowProj * glm::lookAt(light.getPosition(), light.getPosition() + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)); // back
+		shadowTransforms[2] = shadowProj * glm::lookAt(light.getPosition(), light.getPosition() + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)); // up
+		shadowTransforms[3] = shadowProj * glm::lookAt(light.getPosition(), light.getPosition() + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)); // down
+		shadowTransforms[4] = shadowProj * glm::lookAt(light.getPosition(), light.getPosition() + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)); // right
+		shadowTransforms[5] = shadowProj * glm::lookAt(light.getPosition(), light.getPosition() + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)); // left
+
+		m_CubeDepthShader.set("uFar", far);
+		m_CubeDepthShader.set("uLightPosition", light.getPosition());
+		m_LightingShader.set("uFar", far);
+		m_LightingShader.set("uShadowLightPos", light.getPosition());
+
+		for (uint32_t i = 0; i < 6; i++) {
+			m_CubeDepthShader.set("uShadowTransforms[" + std::to_string(i) + "]", shadowTransforms[i]);
+		}
 	}
 
 	// point lights
@@ -146,9 +179,9 @@ void Renderer::updateCamUniforms(size_t programId) {
 	program->set("uWorldToClip", m_Cam->projection() * m_Cam->view());
 }
 
-void Renderer::shadowPass(Scene& scene) {
+void Renderer::directionalShadowPass(Scene& scene) {
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-	m_ShadowBuffer.bind();
+	m_DShadowBuffer.bind();
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glCullFace(GL_FRONT);
@@ -161,6 +194,21 @@ void Renderer::shadowPass(Scene& scene) {
 
 	glViewport(0, 0, m_Resolution.x, m_Resolution.y);
 	glCullFace(GL_BACK);
+}
+
+void Renderer::omnidirectionalShadowPass(Scene& scene) {
+	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+	m_OShadowBuffer.bind();
+	glEnable(GL_DEPTH_TEST);
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	for (size_t i = 0; i < m_Programs.size(); i++) {
+		for (RenderObject& object : scene.getRenderObjects(i)) {
+			object.draw(m_CubeDepthShader);
+		}
+	}
+
+	glViewport(0, 0, m_Resolution.x, m_Resolution.y);
 }
 
 void Renderer::geometryPass(Scene& scene) {
@@ -178,6 +226,7 @@ void Renderer::geometryPass(Scene& scene) {
 		}
 	}
 
+	// draw camera control points
 	if (m_ShowCameraControlPoints && m_Scene->getCameraController().has_value()) {
 		CameraController& camController = m_Scene->getCameraController().value();
 
@@ -196,7 +245,8 @@ void Renderer::lightingPass(bool enableShadows) {
 	m_GPosition.bind(Texture::Type::TEX2D, 0);
 	m_GNormal.bind(Texture::Type::TEX2D, 1);
 	m_GAlbdedoSpec.bind(Texture::Type::TEX2D, 2);
-	m_ShadowMap.bind(Texture::Type::TEX2D, 3);
+	m_DShadowMap.bind(Texture::Type::TEX2D, 3);
+	m_OShadowCubeMap.bind(Texture::Type::CUBE_MAP, 4);
 
 	m_LightingShader.set("uCamPos", m_Cam->getPosition());
 	m_LightingShader.set("uEnableShadows", enableShadows);
@@ -250,11 +300,28 @@ void Renderer::hdrPass(int blurBuffer, float exposure, float gamma) {
 }
 
 void Renderer::generateTextures() {
-	// shadows
-	m_ShadowBuffer.bind();
+	// directional shadows
+	m_DShadowBuffer.bind();
 
-	generateTexture(m_ShadowMap, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_FLOAT, glm::vec2(SHADOW_WIDTH, SHADOW_HEIGHT));
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_ShadowMap.handle, 0);
+	generateTexture(m_DShadowMap, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_FLOAT, glm::vec2(SHADOW_WIDTH, SHADOW_HEIGHT));
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_DShadowMap.handle, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+
+	// omnidirectional shadows
+	m_OShadowBuffer.bind();
+
+	m_OShadowCubeMap.bind(Texture::Type::CUBE_MAP);
+	for (uint32_t i = 0; i < 6; i++) {
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	}
+
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_OShadowCubeMap.handle, 0);
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 
