@@ -18,6 +18,15 @@ struct PointLight {
 	float quadratic;
 };
 
+vec3 sampleOffsetDirections[20] = vec3[]
+(
+   vec3( 1,  1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1,  1,  1),
+   vec3( 1,  1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1,  1, -1),
+   vec3( 1,  1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1,  1,  0),
+   vec3( 1,  0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1,  0, -1),
+   vec3( 0,  1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0,  1, -1)
+);
+
 in vec2 sTexCoord;
 
 layout (location = 0) out vec4 outColor;
@@ -27,15 +36,18 @@ layout (location = 1) out vec4 outBrightColor;
 uniform sampler2D uPosition;
 uniform sampler2D uNormal;
 uniform sampler2D uAlbedoSpec;
-uniform sampler2D uShadowMap;
+uniform sampler2D uDShadowMap;
+uniform samplerCube uOShadowMap;
 
 uniform DirLight uDirLight;
 uniform PointLight uPointLights[NR_POINT_LIGHTS];
+uniform vec3 uShadowLightPos;
+uniform float uFar;
 uniform vec3 uCamPos;
 uniform mat4 uLightSpaceMatrix;
 uniform bool uEnableShadows;
 
-float shadowCalculation(vec4 lightSpaceFragPos, float bias) {
+float dShadowCalculation(vec4 lightSpaceFragPos, float bias) {
 	vec3 projCoords = lightSpaceFragPos.xyz / lightSpaceFragPos.w;
 
 	projCoords = projCoords * 0.5 + 0.5;
@@ -48,18 +60,40 @@ float shadowCalculation(vec4 lightSpaceFragPos, float bias) {
 	float currentDepth = projCoords.z;
 
 	float shadow = 0.0;
-	vec2 texelSize = 1.0 / textureSize(uShadowMap, 0);
+	vec2 texelSize = 1.0 / textureSize(uDShadowMap, 0);
 
 	// blur edges
 	for (int x = -1; x <= 1; x++) {
 		for (int y = -1; y <= 1; y++) {
-			float pcfDepth = texture(uShadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
+			float pcfDepth = texture(uDShadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
 
 			shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
 		}
 	}
 
 	return shadow / 9.0;
+}
+
+float oShadowCalculation(vec3 fragPos) {
+	vec3 fragToLight = fragPos - uShadowLightPos;
+
+	float currentDepth = length(fragToLight);
+
+	float shadow = 0.0f;
+	float bias = 0.15;
+	float samples = 20;
+	float viewDistance = length(uCamPos - fragPos);
+	float diskRadius = (1.0 + (viewDistance / uFar)) / 25.0;
+
+	for (int i = 0; i < samples; i++) {
+		float closestDepth = texture(uOShadowMap, fragToLight + sampleOffsetDirections[i] * diskRadius).r * uFar;
+
+		if (currentDepth - bias > closestDepth) {
+			shadow += 1.0;
+		}
+	}
+
+	return shadow / float(samples);
 }
 
 vec3 calcLight(vec3 lightDir, vec3 viewDir, vec3 normal, vec3 albedo, float specular, vec3 lightColor) {
@@ -104,7 +138,6 @@ void main() {
 	vec3 albedo = texture(uAlbedoSpec, sTexCoord).rgb;
 	float specular = texture(uAlbedoSpec, sTexCoord).a;
 
-	vec4 lightSpaceFragPos = uLightSpaceMatrix * vec4(fragPos, 1.0);
 	vec3 viewDir = normalize(uCamPos - fragPos);
 
 	vec3 result = vec3(0.0);
@@ -125,9 +158,11 @@ void main() {
 	float shadow = 0.0;
 
 	if (uEnableShadows) {
-		float bias = max(0.05 * (1.0 - dot(normal, uDirLight.direction)), 0.005);
+		float dBias = max(0.05 * (1.0 - dot(normal, uDirLight.direction)), 0.005);
+		vec4 lightSpaceFragPos = uLightSpaceMatrix * vec4(fragPos, 1.0);
 
-		shadow = shadowCalculation(lightSpaceFragPos, bias);
+		shadow += 0.5 * dShadowCalculation(lightSpaceFragPos, dBias);
+		shadow += 0.5 * oShadowCalculation(fragPos);
 	}
 
 	result = (1 - shadow) * result;

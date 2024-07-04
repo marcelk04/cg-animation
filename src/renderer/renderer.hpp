@@ -48,7 +48,8 @@ public:
 	void updateCamUniforms(size_t programId);
 
 private:
-	void shadowPass(Scene& scene);
+	void directionalShadowPass(Scene& scene);
+	void omnidirectionalShadowPass(Scene& scene);
 	void geometryPass(Scene& scene);
 	void lightingPass(bool enableShadows);
 	int blurPass(int amount);
@@ -74,13 +75,17 @@ private:
 	Program m_SimpleGeometryShader;
 	std::vector<RenderObject> m_CameraControlRenderObjects;
 
-	// shadow mapping
-	Texture m_ShadowMap;
-	Framebuffer m_ShadowBuffer;
+	// directional shadow mapping
+	Texture m_DShadowMap;
+	Framebuffer m_DShadowBuffer;
 
 	Program m_DepthShader;
 
-	glm::mat4 m_LightSpaceMatrix;
+	// omnidirectional shadow mapping
+	Texture m_OShadowCubeMap;
+	Framebuffer m_OShadowBuffer;
+
+	Program m_CubeDepthShader;
 
 	// deferred shading
 	Texture m_GPosition;
@@ -105,5 +110,5 @@ private:
 
 	float m_Exposure = 1.0f;
 	float m_Gamma = 2.2f;
-	int m_BlurAmount = 10;
+	int m_BlurAmount = 6;
 };

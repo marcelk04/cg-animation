@@ -19,7 +19,7 @@ protected:
 class DirLight : public Light {
 public:
 	DirLight();
-	
+
 	glm::vec3 getDirection() const;
 
 	void setDirection(const glm::vec3& direction);
