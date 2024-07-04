@@ -8,6 +8,27 @@ RenderObject::RenderObject(Mesh& mesh)
 	setModelMatrix(glm::mat4(1.0f));
 }
 
+void RenderObject::draw(Program& program) {
+	program.bind();
+	program.set("uLocalToWorld", m_Model);
+	program.set("uNormalMatrix", m_NormalMatrix);
+
+	if (m_Material.has_value()) {
+		program.set("uMaterial.diffuse", m_Material->diffuse);
+		program.set("uMaterial.specular", m_Material->specular);
+	}
+
+	if (m_DiffuseTexture != nullptr) {
+		m_DiffuseTexture->bind(Texture::Type::TEX2D, 0);
+	}
+
+	if (m_NormalTexture != nullptr) {
+		m_NormalTexture->bind(Texture::Type::TEX2D, 1);
+	}
+
+	m_Mesh.draw();
+}
+
 void RenderObject::setPosition(const glm::vec3& position) {
 	setPositionAndSize(position, 1.0f);
 }
@@ -31,25 +52,4 @@ void RenderObject::setDiffuseTexture(std::shared_ptr<Texture> diffuseTexture) {
 
 void RenderObject::setNormalTexture(std::shared_ptr<Texture> normalTexture) {
 	m_NormalTexture = normalTexture;
-}
-
-void RenderObject::draw(Program& program) {
-	program.bind();
-	program.set("uLocalToWorld", m_Model);
-	program.set("uNormalMatrix", m_NormalMatrix);
-
-	if (m_Material.has_value()) {
-		program.set("uMaterial.diffuse", m_Material->diffuse);
-		program.set("uMaterial.specular", m_Material->specular);
-	}
-
-	if (m_DiffuseTexture != nullptr) {
-		m_DiffuseTexture->bind(Texture::Type::TEX2D, 0);
-	}
-
-	if (m_NormalTexture != nullptr) {
-		m_NormalTexture->bind(Texture::Type::TEX2D, 1);
-	}
-
-	m_Mesh.draw();
 }

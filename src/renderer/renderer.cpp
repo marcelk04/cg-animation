@@ -5,7 +5,7 @@
 #include <iostream>
 
 Renderer::Renderer(std::shared_ptr<MovingCamera> cam, const glm::vec2& resolution)
-	: m_Cam(cam), m_Resolution(resolution) {
+	: m_Cam(cam), m_Resolution(resolution), m_Scene(nullptr) {
 	generateTextures();
 
 	m_DepthShader.load("depthshader.vert", "depthshader.frag");
@@ -36,8 +36,23 @@ Renderer::Renderer(std::shared_ptr<MovingCamera> cam, const glm::vec2& resolutio
 	m_Quad.load(vertices, indices);
 }
 
-void Renderer::update(Scene& scene, float dt) {
-	scene.update(dt);
+void Renderer::update(float dt) {
+	m_Scene->update(dt);
+}
+
+void Renderer::draw() {
+	// only calculate shadow map if scene has a directional light
+	if (m_Scene->getDirLight().has_value()) {
+		shadowPass(*m_Scene);
+	}
+
+	geometryPass(*m_Scene);
+
+	lightingPass(m_Scene->getDirLight().has_value());
+
+	int blurBuffer = blurPass(m_BlurAmount);
+
+	hdrPass(blurBuffer, m_Exposure, m_Gamma);
 }
 
 size_t Renderer::addProgram(std::shared_ptr<Program> program) {
@@ -48,25 +63,21 @@ size_t Renderer::addProgram(std::shared_ptr<Program> program) {
 	return id;
 }
 
-void Renderer::draw(Scene& scene) {
-	// only calculate shadow map if scene has a directional light
-	if (scene.getDirLight().has_value()) {
-		shadowPass(scene);
-	}
+void Renderer::setScene(std::shared_ptr<Scene> scene) {
+	m_Scene = scene;
 
-	geometryPass(scene);
-
-	lightingPass(scene.getDirLight().has_value());
-
-	int blurBuffer = blurPass(m_BlurAmount);
-
-	hdrPass(blurBuffer, m_Exposure, m_Gamma);
+	updateLightingUniforms();
 }
 
-void Renderer::updateLightingUniforms(Scene& scene) {
+void Renderer::setResolution(const glm::vec2& resolution) {
+	m_Resolution = resolution;
+	generateTextures();
+}
+
+void Renderer::updateLightingUniforms() {
 	// directional light
-	if (scene.getDirLight().has_value()) {
-		DirLight& dirLight = scene.getDirLight().value();
+	if (m_Scene->getDirLight().has_value()) {
+		DirLight& dirLight = m_Scene->getDirLight().value();
 
 		m_LightingShader.set("uDirLight.direction", dirLight.getDirection());
 		m_LightingShader.set("uDirLight.color", dirLight.getColor());
@@ -85,8 +96,8 @@ void Renderer::updateLightingUniforms(Scene& scene) {
 	}
 
 	// point lights
-	for (size_t i = 0; i < scene.getPointLights().size(); i++) {
-		PointLight& pointLight = scene.getPointLight(i);
+	for (size_t i = 0; i < m_Scene->getPointLights().size(); i++) {
+		PointLight& pointLight = m_Scene->getPointLight(i);
 
 		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].position", pointLight.getPosition());
 		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].color", pointLight.getColor());
@@ -96,7 +107,7 @@ void Renderer::updateLightingUniforms(Scene& scene) {
 		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].quadratic", pointLight.getQuadratic());
 	}
 
-	for (size_t i = scene.getPointLights().size(); i < scene.MAX_NR_LIGHTS; i++) {
+	for (size_t i = m_Scene->getPointLights().size(); i < m_Scene->MAX_NR_LIGHTS; i++) {
 		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].position", glm::vec3(0.0f));
 		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].color", glm::vec3(0.0f));
 		m_LightingShader.set("uPointLights[" + std::to_string(i) + "].radius", 0.0f);
@@ -116,11 +127,6 @@ void Renderer::updateCamUniforms(size_t programId) {
 	std::shared_ptr<Program> program = m_Programs[programId];
 
 	program->set("uWorldToClip", m_Cam->projection() * m_Cam->view());
-}
-
-void Renderer::setResolution(const glm::vec2& resolution) {
-	m_Resolution = resolution;
-	generateTextures();
 }
 
 void Renderer::shadowPass(Scene& scene) {

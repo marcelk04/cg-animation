@@ -41,7 +41,7 @@ private:
     std::shared_ptr<MovingCamera> cam;
 
     Renderer renderer;
-    Scene scene;
+    std::shared_ptr<Scene> scene;
 
     Mesh cube;
     Mesh plane;

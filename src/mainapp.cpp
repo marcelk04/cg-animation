@@ -21,6 +21,8 @@ MainApp::MainApp()
     App::setTitle("cgintro"); // set title
     App::setVSync(true); // Limit framerate
 
+    scene = std::make_shared<Scene>();
+
     cam->setResolution(resolution);
 
     simpleGeom = std::make_shared<Program>();
@@ -69,24 +71,24 @@ MainApp::MainApp()
     houseObj.setPositionAndSize(glm::vec3(0.0f, 0.0f, -5.0f), 0.2f);
     houseObj.setDiffuseTexture(houseDiffuse);
     houseObj.setNormalTexture(houseNormal);
-    scene.addRenderObject(std::move(houseObj), texturedGeomId);
+    scene->addRenderObject(std::move(houseObj), texturedGeomId);
 
     lightDir = glm::vec3(0.1f, 1.0f, 0.5f);
 
     DirLight dirLight;
     dirLight.setDirection(lightDir);
     dirLight.setColor(glm::vec3(0.5f));
-    scene.setDirLight(std::move(dirLight));
+    scene->setDirLight(std::move(dirLight));
 
     PointLight light0;
     light0.setPosition(glm::vec3(-2.0f, 3.0f, -1.0f));
     light0.setColor(glm::vec3(1.5f));
-    scene.addPointLight(std::move(light0));
+    scene->addPointLight(std::move(light0));
 
     RenderObject lightSphere0(sphere);
     lightSphere0.setPositionAndSize(glm::vec3(-2.0f, 3.0f, -1.0f), 0.1f);
     lightSphere0.setMaterial(lightMaterial);
-    scene.addRenderObject(std::move(lightSphere0), simpleGeomId);
+    scene->addRenderObject(std::move(lightSphere0), simpleGeomId);
 
     Spline s0;
     s0.addCurve({vec3(-4.0f, 2.0f, 5.0f), vec3(0.0f, 3.0f, 6.0f), vec3(3.0f, 0.0f, 3.0f)});
@@ -101,9 +103,9 @@ MainApp::MainApp()
     camController.setMovementSpline(std::move(s0));
     camController.setTargetSpline(std::move(s1));
 
-    scene.setCameraController(std::move(camController));
+    scene->setCameraController(std::move(camController));
 
-    renderer.updateLightingUniforms(scene);
+    renderer.setScene(scene);
     renderer.updateCamUniforms();
 }
 
@@ -117,10 +119,10 @@ void MainApp::init() {
 void MainApp::buildImGui() {
     ImGui::StatisticsWindow(delta, resolution);
 
-    if (scene.getDirLight().has_value()) {
+    if (scene->getDirLight().has_value()) {
         if (ImGui::SphericalSlider("Light direction", lightDir)) {
-            scene.getDirLight().value().setDirection(lightDir);
-            renderer.updateLightingUniforms(scene);
+            scene->getDirLight()->setDirection(lightDir);
+            renderer.updateLightingUniforms();
         }
     }
 
@@ -137,18 +139,18 @@ void MainApp::buildImGui() {
     renderer.setBlurAmount(blurAmount);
 
     if (ImGui::Button("Camera Controller")) {
-        scene.getCameraController()->setEnabled(!scene.getCameraController()->isEnabled());
+        scene->getCameraController()->setEnabled(!scene->getCameraController()->isEnabled());
     }
 }
 
 void MainApp::render() {
-    renderer.update(scene, delta);
+    renderer.update(delta);
 
     if (cam->updateIfChanged()) {
         renderer.updateCamUniforms();
     }
 
-    renderer.draw(scene);
+    renderer.draw();
 }
 
 void MainApp::keyCallback(Key key, Action action) {
