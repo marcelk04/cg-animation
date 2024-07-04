@@ -27,7 +27,7 @@ glm::vec3 Spline::getPoint(float t) const {
 	return Common::deCasteljau(curve, t - static_cast<float>(curveNum));
 }
 
-std::vector<std::vector<glm::vec3>>& Spline::getPoints() {
+const std::vector<std::vector<glm::vec3>>& Spline::getPoints() const {
 	return m_Points;
 }
 

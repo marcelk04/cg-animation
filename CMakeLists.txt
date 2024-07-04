@@ -7,6 +7,7 @@ set(SRC
     src/mainapp.cpp
     src/cinematic_engine/movingcamera.cpp
     src/cinematic_engine/spline.cpp
+    src/cinematic_engine/cameracontroller.cpp
     src/lightninggenerator.cpp
     src/renderer/renderobject.cpp
     src/renderer/renderer.cpp

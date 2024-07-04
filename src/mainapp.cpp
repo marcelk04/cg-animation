@@ -88,6 +88,18 @@ MainApp::MainApp()
     lightSphere0.setMaterial(lightMaterial);
     scene.addRenderObject(std::move(lightSphere0), simpleGeomId);
 
+    Spline s0;
+    s0.addCurve({vec3(-4.0f, 2.0f, 5.0f), vec3(0.0f, 3.0f, 6.0f), vec3(3.0f, 0.0f, 3.0f)});
+
+    Spline s1;
+    s1.addCurve({vec3(0.0f, 2.0f, 0.0f)});
+
+    camController.setCamera(cam);
+    camController.setDuration(10.0f);
+    camController.setEnabled(false);
+    camController.setMovementSpline(std::move(s0));
+    camController.setTargetSpline(std::move(s1));
+
     renderer.updateLightingUniforms(scene);
     renderer.updateCamUniforms();
 }
@@ -120,9 +132,15 @@ void MainApp::buildImGui() {
     int blurAmount = renderer.getBlurAmount();
     ImGui::SliderInt("Blur Amount", &blurAmount, 2, 20);
     renderer.setBlurAmount(blurAmount);
+
+    if (ImGui::Button("Camera Controller")) {
+        camController.setEnabled(!camController.isEnabled());
+    }
 }
 
 void MainApp::render() {
+    camController.update(delta);
+
     if (cam->updateIfChanged()) {
         renderer.updateCamUniforms();
     }

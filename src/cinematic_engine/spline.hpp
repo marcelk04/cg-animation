@@ -9,7 +9,7 @@ public:
 	Spline() = default;
 
 	glm::vec3 getPoint(float t) const;
-	std::vector<std::vector<glm::vec3>>& getPoints();
+	const std::vector<std::vector<glm::vec3>>& getPoints() const;
 	size_t getNumCurves() const;
 
 	void addCurve(const std::vector<glm::vec3>& curve);

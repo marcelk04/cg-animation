@@ -5,6 +5,7 @@ using namespace glm;
 
 #include "cinematic_engine/movingcamera.hpp"
 #include "cinematic_engine/spline.hpp"
+#include "cinematic_engine/cameracontroller.hpp"
 #include "renderer/renderobject.hpp"
 #include "renderer/renderer.hpp"
 #include "renderer/light.hpp"
@@ -41,6 +42,8 @@ private:
 
     Renderer renderer;
     Scene scene;
+
+    CameraController camController;
 
     Mesh cube;
     Mesh plane;
