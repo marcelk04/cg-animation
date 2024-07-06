@@ -6,7 +6,7 @@
 #include <iostream>
 
 RenderObject::RenderObject(Mesh& mesh)
-	: m_Mesh(mesh), m_Material(std::nullopt), m_Position(glm::vec3(0.0f)), m_Scale(1.0f), m_Rotation(glm::angleAxis(0.0f, glm::vec3(1.0f))) {
+	: m_Mesh(mesh), m_Material(std::nullopt), m_Position(glm::vec3(0.0f)), m_Scale(1.0f), m_Rotation(glm::angleAxis(0.0f, glm::vec3(1.0f))), m_DiffuseTexture(std::nullopt), m_NormalTexture(std::nullopt) {
 	setModelMatrix(glm::mat4(1.0f));
 }
 

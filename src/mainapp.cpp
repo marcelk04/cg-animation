@@ -198,33 +198,29 @@ void MainApp::createLights() {
 void MainApp::createRenderObjects() {
     RenderObject floor("plane");
     floor.setScale(10.0f);
-    //floor.setMaterial(floorMaterial);
-    floor.setDiffuseTexture("checker");
-    scene->addRenderObject(std::move(floor), texturedGeomId);
+    floor.setMaterial(floorMaterial);
+    scene->addRenderObject(std::move(floor), simpleGeomId);
 
     RenderObject leftWall("plane");
     leftWall.setScale(2.0f);
     leftWall.setPosition(glm::vec3(-2.0f, 2.0f, 0.0f));
     leftWall.setRotation(glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    leftWall.setDiffuseTexture("checker");
-    //leftWall.setMaterial(leftWallMaterial);
-    scene->addRenderObject(std::move(leftWall), texturedGeomId);
+    leftWall.setMaterial(leftWallMaterial);
+    scene->addRenderObject(std::move(leftWall), simpleGeomId);
 
     RenderObject backWall("plane");
     backWall.setScale(2.0f);
     backWall.setPosition(glm::vec3(0.0f, 2.0f, -2.0f));
     backWall.setRotation(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    backWall.setDiffuseTexture("checker");
-    //backWall.setMaterial(backWallMaterial);
-    scene->addRenderObject(std::move(backWall), texturedGeomId);
+    backWall.setMaterial(backWallMaterial);
+    scene->addRenderObject(std::move(backWall), simpleGeomId);
 
     RenderObject rightWall("plane");
     rightWall.setScale(2.0f);
     rightWall.setPosition(glm::vec3(2.0f, 2.0f, 0.0f));
     rightWall.setRotation(glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    rightWall.setDiffuseTexture("checker");
-    //rightWall.setMaterial(rightWallMaterial);
-    scene->addRenderObject(std::move(rightWall), texturedGeomId);
+    rightWall.setMaterial(rightWallMaterial);
+    scene->addRenderObject(std::move(rightWall), simpleGeomId);
 
     RenderObject lightSphere0("sphere");
     lightSphere0.setPosition(glm::vec3(0.0f, 0.5f, 0.0f));
