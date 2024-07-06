@@ -9,6 +9,7 @@ set(SRC
     src/cinematic_engine/spline.cpp
     src/cinematic_engine/cameracontroller.cpp
     src/lightninggenerator.cpp
+    src/resourcemanager.cpp
     src/renderer/renderobject.cpp
     src/renderer/renderer.cpp
     src/renderer/scene.cpp

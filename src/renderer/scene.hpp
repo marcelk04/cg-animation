@@ -16,7 +16,7 @@ public:
 	const size_t MAX_NR_LIGHTS = 5;
 
 public:
-	Scene() = default;
+	Scene();
 
 	void update(float dt);
 

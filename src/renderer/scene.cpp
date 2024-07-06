@@ -1,7 +1,13 @@
 #include "renderer/scene.hpp"
 
+Scene::Scene()
+	: m_RenderObjects(), m_DirLight(std::nullopt), m_PointLights(), m_CameraController(std::nullopt) {
+}
+
 void Scene::update(float dt) {
-	m_CameraController->update(dt);
+	if (m_CameraController.has_value()) {
+		m_CameraController->update(dt);
+	}
 }
 
 size_t Scene::addRenderObject(RenderObject&& renderObject, size_t programId) {
@@ -39,11 +45,15 @@ std::vector<std::vector<RenderObject>>& Scene::getRenderObjects() {
 }
 
 std::vector<RenderObject>& Scene::getRenderObjects(size_t programId) {
+	while (programId >= m_RenderObjects.size()) {
+		m_RenderObjects.push_back(std::vector<RenderObject>());
+	}
+
 	return m_RenderObjects[programId];
 }
 
 RenderObject& Scene::getRenderObject(size_t programId, size_t objectId) {
-	return m_RenderObjects[programId][objectId];
+	return getRenderObjects(programId)[objectId];
 }
 
 std::optional<DirLight>& Scene::getDirLight() {

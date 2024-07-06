@@ -17,7 +17,10 @@ using namespace glm;
 #include <memory>
 
 MainApp::MainApp()
-    : App(1200, 800), cam(std::make_shared<MovingCamera>(glm::vec3(0.0f, 2.0f, 4.0f), glm::vec3(0.0f))), renderer(cam, resolution) {
+    : App(1200, 800),
+      cam(std::make_shared<MovingCamera>(glm::vec3(0.0f, 1.0f, 2.0f),
+      glm::vec3(0.0f, 1.0f, 0.0f))),
+      renderer(cam, resolution) {
     App::setTitle("cgintro"); // set title
     App::setVSync(true); // Limit framerate
 
@@ -25,85 +28,13 @@ MainApp::MainApp()
 
     cam->setResolution(resolution);
 
-    simpleGeom = std::make_shared<Program>();
-    simpleGeom->load("simple_geometry.vert", "simple_geometry.frag");
-    simpleGeomId = renderer.addProgram(simpleGeom);
+    loadShaders();
+    loadObjects();
+    loadTextures();
 
-    texturedGeom = std::make_shared<Program>();
-    texturedGeom->load("textured_geometry.vert", "textured_geometry.frag");
-    texturedGeom->bindTextureUnit("uDiffuseTexture", 0);
-    texturedGeom->bindTextureUnit("uNormalTexture", 1);
-    texturedGeomId = renderer.addProgram(texturedGeom);
-
-    Material bunnyMaterial {
-        glm::vec3(1.0f, 0.5f, 0.31f),
-        0.4f
-    };
-
-    Material floorMaterial {
-        glm::vec3(0.6f, 0.2f, 0.4f),
-        0.4f
-    };
-
-    Material lightMaterial {
-        glm::vec3(100.0f),
-        0.0f
-    };
-
-    Material lightningMaterial{
-        glm::vec3(5.0f, 5.0f, 10.0f),
-        0.0f
-    };
-
-    cube.load("meshes/cube.obj");
-    plane.load("meshes/plane.obj");
-    sphere.load("meshes/highpolysphere.obj");
-    bunny.load("meshes/bunny.obj");
-    house.load("meshes/cottage.obj");
-
-    std::shared_ptr<Texture> houseDiffuse = std::make_shared<Texture>();
-    houseDiffuse->load(Texture::Format::SRGB8, "textures/cottage_diffuse.png", 0);
-
-    std::shared_ptr<Texture> houseNormal = std::make_shared<Texture>();
-    houseNormal->load(Texture::Format::SRGB8, "textures/cottage_normal.png", 0);
-
-    RenderObject houseObj(house);
-    houseObj.setPositionAndSize(glm::vec3(0.0f, 0.0f, -5.0f), 0.2f);
-    houseObj.setDiffuseTexture(houseDiffuse);
-    houseObj.setNormalTexture(houseNormal);
-    scene->addRenderObject(std::move(houseObj), texturedGeomId);
-
-    lightDir = glm::vec3(0.1f, 1.0f, 0.5f);
-
-    DirLight dirLight;
-    dirLight.setDirection(lightDir);
-    dirLight.setColor(glm::vec3(0.5f));
-    scene->setDirLight(std::move(dirLight));
-
-    PointLight light0;
-    light0.setPosition(glm::vec3(-2.0f, 3.0f, -1.0f));
-    light0.setColor(glm::vec3(1.5f));
-    scene->addPointLight(std::move(light0));
-
-    RenderObject lightSphere0(sphere);
-    lightSphere0.setPositionAndSize(glm::vec3(-2.0f, 3.0f, -1.0f), 0.1f);
-    lightSphere0.setMaterial(lightMaterial);
-    scene->addRenderObject(std::move(lightSphere0), simpleGeomId);
-
-    Spline s0;
-    s0.addCurve({vec3(-4.0f, 2.0f, 5.0f), vec3(0.0f, 3.0f, 6.0f), vec3(3.0f, 0.0f, 3.0f)});
-
-    Spline s1;
-    s1.addCurve({vec3(0.0f, 2.0f, 0.0f)});
-
-    CameraController camController;
-    camController.setCamera(cam);
-    camController.setDuration(10.0f);
-    camController.setEnabled(false);
-    camController.setMovementSpline(std::move(s0));
-    camController.setTargetSpline(std::move(s1));
-
-    scene->setCameraController(std::move(camController));
+    createMaterials();
+    createLights();
+    createRenderObjects();
 
     renderer.setScene(scene);
     renderer.updateCamUniforms();
@@ -137,15 +68,6 @@ void MainApp::buildImGui() {
     int blurAmount = renderer.getBlurAmount();
     ImGui::SliderInt("Blur Amount", &blurAmount, 2, 20);
     renderer.setBlurAmount(blurAmount);
-
-    if (ImGui::Button("Camera Controller")) {
-        scene->getCameraController()->setEnabled(!scene->getCameraController()->isEnabled());
-    }
-
-    if (ImGui::Button("Toggle Cam Control Points")) {
-        showControlPoints = !showControlPoints;
-        renderer.showCameraControlPoints(showControlPoints);
-    }
 }
 
 void MainApp::render() {
@@ -196,4 +118,125 @@ void MainApp::moveCallback(const vec2& movement, bool leftButton, bool rightButt
 void MainApp::resizeCallback(const glm::vec2& resolution) {
     cam->setResolution(resolution);
     renderer.setResolution(resolution);
+}
+
+void MainApp::loadShaders() {
+    simpleGeom = std::make_shared<Program>();
+    simpleGeom->load("simple_geometry.vert", "simple_geometry.frag");
+    simpleGeomId = renderer.addProgram(simpleGeom);
+
+    texturedGeomNormals = std::make_shared<Program>();
+    texturedGeomNormals->load("textured_geometry_normals.vert", "textured_geometry_normals.frag");
+    texturedGeomNormals->bindTextureUnit("uDiffuseTexture", 0);
+    texturedGeomNormals->bindTextureUnit("uNormalTexture", 1);
+    texturedGeomNormalsId = renderer.addProgram(texturedGeomNormals);
+
+    texturedGeom = std::make_shared<Program>();
+    texturedGeom->load("textured_geometry.vert", "textured_geometry.frag");
+    texturedGeom->bindTextureUnit("uDiffuseTexture", 0);
+    texturedGeomId = renderer.addProgram(texturedGeom);
+}
+
+void MainApp::loadObjects() {
+    ResourceManager::loadMesh("meshes/cube.obj", "cube");
+    ResourceManager::loadMesh("meshes/plane.obj", "plane");
+    ResourceManager::loadMesh("meshes/highpolysphere.obj", "sphere");
+    ResourceManager::loadMesh("meshes/bunny.obj", "bunny");
+    //ResourceManager::loadMeshWithTangents("meshes/cottage.obj", "house");
+}
+
+void MainApp::loadTextures() {
+    ResourceManager::loadTexture("textures/checker.png", "checker");
+}
+
+void MainApp::createMaterials() {
+    lightMaterial = {
+        glm::vec3(100.0f),
+        0.0f
+    };
+
+    floorMaterial = {
+        glm::vec3(0.7f, 0.7f, 0.7f),
+        0.5f
+    };
+
+    leftWallMaterial = {
+        glm::vec3(1.0f, 0.0f, 0.0f),
+        0.5f
+    };
+
+    backWallMaterial = {
+        glm::vec3(0.0f, 1.0f, 0.0f),
+        0.5f
+    };
+
+    rightWallMaterial = {
+        glm::vec3(0.0f, 0.0f, 1.0f),
+        0.5f
+    };
+
+    bunnyMaterial = {
+        glm::vec3(1.0f, 0.5f, 0.31f),
+        0.6f
+    };
+}
+
+void MainApp::createLights() {
+    lightDir = glm::vec3(0.1f, 1.0f, 0.5f);
+
+    DirLight dirLight;
+    dirLight.setDirection(lightDir);
+    dirLight.setColor(glm::vec3(0.5f));
+    scene->setDirLight(std::move(dirLight));
+
+    PointLight light0;
+    light0.setPosition(glm::vec3(0.0f, 1.0f, 0.0f));
+    light0.setColor(glm::vec3(1.0f));
+    scene->addPointLight(std::move(light0));
+}
+
+void MainApp::createRenderObjects() {
+    RenderObject floor("plane");
+    floor.setScale(10.0f);
+    floor.setMaterial(floorMaterial);
+    scene->addRenderObject(std::move(floor), simpleGeomId);
+
+    RenderObject leftWall("plane");
+    leftWall.setScale(2.0f);
+    leftWall.setPosition(glm::vec3(-2.0f, 2.0f, 0.0f));
+    leftWall.setRotation(glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    leftWall.setMaterial(leftWallMaterial);
+    scene->addRenderObject(std::move(leftWall), simpleGeomId);
+
+    RenderObject backWall("plane");
+    backWall.setScale(2.0f);
+    backWall.setPosition(glm::vec3(0.0f, 2.0f, -2.0f));
+    backWall.setRotation(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    backWall.setMaterial(backWallMaterial);
+    scene->addRenderObject(std::move(backWall), simpleGeomId);
+
+    RenderObject rightWall("plane");
+    rightWall.setScale(2.0f);
+    rightWall.setPosition(glm::vec3(2.0f, 2.0f, 0.0f));
+    rightWall.setRotation(glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    rightWall.setMaterial(rightWallMaterial);
+    scene->addRenderObject(std::move(rightWall), simpleGeomId);
+
+    RenderObject lightSphere0("sphere");
+    lightSphere0.setPosition(glm::vec3(0.0f, 0.5f, 0.0f));
+    lightSphere0.setScale(0.1f);
+    lightSphere0.setMaterial(lightMaterial);
+    scene->addRenderObject(std::move(lightSphere0), simpleGeomId);
+
+    RenderObject bunnyObj("bunny");
+    bunnyObj.setPosition(glm::vec3(-0.7f, 0.58f, -0.7f));
+    bunnyObj.setScale(0.8f);
+    bunnyObj.setMaterial(bunnyMaterial);
+    scene->addRenderObject(std::move(bunnyObj), simpleGeomId);
+
+    RenderObject cubeObj("cube");
+    cubeObj.setPosition(glm::vec3(0.7, 1.0f, -0.7f));
+    cubeObj.setScale(0.2f);
+    cubeObj.setMaterial(bunnyMaterial);
+    scene->addRenderObject(std::move(cubeObj), simpleGeomId);
 }

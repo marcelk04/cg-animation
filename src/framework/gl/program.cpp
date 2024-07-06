@@ -82,7 +82,15 @@ void Program::bind() {
 }
 
 GLuint Program::uniform(const std::string& name) {
-    return glGetUniformLocation(handle, name.c_str());
+    if (uniformLocationCache.contains(name)) {
+        return uniformLocationCache[name];
+    }
+
+    GLint location = glGetUniformLocation(handle, name.c_str());
+
+    uniformLocationCache[name] = location;
+
+    return location;
 }
 
 void Program::bindUBO(const std::string& loc, GLuint index) {

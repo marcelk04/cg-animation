@@ -171,7 +171,7 @@ void App::initGL() {
     int gladLoadGLStatus = gladLoadGL();
     assert(gladLoadGLStatus);
     // glEnable(GL_FRAMEBUFFER_SRGB); // Enables SRGB rendering
-    // glEnable(GL_DEBUG_OUTPUT); // Enables debug output
+    glEnable(GL_DEBUG_OUTPUT); // Enables debug output
     // glDebugMessageCallback(debugCallback, 0); // Only supported for OpenGL 4.3+
 }
 

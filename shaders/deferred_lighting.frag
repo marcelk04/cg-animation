@@ -102,7 +102,7 @@ vec3 calcLight(vec3 lightDir, vec3 viewDir, vec3 normal, vec3 albedo, float spec
 	float diffuseVal = max(dot(normal, lightDir), 0.0);
 	vec3 diffuseResult = diffuseVal * albedo * lightColor;
 
-	float specularVal = pow(max(dot(normal, halfwayDir), 0.0), 32);
+	float specularVal = pow(max(dot(normal, halfwayDir), 0.0), 128);
 	vec3 specularResult = specularVal * specular * lightColor;
 
 	return diffuseResult + specularResult;
@@ -161,8 +161,10 @@ void main() {
 		float dBias = max(0.05 * (1.0 - dot(normal, uDirLight.direction)), 0.005);
 		vec4 lightSpaceFragPos = uLightSpaceMatrix * vec4(fragPos, 1.0);
 
-		shadow += 0.5 * dShadowCalculation(lightSpaceFragPos, dBias);
-		shadow += 0.5 * oShadowCalculation(fragPos);
+		shadow += 0.75 * dShadowCalculation(lightSpaceFragPos, dBias);
+		shadow += 0.75 * oShadowCalculation(fragPos);
+
+		shadow = min(shadow, 0.9);
 	}
 
 	result = (1 - shadow) * result;
