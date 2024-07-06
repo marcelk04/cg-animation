@@ -1,5 +1,6 @@
 #pragma once
 
+#include "resourcemanager.hpp"
 #include "cinematic_engine/movingcamera.hpp"
 #include "framework/mesh.hpp"
 #include "framework/gl/program.hpp"
@@ -10,6 +11,7 @@
 
 #include <memory>
 #include <optional>
+#include <string>
 
 struct Material {
 	glm::vec3 diffuse;
@@ -19,13 +21,14 @@ struct Material {
 class RenderObject {
 public:
 	RenderObject(Mesh& mesh);
+	RenderObject(const std::string& meshname);
 
 	void draw(Program& program);
 
 	glm::mat4& getModelMatrix() { return m_Model; }
 	std::optional<Material> getMaterial() const { return m_Material; }
-	std::shared_ptr<Texture> getDiffuseTexture() { return m_DiffuseTexture; }
-	std::shared_ptr<Texture> getNormalTexture() { return m_NormalTexture; }
+	std::optional<std::string> getDiffuseTexture() { return m_DiffuseTexture; }
+	std::optional<std::string> getNormalTexture() { return m_NormalTexture; }
 
 	void setPosition(const glm::vec3& position);
 	void setScale(const float scale);
@@ -33,8 +36,8 @@ public:
 	void setRotation(const glm::quat& rotation);
 	void setModelMatrix(const glm::mat4& model);
 	void setMaterial(const Material& material);
-	void setDiffuseTexture(std::shared_ptr<Texture> diffuseTexture);
-	void setNormalTexture(std::shared_ptr<Texture> normalTexture);
+	void setDiffuseTexture(const std::string& texturename);
+	void setNormalTexture(const std::string& texturename);
 
 private:
 	void recalculateModelMatrix();
@@ -48,8 +51,8 @@ private:
 
 	std::optional<Material> m_Material;
 
-	std::shared_ptr<Texture> m_DiffuseTexture;
-	std::shared_ptr<Texture> m_NormalTexture;
+	std::optional<std::string> m_DiffuseTexture;
+	std::optional<std::string> m_NormalTexture;
 
 	glm::mat4 m_Model;
 	glm::mat3 m_NormalMatrix;

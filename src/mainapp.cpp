@@ -29,13 +29,11 @@ MainApp::MainApp()
     cam->setResolution(resolution);
 
     loadShaders();
+    loadObjects();
+    loadTextures();
 
     createMaterials();
-
-    loadObjects();
-
     createLights();
-
     createRenderObjects();
 
     renderer.setScene(scene);
@@ -127,19 +125,28 @@ void MainApp::loadShaders() {
     simpleGeom->load("simple_geometry.vert", "simple_geometry.frag");
     simpleGeomId = renderer.addProgram(simpleGeom);
 
+    texturedGeomNormals = std::make_shared<Program>();
+    texturedGeomNormals->load("textured_geometry_normals.vert", "textured_geometry_normals.frag");
+    texturedGeomNormals->bindTextureUnit("uDiffuseTexture", 0);
+    texturedGeomNormals->bindTextureUnit("uNormalTexture", 1);
+    texturedGeomNormalsId = renderer.addProgram(texturedGeomNormals);
+
     texturedGeom = std::make_shared<Program>();
     texturedGeom->load("textured_geometry.vert", "textured_geometry.frag");
     texturedGeom->bindTextureUnit("uDiffuseTexture", 0);
-    texturedGeom->bindTextureUnit("uNormalTexture", 1);
     texturedGeomId = renderer.addProgram(texturedGeom);
 }
 
 void MainApp::loadObjects() {
-    cube.load("meshes/cube.obj");
-    plane.load("meshes/plane.obj");
-    sphere.load("meshes/highpolysphere.obj");
-    bunny.load("meshes/bunny.obj");
-    //house.loadWithTangents("meshes/cottage.obj");
+    ResourceManager::loadMesh("meshes/cube.obj", "cube");
+    ResourceManager::loadMesh("meshes/plane.obj", "plane");
+    ResourceManager::loadMesh("meshes/highpolysphere.obj", "sphere");
+    ResourceManager::loadMesh("meshes/bunny.obj", "bunny");
+    //ResourceManager::loadMeshWithTangents("meshes/cottage.obj", "house");
+}
+
+void MainApp::loadTextures() {
+    ResourceManager::loadTexture("textures/checker.png", "checker");
 }
 
 void MainApp::createMaterials() {
@@ -189,45 +196,49 @@ void MainApp::createLights() {
 }
 
 void MainApp::createRenderObjects() {
-    RenderObject floor(plane);
+    RenderObject floor("plane");
     floor.setScale(10.0f);
-    floor.setMaterial(floorMaterial);
-    scene->addRenderObject(std::move(floor), simpleGeomId);
+    //floor.setMaterial(floorMaterial);
+    floor.setDiffuseTexture("checker");
+    scene->addRenderObject(std::move(floor), texturedGeomId);
 
-    RenderObject leftWall(plane);
+    RenderObject leftWall("plane");
     leftWall.setScale(2.0f);
     leftWall.setPosition(glm::vec3(-2.0f, 2.0f, 0.0f));
-    leftWall.setRotation(glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    leftWall.setMaterial(leftWallMaterial);
-    scene->addRenderObject(std::move(leftWall), simpleGeomId);
+    leftWall.setRotation(glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    leftWall.setDiffuseTexture("checker");
+    //leftWall.setMaterial(leftWallMaterial);
+    scene->addRenderObject(std::move(leftWall), texturedGeomId);
 
-    RenderObject backWall(plane);
+    RenderObject backWall("plane");
     backWall.setScale(2.0f);
     backWall.setPosition(glm::vec3(0.0f, 2.0f, -2.0f));
     backWall.setRotation(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    backWall.setMaterial(backWallMaterial);
-    scene->addRenderObject(std::move(backWall), simpleGeomId);
+    backWall.setDiffuseTexture("checker");
+    //backWall.setMaterial(backWallMaterial);
+    scene->addRenderObject(std::move(backWall), texturedGeomId);
 
-    RenderObject rightWall(plane);
+    RenderObject rightWall("plane");
     rightWall.setScale(2.0f);
     rightWall.setPosition(glm::vec3(2.0f, 2.0f, 0.0f));
     rightWall.setRotation(glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    rightWall.setMaterial(rightWallMaterial);
-    scene->addRenderObject(std::move(rightWall), simpleGeomId);
+    rightWall.setDiffuseTexture("checker");
+    //rightWall.setMaterial(rightWallMaterial);
+    scene->addRenderObject(std::move(rightWall), texturedGeomId);
 
-    RenderObject lightSphere0(sphere);
+    RenderObject lightSphere0("sphere");
     lightSphere0.setPosition(glm::vec3(0.0f, 0.5f, 0.0f));
     lightSphere0.setScale(0.1f);
     lightSphere0.setMaterial(lightMaterial);
     scene->addRenderObject(std::move(lightSphere0), simpleGeomId);
 
-    RenderObject bunnyObj(bunny);
+    RenderObject bunnyObj("bunny");
     bunnyObj.setPosition(glm::vec3(-0.7f, 0.58f, -0.7f));
     bunnyObj.setScale(0.8f);
     bunnyObj.setMaterial(bunnyMaterial);
     scene->addRenderObject(std::move(bunnyObj), simpleGeomId);
 
-    RenderObject cubeObj(cube);
+    RenderObject cubeObj("cube");
     cubeObj.setPosition(glm::vec3(0.7, 1.0f, -0.7f));
     cubeObj.setScale(0.2f);
     cubeObj.setMaterial(bunnyMaterial);
