@@ -120,7 +120,7 @@ void Renderer::updateLightingUniforms() {
 		PointLight& light = m_Scene->getPointLight(0);
 
 		float aspectRatio = static_cast<float>(SHADOW_WIDTH) / static_cast<float>(SHADOW_HEIGHT);
-		float near = 1.0f;
+		float near = 0.75f;
 		float far = 25.0f;
 		glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), aspectRatio, near, far);
 
@@ -201,6 +201,7 @@ void Renderer::omnidirectionalShadowPass(Scene& scene) {
 	m_OShadowBuffer.bind();
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_DEPTH_BUFFER_BIT);
+	glCullFace(GL_FRONT);
 
 	for (size_t i = 0; i < m_Programs.size(); i++) {
 		for (RenderObject& object : scene.getRenderObjects(i)) {
@@ -209,6 +210,7 @@ void Renderer::omnidirectionalShadowPass(Scene& scene) {
 	}
 
 	glViewport(0, 0, m_Resolution.x, m_Resolution.y);
+	glCullFace(GL_BACK);
 }
 
 void Renderer::geometryPass(Scene& scene) {
@@ -259,6 +261,7 @@ int Renderer::blurPass(int amount) {
 	bool horizontal = true, firstIteration = true;
 
 	m_BlurShader.bind();
+	glDisable(GL_DEPTH_TEST);
 
 	for (size_t i = 0; i < amount; i++) {
 		int framebufferIdx = static_cast<int>(horizontal);
@@ -287,6 +290,7 @@ int Renderer::blurPass(int amount) {
 
 void Renderer::hdrPass(int blurBuffer, float exposure, float gamma) {
 	Framebuffer::bindDefault();
+	glDisable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	m_ColorTexture.bind(Texture::Type::TEX2D, 0);
@@ -312,13 +316,13 @@ void Renderer::generateTextures() {
 	m_OShadowBuffer.bind();
 
 	m_OShadowCubeMap.bind(Texture::Type::CUBE_MAP);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 	for (uint32_t i = 0; i < 6; i++) {
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 	}
 
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_OShadowCubeMap.handle, 0);
@@ -402,7 +406,8 @@ void Renderer::regenerateCameraControlRenderObjects() {
 	for (const auto& curve : camController.getMovementControlPoints()) {
 		for (const auto& point : curve) {
 			RenderObject obj(m_Sphere);
-			obj.setPositionAndSize(point, 0.1f);
+			obj.setPosition(point);
+			obj.setScale(0.1f);
 			obj.setMaterial(movementPointMaterial);
 			m_CameraControlRenderObjects.push_back(std::move(obj));
 		}
@@ -412,7 +417,8 @@ void Renderer::regenerateCameraControlRenderObjects() {
 	for (const auto& curve : camController.getTargetControlPoints()) {
 		for (const auto& point : curve) {
 			RenderObject obj(m_Sphere);
-			obj.setPositionAndSize(point, 0.1f);
+			obj.setPosition(point);
+			obj.setScale(0.1f);
 			obj.setMaterial(targetPointMaterial);
 			m_CameraControlRenderObjects.push_back(std::move(obj));
 		}

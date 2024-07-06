@@ -6,6 +6,7 @@
 #include "framework/gl/texture.hpp"
 
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 #include <memory>
 #include <optional>
@@ -27,14 +28,23 @@ public:
 	std::shared_ptr<Texture> getNormalTexture() { return m_NormalTexture; }
 
 	void setPosition(const glm::vec3& position);
-	void setPositionAndSize(const glm::vec3& position, const float scale);
+	void setScale(const float scale);
+	void setRotation(const float angle, const glm::vec3& axis);
+	void setRotation(const glm::quat& rotation);
 	void setModelMatrix(const glm::mat4& model);
 	void setMaterial(const Material& material);
 	void setDiffuseTexture(std::shared_ptr<Texture> diffuseTexture);
 	void setNormalTexture(std::shared_ptr<Texture> normalTexture);
 
 private:
+	void recalculateModelMatrix();
+
+private:
 	Mesh& m_Mesh;
+
+	glm::vec3 m_Position;
+	float m_Scale;
+	glm::quat m_Rotation;
 
 	std::optional<Material> m_Material;
 

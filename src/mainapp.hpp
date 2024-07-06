@@ -36,6 +36,11 @@ protected:
     void moveCallback(const vec2& movement, bool leftButton, bool rightButton, bool middleButton) override;
     void resizeCallback(const vec2& resolution) override;
 
+    void loadShaders();
+    void loadObjects();
+    void createMaterials();
+    void createLights();
+    void createRenderObjects();
 
 private:
     std::shared_ptr<MovingCamera> cam;
@@ -49,6 +54,13 @@ private:
     Mesh sphere;
     Mesh bunny;
     Mesh house;
+
+    Material lightMaterial;
+    Material floorMaterial;
+    Material leftWallMaterial;
+    Material backWallMaterial;
+    Material rightWallMaterial;
+    Material bunnyMaterial;
 
     glm::vec3 lightDir;
 
