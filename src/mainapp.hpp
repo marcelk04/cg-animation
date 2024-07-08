@@ -51,15 +51,7 @@ private:
     Renderer renderer;
     std::shared_ptr<Scene> scene;
 
-    Material lightMaterial;
-    Material floorMaterial;
-    Material leftWallMaterial;
-    Material backWallMaterial;
-    Material rightWallMaterial;
-    Material bunnyMaterial;
-
     glm::vec3 lightDir;
-    Program fireshader;
     ParticleSystem particleSystem;
   
     std::shared_ptr<Texture> tex;

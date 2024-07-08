@@ -16,7 +16,6 @@ float generateLifetime() {
 }
 
 void ParticleSystem::init() {
-    std::cout<<"init particles\n";
     particles.resize(200000);
     int i = 0;
     for (auto& p : particles) {
