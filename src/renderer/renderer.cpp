@@ -228,6 +228,8 @@ void Renderer::geometryPass(Scene& scene) {
 		}
 	}
 
+	scene.getParticleSystem()->render(m_Cam->projection() * m_Cam->view());
+
 	// draw camera control points
 	if (m_ShowCameraControlPoints && m_Scene->getCameraController().has_value()) {
 		CameraController& camController = m_Scene->getCameraController().value();

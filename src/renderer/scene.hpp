@@ -1,5 +1,7 @@
 #pragma once
 
+#include "particlesystem.hpp"
+
 #include "renderer/light.hpp"
 #include "renderer/renderobject.hpp"
 
@@ -24,6 +26,7 @@ public:
 	void setDirLight(DirLight&& dirLight);
 	bool addPointLight(PointLight&& pointLight);
 	void setCameraController(CameraController&& cameraController);
+	void setParticleSystem(ParticleSystem&& particleSystem);
 
 	std::vector<std::vector<RenderObject>>& getRenderObjects();
 	std::vector<RenderObject>& getRenderObjects(size_t programId);
@@ -32,6 +35,7 @@ public:
 	std::vector<PointLight>& getPointLights();
 	PointLight& getPointLight(size_t i);
 	std::optional<CameraController>& getCameraController();
+	std::optional<ParticleSystem>& getParticleSystem();
 
 private:
 	std::vector<std::vector<RenderObject>> m_RenderObjects;
@@ -40,4 +44,6 @@ private:
 	std::vector<PointLight> m_PointLights;
 
 	std::optional<CameraController> m_CameraController;
+
+	std::optional<ParticleSystem> m_ParticleSystem;
 };
