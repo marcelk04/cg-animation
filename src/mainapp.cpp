@@ -26,7 +26,8 @@ MainApp::MainApp() : App(800, 600) {
     textureShader.load("textureshader.vert", "textureshader.frag");
     textureShader.bindTextureUnit("uTexture", 0);
     textureShader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
-
+    fireshader.load("fireshader.vert", "fireshader.frag");
+    fireshader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
     lightDir = glm::vec3(1.0f);
 }
 
@@ -36,6 +37,7 @@ void MainApp::init() {
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    particleSystem.init();
 }
 
 void MainApp::buildImGui() {
@@ -52,14 +54,16 @@ void MainApp::render() {
     }
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+    fireshader.bind();
     texture.bind(Texture::Type::TEX2D, 0);
     textureShader.bind();
     plane.draw();
+    particleSystem.update(static_cast<float>(glfwGetTime()));
+    particleSystem.render(coolCamera.projection() * coolCamera.view());
 }
 
 void MainApp::keyCallback(Key key, Action action) {
-    float cameraSpeed = 2.5f;
+    float cameraSpeed = 50.0f;
 
     if (action != Action::REPEAT) return;
 
