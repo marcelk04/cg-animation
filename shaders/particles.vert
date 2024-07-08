@@ -7,11 +7,14 @@ layout (location = 3) in float a_Type;
 
 uniform mat4 u_ViewProj;
 uniform float u_Time;
+
+out vec3 v_Position;
 out float v_Type;
 out float v_Lifetime;
 
 void main()
 {
+    v_Position;
     float age = mod(u_Time, a_Lifetime);
     vec3 currentPosition = a_Position + a_Velocity * age;
     gl_Position = u_ViewProj * vec4(currentPosition, 1.0);

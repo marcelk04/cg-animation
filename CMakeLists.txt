@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.26)
 ####################################################################
 # Source files
 set(SRC
-    src/movingcamera.cpp
     src/particlesystem.cpp  # Ensure this is included
     src/main.cpp
     src/mainapp.cpp

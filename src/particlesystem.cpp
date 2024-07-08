@@ -49,10 +49,8 @@ void ParticleSystem::init() {
 }
 
 void ParticleSystem::update(float time) {
-    std::cout<<"update particles\n";
-    shader.bind();
     shader.set("u_Time", time);
-    }
+}
 
 
 void ParticleSystem::render(const glm::mat4& viewProj) {

@@ -7,6 +7,7 @@
 class ParticleSystem {
 public:
     ParticleSystem();
+    //~ParticleSystem();
     void init();
     void update(float time);
     void render(const glm::mat4& viewProj);

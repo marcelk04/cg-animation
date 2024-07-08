@@ -32,13 +32,17 @@ MainApp::MainApp()
     loadObjects();
     loadTextures();
 
-    plane.load("meshes/cottage.obj");
-    textureShader.load("textureshader.vert", "textureshader.frag");
-    textureShader.bindTextureUnit("uTexture", 0);
-    textureShader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
-    fireshader.load("fireshader.vert", "fireshader.frag");
-    fireshader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
+    //plane.load("meshes/cottage.obj");
+    //textureShader.load("textureshader.vert", "textureshader.frag");
+    //textureShader.bindTextureUnit("uTexture", 0);
+    //textureShader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
+    //fireshader.load("fireshader.vert", "fireshader.frag");
+    //fireshader.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
     lightDir = glm::vec3(1.0f);
+
+    particleSystem.init();
+
+    scene->setParticleSystem(std::move(particleSystem));
         
     createMaterials();
     createLights();
@@ -52,7 +56,6 @@ void MainApp::init() {
     glDepthFunc(GL_LESS);
     glEnable(GL_CULL_FACE);
 
-    particleSystem.init();
     Common::randomSeed();
 }
 
@@ -86,13 +89,10 @@ void MainApp::render() {
         renderer.updateCamUniforms();
     }
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    fireshader.bind();
-    texture.bind(Texture::Type::TEX2D, 0);
-    textureShader.bind();
-    plane.draw();
-    particleSystem.update(static_cast<float>(glfwGetTime()));
-    particleSystem.render(coolCamera.projection() * coolCamera.view());
+    //fireshader.bind();
+    //texture.bind(Texture::Type::TEX2D, 0);
+    //textureShader.bind();
+    //plane.draw();
   
     renderer.draw();
 }
