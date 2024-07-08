@@ -37,7 +37,7 @@ MainApp::MainApp()
     particleSystem.init();
 
     scene->setParticleSystem(std::move(particleSystem));
-        
+
     createMaterials();
     createLights();
     createRenderObjects();
@@ -78,11 +78,11 @@ void MainApp::buildImGui() {
 
 void MainApp::render() {
     renderer.update(delta);
-  
+
     if (cam->updateIfChanged()) {
         renderer.updateCamUniforms();
     }
-  
+
     renderer.draw();
 }
 
@@ -157,7 +157,7 @@ void MainApp::loadTextures() {
 }
 
 void MainApp::createMaterials() {
-    
+
 }
 
 void MainApp::createLights() {
