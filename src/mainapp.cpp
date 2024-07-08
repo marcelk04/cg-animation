@@ -18,9 +18,9 @@ using namespace glm;
 
 MainApp::MainApp()
     : App(1200, 800),
-      cam(std::make_shared<MovingCamera>(glm::vec3(0.0f, 10.0f, 20.0f),
-      glm::vec3(0.0f, 5.0f, 0.0f))),
-      renderer(cam, resolution) {
+      cam(std::make_shared<MovingCamera>(glm::vec3(0.0f, 10.0f, 20.0f), glm::vec3(0.0f, 5.0f, 0.0f))),
+      renderer(cam, resolution),
+      lightDir(glm::vec3(1.0f, 1.0f, 1.0f)) {
     App::setTitle("cgintro"); // set title
     App::setVSync(true); // Limit framerate
 
@@ -32,11 +32,7 @@ MainApp::MainApp()
     loadObjects();
     loadTextures();
 
-    lightDir = glm::vec3(1.0f);
-
-    particleSystem.init();
-
-    scene->setParticleSystem(std::move(particleSystem));
+    initParticleSystem();
 
     createMaterials();
     createLights();
@@ -154,6 +150,13 @@ void MainApp::loadObjects() {
 void MainApp::loadTextures() {
     ResourceManager::loadTexture("textures/cottage_diffuse.png", "diffuse");
     ResourceManager::loadTexture("textures/cottage_normal.png", "normal");
+}
+
+void MainApp::initParticleSystem() {
+    ParticleSystem ps;
+    ps.init();
+
+    scene->setParticleSystem(std::move(ps));
 }
 
 void MainApp::createMaterials() {

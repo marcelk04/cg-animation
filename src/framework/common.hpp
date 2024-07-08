@@ -17,10 +17,10 @@ namespace Common {
     void hash_combine(std::size_t& seed, const T& v, const Rest&... rest);
 
     void randomSeed();
-    int randomInt(int first, int last);
+    int randomInt(int min, int max);
     float randomFloat();
-    float randomFloat(float first, float last);
-  
+    float randomFloat(float min, float max);
+
     glm::vec3 deCasteljau(std::vector<glm::vec3> points, float t);
 }
 
