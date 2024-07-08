@@ -7,3 +7,5 @@
 build/
 composed/
 out/
+cmake-build-debug/
+.idea/

@@ -11,6 +11,7 @@ using namespace glm;
 #include "renderer/light.hpp"
 #include "lightninggenerator.hpp"
 #include "resourcemanager.hpp"
+#include "particlesystem.hpp"
 
 #include "framework/app.hpp"
 #include "framework/mesh.hpp"
@@ -58,7 +59,9 @@ private:
     Material bunnyMaterial;
 
     glm::vec3 lightDir;
-
+    Program fireshader;
+    ParticleSystem particleSystem;
+  
     std::shared_ptr<Texture> tex;
 
     std::shared_ptr<Program> simpleGeom;
