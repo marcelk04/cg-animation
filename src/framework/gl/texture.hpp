@@ -16,6 +16,7 @@ class Texture {
         TEX1D = GL_TEXTURE_1D,
         TEX2D = GL_TEXTURE_2D,
         TEX3D = GL_TEXTURE_3D,
+        CUBE_MAP = GL_TEXTURE_CUBE_MAP
     };
     enum class Format { // See https://www.khronos.org/opengl/wiki/Image_Format
         LINEAR8, // 8-bit unsigned normalized integer

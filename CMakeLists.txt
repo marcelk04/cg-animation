@@ -3,24 +3,33 @@ cmake_minimum_required(VERSION 3.26)
 ####################################################################
 # Source files
 set(SRC
-        src/main.cpp
-        src/mainapp.cpp
-        src/movingcamera.cpp
-        src/particlesystem.cpp  # Ensure this is included
-        src/framework/app.cpp
-        src/framework/camera.cpp
-        src/framework/common.cpp
-        src/framework/imguiutil.cpp
-        src/framework/mesh.cpp
-        src/framework/objparser.cpp
-        src/framework/series.hpp
-        src/framework/gl/buffer.cpp
-        src/framework/gl/framebuffer.cpp
-        src/framework/gl/program.cpp
-        src/framework/gl/query.cpp
-        src/framework/gl/shader.cpp
-        src/framework/gl/texture.cpp
-        src/framework/gl/vertexarray.cpp
+    src/movingcamera.cpp
+    src/particlesystem.cpp  # Ensure this is included
+    src/main.cpp
+    src/mainapp.cpp
+    src/cinematic_engine/movingcamera.cpp
+    src/cinematic_engine/spline.cpp
+    src/cinematic_engine/cameracontroller.cpp
+    src/lightninggenerator.cpp
+    src/resourcemanager.cpp
+    src/renderer/renderobject.cpp
+    src/renderer/renderer.cpp
+    src/renderer/scene.cpp
+    src/renderer/light.cpp
+    src/framework/app.cpp
+    src/framework/camera.cpp
+    src/framework/common.cpp
+    src/framework/imguiutil.cpp
+    src/framework/mesh.cpp
+    src/framework/objparser.cpp
+    src/framework/series.hpp
+    src/framework/gl/buffer.cpp
+    src/framework/gl/framebuffer.cpp
+    src/framework/gl/program.cpp
+    src/framework/gl/query.cpp
+    src/framework/gl/shader.cpp
+    src/framework/gl/texture.cpp
+    src/framework/gl/vertexarray.cpp
 )
 set(INCLUDE
         src/

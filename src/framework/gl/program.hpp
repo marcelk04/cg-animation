@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 #include "buffer.hpp"
 #include "shader.hpp"
@@ -12,7 +13,7 @@
  * RAII wrapper for OpenGL program
  */
 class Program {
-   public:
+public:
     Program();
     // Disable copying
     Program(const Program&) = delete;
@@ -22,6 +23,7 @@ class Program {
     Program& operator=(Program&& other);
     ~Program();
     void load(const std::string& vs, const std::string& fs);
+    void load(const std::string& vs, const std::string& gs, const std::string& fs);
     void attach(Shader shader);
     void attach(const std::string& filename, Shader::Type type);
     void link();
@@ -50,8 +52,11 @@ class Program {
     GLuint handle;
     std::vector<Shader> shaders;
 
-   private:
+private:
     void release();
+
+private:
+    std::unordered_map<std::string, GLint> uniformLocationCache;
 };
 
 template <typename T>
