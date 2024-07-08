@@ -98,10 +98,10 @@ void MainApp::keyCallback(Key key, Action action) {
         cam->move(delta * cameraSpeed * cam->getRight());
     }
     else if (key == Key::SPACE) {
-        cam->move(delta * cameraSpeed * cam->getUp());
+        cam->move(delta * cameraSpeed * glm::vec3(0.0f, 1.0f, 0.0f));
     }
     else if (key == Key::LEFT_SHIFT) {
-        cam->move(-delta * cameraSpeed * cam->getUp());
+        cam->move(delta * cameraSpeed * glm::vec3(0.0f, -1.0f, 0.0f));
     }
 }
 

@@ -82,7 +82,7 @@ void Program::bind() {
 }
 
 GLuint Program::uniform(const std::string& name) {
-    if (uniformLocationCache.contains(name)) {
+    if (uniformLocationCache.find(name) != uniformLocationCache.end()) {
         return uniformLocationCache[name];
     }
 
