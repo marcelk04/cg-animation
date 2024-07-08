@@ -40,6 +40,7 @@ protected:
     void loadShaders();
     void loadObjects();
     void loadTextures();
+    void initParticleSystem();
     void createMaterials();
     void createLights();
     void createRenderObjects();
@@ -52,8 +53,7 @@ private:
     std::shared_ptr<Scene> scene;
 
     glm::vec3 lightDir;
-    ParticleSystem particleSystem;
-  
+
     std::shared_ptr<Texture> tex;
 
     std::shared_ptr<Program> simpleGeom;

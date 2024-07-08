@@ -14,7 +14,6 @@ out float v_Lifetime;
 
 void main()
 {
-    v_Position;
     float age = mod(u_Time, a_Lifetime);
     vec3 currentPosition = a_Position + a_Velocity * age;
     gl_Position = u_ViewProj * vec4(currentPosition, 1.0);
