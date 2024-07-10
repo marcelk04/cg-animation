@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 
 Scene::Scene()
-	: m_RenderObjects(), m_DirLight(std::nullopt), m_PointLights(), m_CameraController(std::nullopt) {
+	: m_RenderObjects(), m_DirLight(std::nullopt), m_PointLights(), m_CameraController(std::nullopt), m_ParticleSystem(std::nullopt) {
 }
 
 void Scene::update(float dt) {
@@ -11,7 +11,9 @@ void Scene::update(float dt) {
 		m_CameraController->update(dt);
 	}
 
-	m_ParticleSystem->update(static_cast<float>(glfwGetTime()));
+	if (m_ParticleSystem.has_value()) {
+		m_ParticleSystem->update(static_cast<float>(glfwGetTime()));
+	}
 }
 
 size_t Scene::addRenderObject(RenderObject&& renderObject, size_t programId) {

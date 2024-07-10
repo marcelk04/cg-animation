@@ -88,10 +88,10 @@ void MainApp::keyCallback(Key key, Action action) {
     if (action == Action::RELEASE) return;
 
     if (key == Key::W) {
-        cam->move(delta * cameraSpeed * cam->getDirection());
+        cam->move(delta * cameraSpeed * glm::normalize(glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), cam->getRight())));
     }
     else if (key == Key::S) {
-        cam->move(-delta * cameraSpeed * cam->getDirection());
+        cam->move(-delta * cameraSpeed * glm::normalize(glm::cross(glm::vec3(0.0f, 1.0f, 0.0f), cam->getRight())));
     }
     else if (key == Key::A) {
         cam->move(-delta * cameraSpeed * cam->getRight());

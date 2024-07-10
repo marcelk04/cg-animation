@@ -15,6 +15,7 @@ public:
 	static Texture& getTexture(const std::string& name);
 
 	static void loadMesh(const std::string& filepath, const std::string& name);
+	static void addMesh(Mesh&& mesh, const std::string& name);
 	static void loadMeshWithTangents(const std::string& filepath, const std::string& name);
 	static Mesh& getMesh(const std::string& name);
 

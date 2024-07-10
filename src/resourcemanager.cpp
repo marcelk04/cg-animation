@@ -19,6 +19,10 @@ void ResourceManager::loadMesh(const std::string& filepath, const std::string& n
 	Mesh mesh;
 	mesh.load(filepath);
 
+	addMesh(std::move(mesh), name);
+}
+
+void ResourceManager::addMesh(Mesh&& mesh, const std::string& name) {
 	s_Meshes[name] = std::move(mesh);
 }
 

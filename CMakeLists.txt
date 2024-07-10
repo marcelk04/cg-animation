@@ -36,6 +36,25 @@ set(INCLUDE
 )
 # Resource files
 set(SHADERS
+        shaders/blurshader.vert
+        shaders/blurshader.frag
+        shaders/cubedepthshader.vert
+        shaders/cubedepthshader.geom
+        shaders/cubedepthshader.frag
+        shaders/deferred_lighting.vert
+        shaders/deferred_lighting.frag
+        shaders/depthshader.vert
+        shaders/depthshader.frag
+        shaders/hdrshader.vert
+        shaders/hdrshader.frag
+        shaders/particleshader.vert
+        shaders/particleshader.frag
+        shaders/simple_geometry.vert
+        shaders/simple_geometry.frag
+        shaders/textured_geometry_normals.vert
+        shaders/textured_geometry_normals.frag
+        shaders/textured_geometry.vert
+        shaders/textured_geometry.frag
 )
 set(MESHES
         meshes/bunny.obj
@@ -45,10 +64,16 @@ set(MESHES
         meshes/highpolysphere.obj
         meshes/plane.obj
         meshes/suzanne.obj
+        meshes/cottage.obj
+        meshes/farmhouse_obj.obj
 )
 set(TEXTURES
         textures/checker.png
         textures/checkerbw.png
+        textures/cottage_diffuse.png
+        textures/cottage_normal.png
+        textures/FarmhouseTexture.jpg
+        textures/FarmhouseTextureBumpMap.jpg
 )
 set(ICON
         icons/AppIcon.icns

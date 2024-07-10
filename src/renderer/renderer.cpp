@@ -219,6 +219,11 @@ void Renderer::geometryPass(Scene& scene) {
 	glEnable(GL_BLEND);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	// render particle system
+	if (scene.getParticleSystem().has_value()) {
+		scene.getParticleSystem()->render(m_Cam->projection() * m_Cam->view());
+	}
+
 	for (size_t i = 0; i < m_Programs.size(); i++) {
 		std::shared_ptr<Program> program = m_Programs[i];
 
@@ -227,8 +232,6 @@ void Renderer::geometryPass(Scene& scene) {
 			object.draw(*program);
 		}
 	}
-
-	scene.getParticleSystem()->render(m_Cam->projection() * m_Cam->view());
 
 	// draw camera control points
 	if (m_ShowCameraControlPoints && m_Scene->getCameraController().has_value()) {
