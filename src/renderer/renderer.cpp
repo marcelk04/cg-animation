@@ -52,18 +52,57 @@ void Renderer::update(float dt) {
 void Renderer::draw() {
 	// only calculate shadow map if scene has a directional light
 	if (m_Scene->getDirLight().has_value()) {
+		m_DShadowBuffer.bind();
+		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+		glCullFace(GL_FRONT);
+		glEnable(GL_DEPTH_TEST);
+		glClear(GL_DEPTH_BUFFER_BIT);
+
 		directionalShadowPass(*m_Scene);
 	}
 
 	if (m_Scene->getRenderObjects().size() > 0) {
+		m_OShadowBuffer.bind();
+		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+		glCullFace(GL_FRONT);
+		glEnable(GL_DEPTH_TEST);
+		glClear(GL_DEPTH_BUFFER_BIT);
+
 		omnidirectionalShadowPass(*m_Scene);
 	}
 
-	geometryPass(*m_Scene);
+	m_GBuffer.bind();
+	glViewport(0, 0, m_Resolution.x, m_Resolution.y);
+	glCullFace(GL_BACK);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	int n = 10;
+
+	for (int i = 0; i < n; i++) {
+
+		glm::vec3 bokeh = m_Cam->getRight() * std::cosf(i * 2.0f * glm::pi<float>() / n) + m_Cam->getUp() * std::sinf(i * 2.0f * glm::pi<float>() / n);
+		glm::mat4 view = glm::lookAt(m_Cam->getPosition() + m_Aperture * bokeh, m_Cam->getPosition() + m_FocusDistance * m_Cam->getDirection(), m_Cam->getUp());
+
+		geometryPass(*m_Scene, view);
+
+		glAccum(i != 0 ? GL_ACCUM : GL_LOAD, 1.0f / n);
+	}
+
+	glAccum(GL_RETURN, 1);
+
+	m_ColorBuffer.bind();
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
+	glClear(GL_COLOR_BUFFER_BIT);
 
 	lightingPass(m_Scene->getDirLight().has_value());
 
 	int blurBuffer = blurPass(m_BlurAmount);
+
+	Framebuffer::bindDefault();
+	glClear(GL_COLOR_BUFFER_BIT);
 
 	hdrPass(blurBuffer, m_Exposure, m_Gamma);
 }
@@ -180,45 +219,22 @@ void Renderer::updateCamUniforms(size_t programId) {
 }
 
 void Renderer::directionalShadowPass(Scene& scene) {
-	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-	m_DShadowBuffer.bind();
-	glEnable(GL_DEPTH_TEST);
-	glClear(GL_DEPTH_BUFFER_BIT);
-	glCullFace(GL_FRONT);
-
 	for (size_t i = 0; i < m_Programs.size(); i++) {
 		for (RenderObject& object : scene.getRenderObjects(i)) {
 			object.draw(m_DepthShader);
 		}
 	}
-
-	glViewport(0, 0, m_Resolution.x, m_Resolution.y);
-	glCullFace(GL_BACK);
 }
 
 void Renderer::omnidirectionalShadowPass(Scene& scene) {
-	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-	m_OShadowBuffer.bind();
-	glEnable(GL_DEPTH_TEST);
-	glClear(GL_DEPTH_BUFFER_BIT);
-	glCullFace(GL_FRONT);
-
 	for (size_t i = 0; i < m_Programs.size(); i++) {
 		for (RenderObject& object : scene.getRenderObjects(i)) {
 			object.draw(m_CubeDepthShader);
 		}
 	}
-
-	glViewport(0, 0, m_Resolution.x, m_Resolution.y);
-	glCullFace(GL_BACK);
 }
 
-void Renderer::geometryPass(Scene& scene) {
-	m_GBuffer.bind();
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+void Renderer::geometryPass(Scene& scene, const glm::mat4& view) {
 	// render particle system
 	if (scene.getParticleSystem().has_value()) {
 		scene.getParticleSystem()->render(m_Cam->projection() * m_Cam->view());
@@ -226,6 +242,8 @@ void Renderer::geometryPass(Scene& scene) {
 
 	for (size_t i = 0; i < m_Programs.size(); i++) {
 		std::shared_ptr<Program> program = m_Programs[i];
+
+		program->set("uWorldToClip", m_Cam->projection() * view);
 
 		// draw all objects that use this shader
 		for (RenderObject& object : scene.getRenderObjects(i)) {
@@ -244,11 +262,6 @@ void Renderer::geometryPass(Scene& scene) {
 }
 
 void Renderer::lightingPass(bool enableShadows) {
-	m_ColorBuffer.bind();
-	glDisable(GL_DEPTH_TEST);
-	glDisable(GL_BLEND);
-	glClear(GL_COLOR_BUFFER_BIT);
-
 	m_GPosition.bind(Texture::Type::TEX2D, 0);
 	m_GNormal.bind(Texture::Type::TEX2D, 1);
 	m_GAlbdedoSpec.bind(Texture::Type::TEX2D, 2);
@@ -266,7 +279,6 @@ int Renderer::blurPass(int amount) {
 	bool horizontal = true, firstIteration = true;
 
 	m_BlurShader.bind();
-	glDisable(GL_DEPTH_TEST);
 
 	for (size_t i = 0; i < amount; i++) {
 		int framebufferIdx = static_cast<int>(horizontal);
@@ -294,10 +306,6 @@ int Renderer::blurPass(int amount) {
 }
 
 void Renderer::hdrPass(int blurBuffer, float exposure, float gamma) {
-	Framebuffer::bindDefault();
-	glDisable(GL_DEPTH_TEST);
-	glClear(GL_COLOR_BUFFER_BIT);
-
 	m_ColorTexture.bind(Texture::Type::TEX2D, 0);
 	m_BlurTextures[blurBuffer].bind(Texture::Type::TEX2D, 1);
 

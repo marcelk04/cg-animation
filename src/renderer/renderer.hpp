@@ -12,6 +12,7 @@
 #include "framework/gl/framebuffer.hpp"
 
 #include <glm/glm.hpp>
+#include <glad/glad.h>
 
 #include <vector>
 #include <array>
@@ -31,11 +32,15 @@ public:
 
 	std::shared_ptr<Scene> getScene() { return m_Scene; }
 	std::shared_ptr<Program> getProgram(size_t programId) { return m_Programs[programId]; }
+	float getAperture() const { return m_Aperture; }
+	float getFocusDistance() const { return m_FocusDistance; }
 	float getExposure() const { return m_Exposure; }
 	float getGamma() const { return m_Gamma; }
 	int getBlurAmount() const { return m_BlurAmount; }
 
 	void setScene(std::shared_ptr<Scene> scene);
+	void setAperture(float aperture) { m_Aperture = aperture; }
+	void setFocusDistance(float focusDistance) { m_FocusDistance = focusDistance; }
 	void setExposure(float exposure) { m_Exposure = exposure; }
 	void setGamma(float gamma) { m_Gamma = gamma; }
 	void setBlurAmount(int blurAmount) { m_BlurAmount = blurAmount; }
@@ -50,7 +55,7 @@ public:
 private:
 	void directionalShadowPass(Scene& scene);
 	void omnidirectionalShadowPass(Scene& scene);
-	void geometryPass(Scene& scene);
+	void geometryPass(Scene& scene, const glm::mat4& view);
 	void lightingPass(bool enableShadows);
 	int blurPass(int amount);
 	void hdrPass(int blurBuffer, float exposure, float gamma);
@@ -108,6 +113,8 @@ private:
 
 	Program m_BlurShader;
 
+	float m_Aperture = 0.05f;
+	float m_FocusDistance = 5.0f;
 	float m_Exposure = 1.0f;
 	float m_Gamma = 2.2f;
 	int m_BlurAmount = 6;

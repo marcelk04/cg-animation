@@ -32,7 +32,7 @@ MainApp::MainApp()
     loadObjects();
     loadTextures();
 
-    initParticleSystem();
+    //initParticleSystem();
 
     createMaterials();
     createLights();
@@ -58,6 +58,14 @@ void MainApp::buildImGui() {
             renderer.updateLightingUniforms();
         }
     }
+
+    float aperture = renderer.getAperture();
+    ImGui::SliderFloat("Aperture", &aperture, 0.01f, 0.5f);
+    renderer.setAperture(aperture);
+
+    float focusDistance = renderer.getFocusDistance();
+    ImGui::SliderFloat("Focus Distance", &focusDistance, 1.0f, 10.0f);
+    renderer.setFocusDistance(focusDistance);
 
     float exposure = renderer.getExposure();
     ImGui::SliderFloat("Exposure", &exposure, 0.0f, 2.0f);
