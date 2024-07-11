@@ -101,13 +101,22 @@ void Mesh::load(const std::string& filepath) {
         return;
     }
 
+
     std::vector<VertexPCNT> vertices;
     std::vector<unsigned int> indices;
-
+    //check if animation exists
+    if (scene->HasAnimations()) {
+        std::cout << "Model has animation data." << std::endl;
+        animationData.animation = scene->mAnimations[0];
+        boneCount = 0;
+    } else {
+        std::cout << "Model does not have animation data." << std::endl;
+    }
     std::cout << "Number of meshes: " << scene->mNumMeshes << std::endl;
     int offset = 0;
-    for (unsigned int m = 2; m < scene->mNumMeshes; ++m) {
+    for (unsigned int m = 0; m < scene->mNumMeshes; ++m) {
         aiMesh* mesh = scene->mMeshes[m];
+        std::cout<<"number of vertices, indices and bones" << " " << scene->mNumMeshes << " " << mesh->mNumVertices << " " << mesh->mNumBones << std::endl;
 
         for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
             VertexPCNT vertex;
@@ -115,7 +124,6 @@ void Mesh::load(const std::string& filepath) {
             vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
             vertex.texCoord = mesh->HasTextureCoords(0) ? glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y) : glm::vec2(0.0f, 0.0f);
             vertex.tangent = mesh->mTangents ? glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z) : glm::vec3(0.0f, 0.0f, 0.0f);
-            std::cout<<vertex.position.x << " " << vertex.position.y << " " << vertex.position.z <<std::endl;
 
             for (int j = 0; j < 4; ++j) {
                 vertex.boneIDs[j] = -1;
