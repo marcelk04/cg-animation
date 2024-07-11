@@ -12,17 +12,37 @@ MainApp::MainApp() : App(800, 600), animator(nullptr) {
     // Load the FBX mesh
     mesh.load("/home/timnogga/CLionProjects/cg-animation/rigged_model/surely.dae"); // Replace with your FBX model path
 
+    // Ensure the scene is loaded
+    const aiScene* scene = mesh.getScene();
+    if (!scene) {
+        std::cerr << "Failed to load the scene." << std::endl;
+        return;
+    }
+
+    std::cerr << "Scene loaded successfully" << std::endl;
+
+    // Initialize the animator
+    if (scene->HasAnimations()) {
+        const aiAnimation* animation = scene->mAnimations[0];
+        const aiNode* rootNode = scene->mRootNode;
+        if (!animation) {
+            std::cerr << "No animation found in the scene." << std::endl;
+            return;
+        }
+        if (!rootNode) {
+            std::cerr << "No root node found in the scene." << std::endl;
+            return;
+        }
+        animator = new Animator(animation, rootNode);
+    } else {
+        std::cerr << "No animation data found in the model." << std::endl;
+    }
+
     // Load shaders
     shaderProgram.load("assimpshader.vert", "assimpshader.frag");
     shaderProgram.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
     shaderProgram.set("view", coolCamera.view());
     shaderProgram.set("projection", coolCamera.projection());
-
-    // Initialize the animator
-    const aiScene* scene = mesh.getScene();
-    if (scene->HasAnimations()) {
-        animator = new Animator(scene->mAnimations[0], scene->mRootNode);
-    }
 
     for (int i = 0; i < 100; i++) {
         shaderProgram.set("uBones[" + std::to_string(i) + "]", glm::mat4(1.0f));
@@ -34,6 +54,7 @@ MainApp::MainApp() : App(800, 600), animator(nullptr) {
 MainApp::~MainApp() {
     delete animator;
 }
+
 
 void MainApp::init() {
     glEnable(GL_DEPTH_TEST);

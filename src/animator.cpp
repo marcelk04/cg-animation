@@ -1,5 +1,6 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
+#include <iostream>
 #include "animator.hpp"
 
 Animator::Animator(const aiAnimation* animation, const aiNode* rootNode)
@@ -8,11 +9,28 @@ Animator::Animator(const aiAnimation* animation, const aiNode* rootNode)
 }
 
 void Animator::UpdateAnimation(float dt) {
-    m_CurrentTime += m_CurrentAnimation->mTicksPerSecond * dt;
-    float animationTime = fmod(m_CurrentTime, m_CurrentAnimation->mDuration);
-    CalculateBoneTransform(m_RootNode, glm::mat4(1.0f), animationTime);
-}
+    if (!m_CurrentAnimation || !m_RootNode) {
+        std::cerr << "ERROR: Animation or root node is null" << std::endl;
+        return;
+    }
+    if (!m_CurrentAnimation->mTicksPerSecond ) {
+        std::cerr << "ERROR: m_CurrentAnimation is null" << std::endl;
+    } else {
+        std::cerr << "Ticks per second: " << m_CurrentAnimation->mTicksPerSecond << std::endl;
+    }
 
+    float ticksPerSecond = (m_CurrentAnimation->mTicksPerSecond != 0)
+                           ? m_CurrentAnimation->mTicksPerSecond
+                           : 25.0f;
+    float timeInTicks = dt * ticksPerSecond;
+    m_CurrentTime += timeInTicks;
+
+    if (m_CurrentTime > m_CurrentAnimation->mDuration) {
+        m_CurrentTime = fmod(m_CurrentTime, m_CurrentAnimation->mDuration);
+    }
+
+    CalculateBoneTransform(m_RootNode, glm::mat4(1.0f), m_CurrentTime);
+}
 void Animator::CalculateBoneTransform(const aiNode* node, glm::mat4 parentTransform, float animationTime) {
     std::string nodeName(node->mName.data);
     glm::mat4 nodeTransform = ConvertMatrixToGLMFormat(node->mTransformation);
