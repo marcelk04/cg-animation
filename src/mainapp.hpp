@@ -6,13 +6,15 @@
 #include "framework/app.hpp"
 #include "framework/camera.hpp"
 #include "framework/gl/program.hpp"
-#include "mesh.hpp" // Include the Mesh class
+#include "mesh.hpp"
+#include "animator.hpp"  // Include Animator class
 
 using namespace glm;
 
 class MainApp : public App {
 public:
     MainApp();
+    ~MainApp();
 
 protected:
     void init() override;
@@ -23,14 +25,15 @@ protected:
     void moveCallback(const vec2& movement, bool leftButton, bool rightButton, bool middleButton) override;
 
 private:
-    glm::vec3 deCasteljau(const std::vector<glm::vec3>& spline, float t);
+    //glm::vec3 deCasteljau(const std::vector<glm::vec3>& spline, float t);
 
 private:
-    Mesh mesh; // Use Mesh class to load and render a mesh
+    Mesh mesh;
     Program shaderProgram;
     MovingCamera coolCamera{ glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f) };
     std::vector<glm::vec3> spline{ glm::vec3(-2.0f, -1.0f, 3.0f), glm::vec3(0.0f, 3.0f, 2.0f), glm::vec3(2.0f, 2.0f, 0.0f), glm::vec3(3.0f, 1.5f, 0.0f) };
     float t = 0;
-
     glm::vec3 lightDir;
+
+    Animator* animator;  // Animator instance
 };

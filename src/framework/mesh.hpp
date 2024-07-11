@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <assimp/scene.h>
 #include "gl/buffer.hpp"
 #include "gl/vertexarray.hpp"
-#include <assimp/scene.h>
 
 struct BoneInfo {
     int id;
@@ -39,8 +39,11 @@ public:
     void load(const std::string& filepath);
     void loadWithTangents(const std::string& filepath);
     void draw();
+    const aiScene* getScene() const { return scene; }
 
 private:
+    void processNodeHierarchy(aiNode* node, const aiScene* scene, std::map<std::string, std::string>& nodeParentMap);
+
     glm::mat4 convertMatrixToGLMFormat(const aiMatrix4x4& from);
 
     unsigned int numIndices = 0;
@@ -50,6 +53,8 @@ private:
 
     std::map<std::string, BoneInfo> boneInfoMap;
     int boneCount = 0;
+
+    const aiScene* scene = nullptr; // Declare scene as a member variable
 
     struct AnimationData {
         const aiAnimation* animation;

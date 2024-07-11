@@ -5,18 +5,24 @@
 #include <iostream>
 #include "framework/imguiutil.hpp"
 
-MainApp::MainApp() : App(800, 600) {
+MainApp::MainApp() : App(800, 600), animator(nullptr) {
     App::setTitle("cgintro"); // Set title
     App::setVSync(true); // Limit framerate
 
     // Load the FBX mesh
-    mesh.load("/home/timnogga/CLionProjects/cg-animation/rigged_model/rigged.dae"); // Replace with your FBX model path
+    mesh.load("/home/timnogga/CLionProjects/cg-animation/rigged_model/surely.dae"); // Replace with your FBX model path
 
     // Load shaders
     shaderProgram.load("assimpshader.vert", "assimpshader.frag");
     shaderProgram.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
     shaderProgram.set("view", coolCamera.view());
     shaderProgram.set("projection", coolCamera.projection());
+
+    // Initialize the animator
+    const aiScene* scene = mesh.getScene();
+    if (scene->HasAnimations()) {
+        animator = new Animator(scene->mAnimations[0], scene->mRootNode);
+    }
 
     for (int i = 0; i < 100; i++) {
         shaderProgram.set("uBones[" + std::to_string(i) + "]", glm::mat4(1.0f));
@@ -25,38 +31,40 @@ MainApp::MainApp() : App(800, 600) {
     lightDir = glm::vec3(1.0f);
 }
 
+MainApp::~MainApp() {
+    delete animator;
+}
+
 void MainApp::init() {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 }
+
 void MainApp::buildImGui() {
     // Custom ImGui statistics window
     ImGui::StatisticsWindow(delta, resolution);
-
-    // Custom ImGui spherical slider
-    /*if (ImGui::SphericalSlider("Light Direction", lightDir)) {
-        shaderProgram.set("uLightDir", lightDir);
-    }
-
-    ImGui::SliderFloat("t", &t, 0.0f, 1.0f);*/
 }
 
 void MainApp::render() {
-//    glm::vec3 pos = deCasteljau(spline, t);
-//
-//    coolCamera.moveTo(pos);
-//    coolCamera.lookAt(glm::vec3(0.0f));
-
     if (coolCamera.updateIfChanged()) {
         shaderProgram.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
         shaderProgram.set("view", coolCamera.view());
         shaderProgram.set("projection", coolCamera.projection());
-
     }
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     shaderProgram.bind();
+
+    // Update animation
+    if (animator) {
+        animator->UpdateAnimation(delta);
+        auto transforms = animator->GetFinalBoneMatrices();
+        for (int i = 0; i < transforms.size(); ++i) {
+            shaderProgram.set("uBones[" + std::to_string(i) + "]", transforms[i]);
+        }
+    }
+
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, 1.0f, 0.0f));
     model = glm::rotate(model, glm::radians(270.0f), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -101,6 +109,7 @@ void MainApp::moveCallback(const vec2& movement, bool leftButton, bool rightButt
     }
 }
 
+/*
 glm::vec3 MainApp::deCasteljau(const std::vector<glm::vec3>& spline, float t) {
     std::vector<glm::vec3> points(spline.size());
 
@@ -111,9 +120,10 @@ glm::vec3 MainApp::deCasteljau(const std::vector<glm::vec3>& spline, float t) {
     int n = points.size();
     for (int j = 1; j < n; j++) {
         for (int i = 0; i < n - j; i++) {
-            points[i] = (1 - t) * points[i] + t * points[i + 1];
+            points[i] = (1 - t) * points[i] + t * points[i + 1]);
         }
     }
 
     return points[0];
 }
+*/

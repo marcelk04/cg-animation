@@ -20,6 +20,7 @@ set(SRC
         src/framework/gl/shader.cpp
         src/framework/gl/texture.cpp
         src/framework/gl/vertexarray.cpp
+        src/animator.cpp
 )
 set(INCLUDE
         src/
