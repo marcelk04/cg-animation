@@ -1,3 +1,4 @@
+/*
 #pragma once
 
 #include <glm/glm.hpp>
@@ -8,11 +9,7 @@
 #include "gl/buffer.hpp"
 #include "gl/vertexarray.hpp"
 
-struct BoneInfo {
-    int id;
-    glm::mat4 BoneOffset;
-    glm::mat4 FinalTransformation;
-};
+
 
 class Mesh {
 public:
@@ -54,7 +51,7 @@ private:
     std::map<std::string, BoneInfo> boneInfoMap;
     int boneCount = 0;
 
-    const aiScene* scene = nullptr; // Declare scene as a member variable
+    const aiScene* scene;
 
     struct AnimationData {
         const aiAnimation* animation;
@@ -62,3 +59,4 @@ private:
     };
     AnimationData animationData;
 };
+*/

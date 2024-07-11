@@ -1,158 +1,51 @@
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/quaternion.hpp>
-#include <iostream>
 #include "animator.hpp"
+#include <glm/gtc/matrix_transform.hpp>
 
-Animator::Animator(const aiAnimation* animation, const aiNode* rootNode)
-        : m_CurrentAnimation(animation), m_RootNode(rootNode), m_CurrentTime(0.0f), m_BoneCount(0) {
-    m_FinalBoneMatrices.resize(100, glm::mat4(1.0f));
+Animator::Animator(Animation* animation)
+        : m_CurrentAnimation(animation), m_CurrentTime(0.0), m_DeltaTime(0.0) {
+    m_FinalBoneMatrices.reserve(100);
+    for (int i = 0; i < 100; i++)
+        m_FinalBoneMatrices.push_back(glm::mat4(1.0f));
 }
 
 void Animator::UpdateAnimation(float dt) {
-    if (!m_CurrentAnimation || !m_RootNode) {
-        std::cerr << "ERROR: Animation or root node is null" << std::endl;
-        return;
+    m_DeltaTime = dt;
+    if (m_CurrentAnimation) {
+        m_CurrentTime += m_CurrentAnimation->GetTicksPerSecond() * dt;
+        m_CurrentTime = fmod(m_CurrentTime, m_CurrentAnimation->GetDuration());
+        CalculateBoneTransform(&m_CurrentAnimation->GetRootNode(), glm::mat4(1.0f));
     }
-    if (!m_CurrentAnimation->mTicksPerSecond ) {
-        std::cerr << "ERROR: m_CurrentAnimation is null" << std::endl;
-    } else {
-        std::cerr << "Ticks per second: " << m_CurrentAnimation->mTicksPerSecond << std::endl;
-    }
-
-    float ticksPerSecond = (m_CurrentAnimation->mTicksPerSecond != 0)
-                           ? m_CurrentAnimation->mTicksPerSecond
-                           : 25.0f;
-    float timeInTicks = dt * ticksPerSecond;
-    m_CurrentTime += timeInTicks;
-
-    if (m_CurrentTime > m_CurrentAnimation->mDuration) {
-        m_CurrentTime = fmod(m_CurrentTime, m_CurrentAnimation->mDuration);
-    }
-
-    CalculateBoneTransform(m_RootNode, glm::mat4(1.0f), m_CurrentTime);
 }
-void Animator::CalculateBoneTransform(const aiNode* node, glm::mat4 parentTransform, float animationTime) {
-    std::string nodeName(node->mName.data);
-    glm::mat4 nodeTransform = ConvertMatrixToGLMFormat(node->mTransformation);
 
-    const aiNodeAnim* nodeAnim = FindNodeAnim(m_CurrentAnimation, nodeName);
+void Animator::PlayAnimation(Animation* pAnimation) {
+    m_CurrentAnimation = pAnimation;
+    m_CurrentTime = 0.0f;
+}
 
-    if (nodeAnim) {
-        glm::vec3 scaling = InterpolateScaling(animationTime, nodeAnim);
-        glm::mat4 scalingM = glm::scale(glm::mat4(1.0f), scaling);
+void Animator::CalculateBoneTransform(const AssimpNodeData* node, glm::mat4 parentTransform) {
+    std::string nodeName = node->name;
+    glm::mat4 nodeTransform = node->transformation;
 
-        glm::quat rotationQ = InterpolateRotation(animationTime, nodeAnim);
-        glm::mat4 rotationM = glm::toMat4(rotationQ);
+    Bone* bone = m_CurrentAnimation->FindBone(nodeName);
 
-        glm::vec3 translation = InterpolatePosition(animationTime, nodeAnim);
-        glm::mat4 translationM = glm::translate(glm::mat4(1.0f), translation);
-
-        nodeTransform = translationM * rotationM * scalingM;
+    if (bone) {
+        bone->Update(m_CurrentTime);
+        nodeTransform = bone->GetLocalTransform();
     }
 
     glm::mat4 globalTransformation = parentTransform * nodeTransform;
 
-    if (m_BoneInfoMap.find(nodeName) != m_BoneInfoMap.end()) {
-        m_BoneInfoMap[nodeName].FinalTransformation = globalTransformation * m_BoneInfoMap[nodeName].BoneOffset;
-        m_FinalBoneMatrices[m_BoneInfoMap[nodeName].id] = m_BoneInfoMap[nodeName].FinalTransformation;
+    auto boneInfoMap = m_CurrentAnimation->GetBoneIDMap();
+    if (boneInfoMap.find(nodeName) != boneInfoMap.end()) {
+        int index = boneInfoMap[nodeName].id;
+        glm::mat4 offset = boneInfoMap[nodeName].offset;
+        m_FinalBoneMatrices[index] = globalTransformation * offset;
     }
 
-    for (unsigned int i = 0; i < node->mNumChildren; i++) {
-        CalculateBoneTransform(node->mChildren[i], globalTransformation, animationTime);
-    }
+    for (int i = 0; i < node->childrenCount; i++)
+        CalculateBoneTransform(&node->children[i], globalTransformation);
 }
 
-glm::mat4 Animator::ConvertMatrixToGLMFormat(const aiMatrix4x4& from) {
-    glm::mat4 to;
-    to[0][0] = from.a1; to[0][1] = from.b1; to[0][2] = from.c1; to[0][3] = from.d1;
-    to[1][0] = from.a2; to[1][1] = from.b2; to[1][2] = from.c2; to[1][3] = from.d2;
-    to[2][0] = from.a3; to[2][1] = from.b3; to[2][2] = from.c3; to[2][3] = from.d3;
-    to[3][0] = from.a4; to[3][1] = from.b4; to[3][2] = from.c4; to[3][3] = from.d4;
-    return to;
-}
-
-const aiNodeAnim* Animator::FindNodeAnim(const aiAnimation* animation, const std::string& nodeName) {
-    for (unsigned int i = 0; i < animation->mNumChannels; i++) {
-        const aiNodeAnim* nodeAnim = animation->mChannels[i];
-        if (std::string(nodeAnim->mNodeName.data) == nodeName) {
-            return nodeAnim;
-        }
-    }
-    return nullptr;
-}
-
-uint Animator::FindScaling(float animationTime, const aiNodeAnim* pNodeAnim) {
-    for (uint i = 0; i < pNodeAnim->mNumScalingKeys - 1; i++) {
-        if (animationTime < pNodeAnim->mScalingKeys[i + 1].mTime) {
-            return i;
-        }
-    }
-    return 0;
-}
-
-uint Animator::FindRotation(float animationTime, const aiNodeAnim* pNodeAnim) {
-    for (uint i = 0; i < pNodeAnim->mNumRotationKeys - 1; i++) {
-        if (animationTime < pNodeAnim->mRotationKeys[i + 1].mTime) {
-            return i;
-        }
-    }
-    return 0;
-}
-
-uint Animator::FindPosition(float animationTime, const aiNodeAnim* pNodeAnim) {
-    for (uint i = 0; i < pNodeAnim->mNumPositionKeys - 1; i++) {
-        if (animationTime < pNodeAnim->mPositionKeys[i + 1].mTime) {
-            return i;
-        }
-    }
-    return 0;
-}
-
-glm::vec3 Animator::InterpolateScaling(float animationTime, const aiNodeAnim* nodeAnim) {
-    if (nodeAnim->mNumScalingKeys == 1) {
-        return glm::vec3(nodeAnim->mScalingKeys[0].mValue.x, nodeAnim->mScalingKeys[0].mValue.y, nodeAnim->mScalingKeys[0].mValue.z);
-    }
-
-    uint scalingIndex = FindScaling(animationTime, nodeAnim);
-    uint nextScalingIndex = scalingIndex + 1;
-    float deltaTime = nodeAnim->mScalingKeys[nextScalingIndex].mTime - nodeAnim->mScalingKeys[scalingIndex].mTime;
-    float factor = (animationTime - nodeAnim->mScalingKeys[scalingIndex].mTime) / deltaTime;
-    const aiVector3D& start = nodeAnim->mScalingKeys[scalingIndex].mValue;
-    const aiVector3D& end = nodeAnim->mScalingKeys[nextScalingIndex].mValue;
-    aiVector3D delta = end - start;
-    aiVector3D interpolated = start + factor * delta;
-    return glm::vec3(interpolated.x, interpolated.y, interpolated.z);
-}
-
-glm::quat Animator::InterpolateRotation(float animationTime, const aiNodeAnim* nodeAnim) {
-    if (nodeAnim->mNumRotationKeys == 1) {
-        return glm::quat(nodeAnim->mRotationKeys[0].mValue.w, nodeAnim->mRotationKeys[0].mValue.x, nodeAnim->mRotationKeys[0].mValue.y, nodeAnim->mRotationKeys[0].mValue.z);
-    }
-
-    uint rotationIndex = FindRotation(animationTime, nodeAnim);
-    uint nextRotationIndex = rotationIndex + 1;
-    float deltaTime = nodeAnim->mRotationKeys[nextRotationIndex].mTime - nodeAnim->mRotationKeys[rotationIndex].mTime;
-    float factor = (animationTime - nodeAnim->mRotationKeys[rotationIndex].mTime) / deltaTime;
-    const aiQuaternion& start = nodeAnim->mRotationKeys[rotationIndex].mValue;
-    const aiQuaternion& end = nodeAnim->mRotationKeys[nextRotationIndex].mValue;
-    aiQuaternion result;
-    aiQuaternion::Interpolate(result, start, end, factor);
-    result = result.Normalize();
-    return glm::quat(result.w, result.x, result.y, result.z);
-}
-
-glm::vec3 Animator::InterpolatePosition(float animationTime, const aiNodeAnim* nodeAnim) {
-    if (nodeAnim->mNumPositionKeys == 1) {
-        return glm::vec3(nodeAnim->mPositionKeys[0].mValue.x, nodeAnim->mPositionKeys[0].mValue.y, nodeAnim->mPositionKeys[0].mValue.z);
-    }
-
-    uint positionIndex = FindPosition(animationTime, nodeAnim);
-    uint nextPositionIndex = positionIndex + 1;
-    float deltaTime = nodeAnim->mPositionKeys[nextPositionIndex].mTime - nodeAnim->mPositionKeys[positionIndex].mTime;
-    float factor = (animationTime - nodeAnim->mPositionKeys[positionIndex].mTime) / deltaTime;
-    const aiVector3D& start = nodeAnim->mPositionKeys[positionIndex].mValue;
-    const aiVector3D& end = nodeAnim->mPositionKeys[nextPositionIndex].mValue;
-    aiVector3D delta = end - start;
-    aiVector3D interpolated = start + factor * delta;
-    return glm::vec3(interpolated.x, interpolated.y, interpolated.z);
+std::vector<glm::mat4> Animator::GetFinalBoneMatrices() {
+    return m_FinalBoneMatrices;
 }

@@ -1,3 +1,4 @@
+/*
 #include "mesh.hpp"
 
 #include <glad/glad.h>
@@ -83,6 +84,11 @@ void Mesh::load(const std::string& filepath) {
 
     if (scene->HasAnimations()) {
         std::cout << "Model has animation data." << std::endl;
+        std::cerr << "Number of animations: " << scene->mNumAnimations << std::endl;
+        for (unsigned int i = 0; i < scene->mNumAnimations; ++i) {
+            std::cerr << "Animation " << i << " duration: " << scene->mAnimations[i]->mDuration << std::endl;
+            std::cerr << "Animation " << i << " ticks per second: " << scene->mAnimations[i]->mTicksPerSecond << std::endl;
+        }
     } else {
         std::cout << "Model does not have animation data." << std::endl;
     }
@@ -150,6 +156,7 @@ void Mesh::load(const std::string& filepath) {
     load(vertices, indices);
 }
 
+
 void Mesh::draw() {
     vao.bind();
     glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
@@ -163,4 +170,4 @@ glm::mat4 Mesh::convertMatrixToGLMFormat(const aiMatrix4x4& from) {
     to[2][0] = from.a3; to[2][1] = from.b3; to[2][2] = from.c3; to[2][3] = from.d3;
     to[3][0] = from.a4; to[3][1] = from.b4; to[3][2] = from.c4; to[3][3] = from.d4;
     return to;
-}
+}*/

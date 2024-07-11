@@ -5,13 +5,13 @@ cmake_minimum_required(VERSION 3.26)
 set(SRC
         src/main.cpp
         src/mainapp.cpp
-        src/movingcamera.cpp
+        #src/movingcamera.cpp
         src/framework/app.cpp
         src/framework/camera.cpp
         src/framework/common.cpp
         src/framework/imguiutil.cpp
         src/framework/mesh.cpp
-        src/framework/objparser.cpp
+        #src/framework/objparser.cpp
         src/framework/series.hpp
         src/framework/gl/buffer.cpp
         src/framework/gl/framebuffer.cpp
@@ -21,6 +21,15 @@ set(SRC
         src/framework/gl/texture.cpp
         src/framework/gl/vertexarray.cpp
         src/animator.cpp
+        src/model_animation.cpp
+        src/glm_helpers.hpp
+        src/bone.cpp
+        src/animator.cpp
+        src/animation.cpp
+        src/framework/skeletal_camera.cpp
+        src/framework/skeletalmesh.cpp
+        src/framework/skeletal_shader.cpp
+        src/framework/filesystem.cpp
 )
 set(INCLUDE
         src/

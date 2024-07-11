@@ -1,39 +1,38 @@
-#pragma once
-
-#include <glm/glm.hpp>
-#include <vector>
-#include "movingcamera.hpp"
-#include "framework/app.hpp"
-#include "framework/camera.hpp"
-#include "framework/gl/program.hpp"
-#include "mesh.hpp"
-#include "animator.hpp"  // Include Animator class
-
-using namespace glm;
-
-class MainApp : public App {
-public:
-    MainApp();
-    ~MainApp();
-
-protected:
-    void init() override;
-    void buildImGui() override;
-    void render() override;
-    void keyCallback(Key key, Action action) override;
-    void scrollCallback(float amount) override;
-    void moveCallback(const vec2& movement, bool leftButton, bool rightButton, bool middleButton) override;
-
-private:
-    //glm::vec3 deCasteljau(const std::vector<glm::vec3>& spline, float t);
-
-private:
-    Mesh mesh;
-    Program shaderProgram;
-    MovingCamera coolCamera{ glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f) };
-    std::vector<glm::vec3> spline{ glm::vec3(-2.0f, -1.0f, 3.0f), glm::vec3(0.0f, 3.0f, 2.0f), glm::vec3(2.0f, 2.0f, 0.0f), glm::vec3(3.0f, 1.5f, 0.0f) };
-    float t = 0;
-    glm::vec3 lightDir;
-
-    Animator* animator;  // Animator instance
-};
+//#pragma once
+//
+//#include <glad/glad.h>
+//#include <GLFW/glfw3.h>
+//#include <glm/glm.hpp>
+//#include <glm/gtc/matrix_transform.hpp>
+//#include <glm/gtc/type_ptr.hpp>
+//
+//#include "skeletal_shader.hpp"
+//#include "skeletal_camera.hpp"
+//#include "animator.hpp"
+//#include "model_animation.hpp"
+//#include "animationdata.hpp"
+//#include "filesystem.hpp"
+//
+//class MainApp {
+//public:
+//    MainApp();
+//    ~MainApp();
+//    void run();
+//
+//private:
+//    void init();
+//    void processInput(GLFWwindow* window);
+//    static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+////    static void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+////    static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+//
+//    GLFWwindow* window;
+//    Camera camera;
+//    float lastX, lastY;
+//    bool firstMouse;
+//    float deltaTime, lastFrame;
+//    SkeletalShader* ourShader;
+//    Model* ourModel;
+//    Animation* danceAnimation;
+//    Animator* animator;
+//};

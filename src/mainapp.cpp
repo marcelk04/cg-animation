@@ -1,150 +1,205 @@
-#include "mainapp.hpp"
+
+
 #include <glad/glad.h>
-#include <imgui.h>
+#include <GLFW/glfw3.h>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#include "skeletal_shader.hpp"
+#include "skeletal_camera.hpp"
+#include "animator.hpp"
+#include "model_animation.hpp"
+#include "animationdata.hpp"
+#include "filesystem.hpp"
+
 #include <iostream>
-#include "framework/imguiutil.hpp"
 
-MainApp::MainApp() : App(800, 600), animator(nullptr) {
-    App::setTitle("cgintro"); // Set title
-    App::setVSync(true); // Limit framerate
 
-    // Load the FBX mesh
-    mesh.load("/home/timnogga/CLionProjects/cg-animation/rigged_model/surely.dae"); // Replace with your FBX model path
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void processInput(GLFWwindow* window);
 
-    // Ensure the scene is loaded
-    const aiScene* scene = mesh.getScene();
-    if (!scene) {
-        std::cerr << "Failed to load the scene." << std::endl;
-        return;
+// settings
+const unsigned int SCR_WIDTH = 800;
+const unsigned int SCR_HEIGHT = 600;
+
+// camera
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+float lastX = SCR_WIDTH / 2.0f;
+float lastY = SCR_HEIGHT / 2.0f;
+bool firstMouse = true;
+
+// timing
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
+
+int main()
+{
+    // glfw: initialize and configure
+    // ------------------------------
+    glfwInit();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+#ifdef __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
+    // glfw window creation
+    // --------------------
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+    if (window == NULL)
+    {
+        std::cout << "Failed to create GLFW window" << std::endl;
+        glfwTerminate();
+        return -1;
+    }
+    glfwMakeContextCurrent(window);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+
+    // tell GLFW to capture our mouse
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    // glad: load all OpenGL function pointers
+    // ---------------------------------------
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
+        std::cout << "Failed to initialize GLAD" << std::endl;
+        return -1;
     }
 
-    std::cerr << "Scene loaded successfully" << std::endl;
+    // tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
+    stbi_set_flip_vertically_on_load(true);
 
-    // Initialize the animator
-    if (scene->HasAnimations()) {
-        const aiAnimation* animation = scene->mAnimations[0];
-        const aiNode* rootNode = scene->mRootNode;
-        if (!animation) {
-            std::cerr << "No animation found in the scene." << std::endl;
-            return;
-        }
-        if (!rootNode) {
-            std::cerr << "No root node found in the scene." << std::endl;
-            return;
-        }
-        animator = new Animator(animation, rootNode);
-    } else {
-        std::cerr << "No animation data found in the model." << std::endl;
-    }
-
-    // Load shaders
-    shaderProgram.load("assimpshader.vert", "assimpshader.frag");
-    shaderProgram.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
-    shaderProgram.set("view", coolCamera.view());
-    shaderProgram.set("projection", coolCamera.projection());
-
-    for (int i = 0; i < 100; i++) {
-        shaderProgram.set("uBones[" + std::to_string(i) + "]", glm::mat4(1.0f));
-    }
-
-    lightDir = glm::vec3(1.0f);
-}
-
-MainApp::~MainApp() {
-    delete animator;
-}
-
-
-void MainApp::init() {
+    // configure global opengl state
+    // -----------------------------
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
+
+    // build and compile shaders
+    // -------------------------
+    SkeletalShader ourShader("assimpshader.vert", "assimpshader.frag");
+
+
+    // load models
+    // -----------
+    Model ourModel(FileSystem::getPath("surely.dae"));
+    Animation danceAnimation(FileSystem::getPath("surely.dae"),&ourModel);
+    Animator animator(&danceAnimation);
+
+
+    // draw in wireframe
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    // render loop
+    // -----------
+    while (!glfwWindowShouldClose(window))
+    {
+        // per-frame time logic
+        // --------------------
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
+        // input
+        // -----
+        processInput(window);
+        animator.UpdateAnimation(deltaTime);
+
+        // render
+        // ------
+        glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // don't forget to enable shader before setting uniforms
+        ourShader.use();
+
+        // view/projection transformations
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 view = camera.GetViewMatrix();
+        ourShader.setMat4("projection", projection);
+        ourShader.setMat4("view", view);
+
+        auto transforms = animator.GetFinalBoneMatrices();
+        for (int i = 0; i < transforms.size(); ++i)
+            ourShader.setMat4("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
+
+
+        // render the loaded model
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, -0.4f, 0.0f)); // translate it down so it's at the center of the scene
+        model = glm::scale(model, glm::vec3(.5f, .5f, .5f));	// it's a bit too big for our scene, so scale it down
+        ourShader.setMat4("model", model);
+        ourModel.Draw(ourShader);
+
+
+        // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+        // -------------------------------------------------------------------------------
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+
+    // glfw: terminate, clearing all previously allocated GLFW resources.
+    // ------------------------------------------------------------------
+    glfwTerminate();
+    return 0;
 }
 
-void MainApp::buildImGui() {
-    // Custom ImGui statistics window
-    ImGui::StatisticsWindow(delta, resolution);
+// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
+// ---------------------------------------------------------------------------------------------------------
+void processInput(GLFWwindow* window)
+{
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        camera.ProcessKeyboard(FORWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        camera.ProcessKeyboard(BACKWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        camera.ProcessKeyboard(LEFT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        camera.ProcessKeyboard(RIGHT, deltaTime);
 }
 
-void MainApp::render() {
-    if (coolCamera.updateIfChanged()) {
-        shaderProgram.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
-        shaderProgram.set("view", coolCamera.view());
-        shaderProgram.set("projection", coolCamera.projection());
-    }
-
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    shaderProgram.bind();
-
-    // Update animation
-    if (animator) {
-        animator->UpdateAnimation(delta);
-        auto transforms = animator->GetFinalBoneMatrices();
-        for (int i = 0; i < transforms.size(); ++i) {
-            shaderProgram.set("uBones[" + std::to_string(i) + "]", transforms[i]);
-        }
-    }
-
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0.0f, 1.0f, 0.0f));
-    model = glm::rotate(model, glm::radians(270.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
-
-    shaderProgram.set("model", model);
-    mesh.draw();
+// glfw: whenever the window size changed (by OS or user resize) this callback function executes
+// ---------------------------------------------------------------------------------------------
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+    // make sure the viewport matches the new window dimensions; note that width and
+    // height will be significantly larger than specified on retina displays.
+    glViewport(0, 0, width, height);
 }
 
-void MainApp::keyCallback(Key key, Action action) {
-    float cameraSpeed = 10.0f;
+// glfw: whenever the mouse moves, this callback is called
+// -------------------------------------------------------
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
 
-    if (action != Action::REPEAT) return;
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
 
-    if (key == Key::W) {
-        coolCamera.move(delta * cameraSpeed * coolCamera.m_Direction);
-    }
-    else if (key == Key::S) {
-        coolCamera.move(-delta * cameraSpeed * coolCamera.m_Direction);
-    }
-    else if (key == Key::A) {
-        coolCamera.move(-delta * cameraSpeed * coolCamera.m_Right);
-    }
-    else if (key == Key::D) {
-        coolCamera.move(delta * cameraSpeed * coolCamera.m_Right);
-    }
-    else if (key == Key::SPACE) {
-        coolCamera.move(delta * cameraSpeed * coolCamera.m_Up);
-    }
-    else if (key == Key::LEFT_SHIFT) {
-        coolCamera.move(-delta * cameraSpeed * coolCamera.m_Up);
-    }
+    lastX = xpos;
+    lastY = ypos;
+
+    camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
-void MainApp::scrollCallback(float amount) {
-    coolCamera.zoom(0.1f * amount);
+// glfw: whenever the mouse scroll wheel scrolls, this callback is called
+// ----------------------------------------------------------------------
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    camera.ProcessMouseScroll(yoffset);
 }
 
-void MainApp::moveCallback(const vec2& movement, bool leftButton, bool rightButton, bool middleButton) {
-    if (leftButton || rightButton || middleButton) {
-        coolCamera.rotate(0.002f * movement);
-    }
-}
-
-/*
-glm::vec3 MainApp::deCasteljau(const std::vector<glm::vec3>& spline, float t) {
-    std::vector<glm::vec3> points(spline.size());
-
-    for (int i = 0; i < spline.size(); i++) {
-        points[i] = glm::vec3(spline[i]);
-    }
-
-    int n = points.size();
-    for (int j = 1; j < n; j++) {
-        for (int i = 0; i < n - j; i++) {
-            points[i] = (1 - t) * points[i] + t * points[i + 1]);
-        }
-    }
-
-    return points[0];
-}
-*/
