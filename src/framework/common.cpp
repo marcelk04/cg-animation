@@ -9,6 +9,12 @@
 
 #include "config.hpp"
 
+std::string Common::absolutePath(const std::string& filepath) {
+    Config::setWorkingDirectory();
+    std::filesystem::path path(filepath);
+    return std::filesystem::absolute(path);
+}
+
 std::string Common::readFile(const std::string& filepath) {
     Config::setWorkingDirectory();
     std::filesystem::path path{filepath};

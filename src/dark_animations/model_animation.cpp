@@ -2,7 +2,7 @@
 
 Model::Model(const std::string &path)
 {
-loadModel(path);
+    loadModel(path);
 }
 
 void Model::Draw(Program &program)

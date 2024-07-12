@@ -1,12 +1,16 @@
 #include "mainapp.hpp"
+
+#include "framework/imguiutil.hpp"
+#include "framework/common.hpp"
+#include "dark_animations/animator.hpp"
+
 #include <glad/glad.h>
 #include <imgui.h>
 #include <glm/gtc/type_ptr.hpp>
-#include <iostream>
-#include "framework/imguiutil.hpp"
-#include "dark_animations/animator.hpp"
 
-MainApp::MainApp() : App(800, 600),  model("rigged_model/surely.dae"), animation("rigged_model/surely.dae", &model), animator(&animation) {
+#include <iostream>
+
+MainApp::MainApp() : App(800, 600),  model(Common::absolutePath("rigged_model/surely.dae")), animation("rigged_model/surely.dae", &model), animator(&animation) {
     App::setTitle("cgintro"); // Set title
     App::setVSync(true); // Limit framerate
 

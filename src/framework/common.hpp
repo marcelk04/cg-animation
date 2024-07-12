@@ -5,6 +5,7 @@
 
 namespace Common {
 
+    std::string absolutePath(const std::string& filepath);
     std::string readFile(const std::string& filepath);
     void writeToFile(const std::string& content, const std::string& filepath);
     void filesInDirectory(const std::string& directoryPath, const std::string& extension, std::vector<std::string>& filenames);
