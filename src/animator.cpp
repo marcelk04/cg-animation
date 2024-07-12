@@ -1,3 +1,4 @@
+/*
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 #include <iostream>
@@ -152,3 +153,4 @@ glm::vec3 Animator::InterpolatePosition(float animationTime, const aiNodeAnim* n
     aiVector3D interpolated = start + factor * delta;
     return glm::vec3(interpolated.x, interpolated.y, interpolated.z);
 }
+*/

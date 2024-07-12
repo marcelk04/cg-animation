@@ -1,3 +1,4 @@
+/*
 #pragma once
 #include <assimp/scene.h>
 #include <glm/glm.hpp>
@@ -30,3 +31,4 @@ private:
     std::map<std::string, BoneInfo> m_BoneInfoMap;
     int m_BoneCount;
 };
+*/

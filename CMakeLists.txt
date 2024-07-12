@@ -21,6 +21,11 @@ set(SRC
         src/framework/gl/texture.cpp
         src/framework/gl/vertexarray.cpp
         src/animator.cpp
+        src/dark_animations/animation.cpp
+        src/dark_animations/animator.cpp
+        src/dark_animations/assimp_glm_helpers.cpp
+        src/dark_animations/bone.cpp
+        src/dark_animations/model_animation.cpp
 )
 set(INCLUDE
         src/

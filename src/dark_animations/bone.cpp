@@ -76,7 +76,7 @@ int Bone::GetScaleIndex(float animationTime)
     assert(0);
 }
 
-float Bone::GetScaleFactor(float lastTimeStamp, float nextTimeStamp, float animationTime) {}
+float Bone::GetScaleFactor(float lastTimeStamp, float nextTimeStamp, float animationTime)
 {
 for (int index = 0; index < m_NumScalings - 1; ++index)
 {

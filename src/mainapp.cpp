@@ -4,8 +4,9 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include "framework/imguiutil.hpp"
+#include "dark_animations/animator.hpp"
 
-MainApp::MainApp() : App(800, 600), animator(nullptr) {
+MainApp::MainApp() : App(800, 600),  model("rigged_model/surely.dae"), animation("rigged_model/surely.dae", &model), animator(&animation) {
     App::setTitle("cgintro"); // Set title
     App::setVSync(true); // Limit framerate
 
@@ -15,39 +16,6 @@ MainApp::MainApp() : App(800, 600), animator(nullptr) {
     shaderProgram.set("view", coolCamera.view());
     shaderProgram.set("projection", coolCamera.projection());
 
-    // Load the FBX mesh
-    mesh.load("rigged_model/surely.dae"); // Replace with your FBX model path
-
-    // Ensure the scene is loaded
-    const aiScene* scene = mesh.getScene();
-    if (!scene) {
-        std::cerr << "Failed to load the scene." << std::endl;
-        return;
-    }
-
-    std::cerr << "Scene loaded successfully" << std::endl;
-
-    // Initialize the animator
-    if (scene->HasAnimations()) {
-        const aiAnimation* animation = scene->mAnimations[0];
-        const aiNode* rootNode = scene->mRootNode;
-        if (!animation) {
-            std::cerr << "No animation found in the scene." << std::endl;
-            return;
-        }
-        if (!rootNode) {
-            std::cerr << "No root node found in the scene." << std::endl;
-            return;
-        }
-
-        animator = std::make_unique<Animator>(animation, rootNode);
-    } else {
-        std::cerr << "No animation data found in the model." << std::endl;
-    }
-
-    for (int i = 0; i < 100; i++) {
-        shaderProgram.set("uBones[" + std::to_string(i) + "]", glm::mat4(1.0f));
-    }
 
     lightDir = glm::vec3(1.0f);
 }
@@ -70,19 +38,13 @@ void MainApp::render() {
         shaderProgram.set("projection", coolCamera.projection());
     }
 
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     shaderProgram.bind();
 
     // Update animation
-    if (animator != nullptr) {
-        animator->UpdateAnimation(delta);
-        auto transforms = animator->GetFinalBoneMatrices();
-        for (int i = 0; i < transforms.size(); ++i) {
-            shaderProgram.set("uBones[" + std::to_string(i) + "]", transforms[i]);
-        }
-    }
-
+    model.Draw(shaderProgram);
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, 1.0f, 0.0f));
     model = glm::rotate(model, glm::radians(270.0f), glm::vec3(1.0f, 0.0f, 0.0f));
