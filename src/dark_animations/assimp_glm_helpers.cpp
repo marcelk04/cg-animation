@@ -1,6 +1,5 @@
 #include "assimp_glm_helpers.hpp"
-
- inline glm::mat4 AssimpGLMHelpers::ConvertMatrixToGLMFormat(const aiMatrix4x4 &from) {
+glm::mat4 AssimpGLMHelpers::ConvertMatrixToGLMFormat(const aiMatrix4x4 &from) {
      glm::mat4 to;
     //the a,b,c,d in assimp is the row ; the 1,2,3,4 is the column
     to[0][0] = from.a1; to[1][0] = from.a2; to[2][0] = from.a3; to[3][0] = from.a4;
@@ -10,10 +9,10 @@
     return to;
 }
 
-inline glm::vec3 AssimpGLMHelpers::GetGLMVec(const aiVector3D &vec) {
+glm::vec3 AssimpGLMHelpers::GetGLMVec(const aiVector3D &vec) {
     return glm::vec3(vec.x, vec.y, vec.z);
 }
 
-inline glm::quat AssimpGLMHelpers::GetGLMQuat(const aiQuaternion &pOrientation) {
+glm::quat AssimpGLMHelpers::GetGLMQuat(const aiQuaternion &pOrientation) {
     return glm::quat(pOrientation.w, pOrientation.x, pOrientation.y, pOrientation.z);
 }

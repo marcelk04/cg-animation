@@ -8,6 +8,7 @@
 #include <functional>
 #include "framework/mesh.hpp"
 #include "model_animation.hpp"
+#include "assimp_glm_helpers.hpp"
 
 struct AssimpNodeData
 {
