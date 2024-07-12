@@ -1,12 +1,15 @@
 #pragma once
 
+#include "gl/buffer.hpp"
+#include "gl/vertexarray.hpp"
+
 #include <glm/glm.hpp>
+#include <assimp/scene.h>
+#include <assimp/Importer.hpp>
+
 #include <string>
 #include <vector>
 #include <map>
-#include <assimp/scene.h>
-#include "gl/buffer.hpp"
-#include "gl/vertexarray.hpp"
 
 struct BoneInfo {
     int id;
@@ -61,4 +64,6 @@ private:
         float currentTime = 0.0f;
     };
     AnimationData animationData;
+
+    static Assimp::Importer s_Importer;
 };

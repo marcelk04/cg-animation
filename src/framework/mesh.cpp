@@ -72,11 +72,11 @@ void Mesh::load(const std::vector<VertexPCNT>& vertices, const std::vector<unsig
 }
 
 void Mesh::load(const std::string& filepath) {
-    Assimp::Importer importer;
-    scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+    //Assimp::Importer importer;
+    scene = s_Importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-        std::cerr << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
+        std::cerr << "ERROR::ASSIMP::" << s_Importer.GetErrorString() << std::endl;
         scene = nullptr; // Ensure scene is null if loading failed
         return;
     }
@@ -164,3 +164,5 @@ glm::mat4 Mesh::convertMatrixToGLMFormat(const aiMatrix4x4& from) {
     to[3][0] = from.a4; to[3][1] = from.b4; to[3][2] = from.c4; to[3][3] = from.d4;
     return to;
 }
+
+Assimp::Importer Mesh::s_Importer;

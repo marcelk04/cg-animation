@@ -9,8 +9,14 @@ MainApp::MainApp() : App(800, 600), animator(nullptr) {
     App::setTitle("cgintro"); // Set title
     App::setVSync(true); // Limit framerate
 
+    // Load shaders
+    shaderProgram.load("assimpshader.vert", "assimpshader.frag");
+    shaderProgram.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
+    shaderProgram.set("view", coolCamera.view());
+    shaderProgram.set("projection", coolCamera.projection());
+
     // Load the FBX mesh
-    mesh.load("/home/timnogga/CLionProjects/cg-animation/rigged_model/surely.dae"); // Replace with your FBX model path
+    mesh.load("rigged_model/surely.dae"); // Replace with your FBX model path
 
     // Ensure the scene is loaded
     const aiScene* scene = mesh.getScene();
@@ -33,26 +39,17 @@ MainApp::MainApp() : App(800, 600), animator(nullptr) {
             std::cerr << "No root node found in the scene." << std::endl;
             return;
         }
-        animator = new Animator(animation, rootNode);
+
+        animator = std::make_unique<Animator>(animation, rootNode);
     } else {
         std::cerr << "No animation data found in the model." << std::endl;
     }
-
-    // Load shaders
-    shaderProgram.load("assimpshader.vert", "assimpshader.frag");
-    shaderProgram.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
-    shaderProgram.set("view", coolCamera.view());
-    shaderProgram.set("projection", coolCamera.projection());
 
     for (int i = 0; i < 100; i++) {
         shaderProgram.set("uBones[" + std::to_string(i) + "]", glm::mat4(1.0f));
     }
 
     lightDir = glm::vec3(1.0f);
-}
-
-MainApp::~MainApp() {
-    delete animator;
 }
 
 
@@ -78,7 +75,7 @@ void MainApp::render() {
     shaderProgram.bind();
 
     // Update animation
-    if (animator) {
+    if (animator != nullptr) {
         animator->UpdateAnimation(delta);
         auto transforms = animator->GetFinalBoneMatrices();
         for (int i = 0; i < transforms.size(); ++i) {

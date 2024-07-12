@@ -32,7 +32,7 @@ void Animator::UpdateAnimation(float dt) {
     CalculateBoneTransform(m_RootNode, glm::mat4(1.0f), m_CurrentTime);
 }
 void Animator::CalculateBoneTransform(const aiNode* node, glm::mat4 parentTransform, float animationTime) {
-    std::string nodeName(node->mName.data);
+    std::string nodeName(node->mName.C_Str());
     glm::mat4 nodeTransform = ConvertMatrixToGLMFormat(node->mTransformation);
 
     const aiNodeAnim* nodeAnim = FindNodeAnim(m_CurrentAnimation, nodeName);
@@ -74,7 +74,7 @@ glm::mat4 Animator::ConvertMatrixToGLMFormat(const aiMatrix4x4& from) {
 const aiNodeAnim* Animator::FindNodeAnim(const aiAnimation* animation, const std::string& nodeName) {
     for (unsigned int i = 0; i < animation->mNumChannels; i++) {
         const aiNodeAnim* nodeAnim = animation->mChannels[i];
-        if (std::string(nodeAnim->mNodeName.data) == nodeName) {
+        if (std::strcmp(nodeAnim->mNodeName.C_Str(), nodeName.c_str()) == 0) {
             return nodeAnim;
         }
     }

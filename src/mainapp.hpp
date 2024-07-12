@@ -1,7 +1,10 @@
 #pragma once
 
 #include <glm/glm.hpp>
+
 #include <vector>
+#include <memory>
+
 #include "movingcamera.hpp"
 #include "framework/app.hpp"
 #include "framework/camera.hpp"
@@ -14,7 +17,6 @@ using namespace glm;
 class MainApp : public App {
 public:
     MainApp();
-    ~MainApp();
 
 protected:
     void init() override;
@@ -35,5 +37,5 @@ private:
     float t = 0;
     glm::vec3 lightDir;
 
-    Animator* animator;  // Animator instance
+    std::shared_ptr<Animator> animator;  // Animator instance
 };
