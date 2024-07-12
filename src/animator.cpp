@@ -13,11 +13,7 @@ void Animator::UpdateAnimation(float dt) {
         std::cerr << "ERROR: Animation or root node is null" << std::endl;
         return;
     }
-    if (!m_CurrentAnimation->mTicksPerSecond ) {
-        std::cerr << "ERROR: m_CurrentAnimation is null" << std::endl;
-    } else {
-        std::cerr << "Ticks per second: " << m_CurrentAnimation->mTicksPerSecond << std::endl;
-    }
+
 
     float ticksPerSecond = (m_CurrentAnimation->mTicksPerSecond != 0)
                            ? m_CurrentAnimation->mTicksPerSecond

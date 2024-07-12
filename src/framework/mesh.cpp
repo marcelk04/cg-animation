@@ -93,7 +93,7 @@ void Mesh::load(const std::string& filepath) {
 
     std::cout << "Number of meshes: " << scene->mNumMeshes << std::endl;
     int offset = 0;
-    for (unsigned int m = 0; m < scene->mNumMeshes; ++m) {
+    for (unsigned int m = 2; m < scene->mNumMeshes; ++m) {
         aiMesh* mesh = scene->mMeshes[m];
         std::cout << "number of vertices, indices and bones: " << mesh->mNumVertices << " " << mesh->mNumFaces * 3 << " " << mesh->mNumBones << std::endl;
 

@@ -4,7 +4,7 @@
 #include <vector>
 #include <map>
 #include <string>
-#include "mesh.hpp"  // Include mesh.hpp to use the BoneInfo struct
+#include "mesh.hpp"
 
 class Animator {
 public:
