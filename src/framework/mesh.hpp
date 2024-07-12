@@ -14,7 +14,6 @@
 struct BoneInfo {
     int id;
     glm::mat4 BoneOffset;
-    glm::mat4 FinalTransformation;
 };
 
 class Mesh {
