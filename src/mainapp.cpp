@@ -10,7 +10,7 @@
 
 #include <iostream>
 
-MainApp::MainApp() : App(800, 600),  model(Common::absolutePath("rigged_model/surely.dae")), animation(Common::absolutePath("rigged_model/surely.dae"), &model), animator(&animation) {
+MainApp::MainApp() : App(800, 600),  model(Common::absolutePath("rigged_model/dancing_vampire.dae")), animation(Common::absolutePath("rigged_model/dancing_vampire.dae"), &model), animator(&animation) {
     App::setTitle("cgintro"); // Set title
     App::setVSync(true); // Limit framerate
 
@@ -51,9 +51,9 @@ void MainApp::render() {
     
     // Set model matrix
     glm::mat4 modelMat = glm::mat4(1.0f);
-    modelMat = glm::translate(modelMat, glm::vec3(0.0f, 1.0f, 0.0f));
-    modelMat = glm::rotate(modelMat, glm::radians(270.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    modelMat = glm::scale(modelMat, glm::vec3(0.2f, 0.2f, 0.2f));
+//    modelMat = glm::translate(modelMat, glm::vec3(0.0f, 1.0f, 0.0f));
+//    modelMat = glm::rotate(modelMat, glm::radians(270.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+//    modelMat = glm::scale(modelMat, glm::vec3(0.2f, 0.2f, 0.2f));
 
     shaderProgram.set("model", modelMat);
 
@@ -67,7 +67,7 @@ void MainApp::render() {
 }
 
 void MainApp::keyCallback(Key key, Action action) {
-    float cameraSpeed = 10.0f;
+    float cameraSpeed = 50.0f;
 
     if (action != Action::REPEAT) return;
 
