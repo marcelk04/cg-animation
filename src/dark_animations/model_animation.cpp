@@ -40,6 +40,7 @@ void Model::processNode(aiNode *node, const aiScene *scene)
     // after we've processed all of the meshes (if any) we then recursively process each of the children nodes
     for(unsigned int i = 0; i < node->mNumChildren; i++)
     {
+        //std::cout << i << " " << node->mNumChildren << std::endl;
         processNode(node->mChildren[i], scene);
     }
 
@@ -66,8 +67,8 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
         {
             Mesh::VertexPCNT vertex;
             for (int j=0; j<4; j++) {
-                vertex.boneIDs[i] = -1;
-                vertex.weights[i] = 0.0f;
+                vertex.boneIDs[j] = -1;
+                vertex.weights[j] = 0.0f;
             }
             vertex.position = AssimpGLMHelpers::GetGLMVec(mesh->mVertices[i]);
             vertex.normal = AssimpGLMHelpers::GetGLMVec(mesh->mNormals[i]);

@@ -56,12 +56,12 @@ void Mesh::load(const std::vector<VertexPCNT>& vertices, const std::vector<unsig
     vbo.bind(Buffer::Type::ARRAY_BUFFER);
     ebo.bind(Buffer::Type::INDEX_BUFFER);
     size_t stride = sizeof(VertexPCNT);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*) (0 * sizeof(float)));
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (void*) (3 * sizeof(float)));
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride, (void*) (5 * sizeof(float)));
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, stride, (void*) (8 * sizeof(float)));
-    glVertexAttribPointer(4, 4, GL_INT, GL_FALSE, stride, (void*) (11 * sizeof(float)));
-    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, stride, (void*) (15 * sizeof(float)));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)offsetof(VertexPCNT, position));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (void*)offsetof(VertexPCNT, texCoord));
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride, (void*)offsetof(VertexPCNT, normal));
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, stride, (void*)offsetof(VertexPCNT, tangent));
+    glVertexAttribPointer(4, 4, GL_INT, GL_FALSE, stride, (void*)offsetof(VertexPCNT, boneIDs));
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, stride, (void*)offsetof(VertexPCNT, weights));
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);

@@ -10,7 +10,7 @@
 
 #include <iostream>
 
-MainApp::MainApp() : App(800, 600),  model(Common::absolutePath("rigged_model/surely.dae")), animation("rigged_model/surely.dae", &model), animator(&animation) {
+MainApp::MainApp() : App(800, 600),  model(Common::absolutePath("rigged_model/surely.dae")), animation(Common::absolutePath("rigged_model/surely.dae"), &model), animator(&animation) {
     App::setTitle("cgintro"); // Set title
     App::setVSync(true); // Limit framerate
 
@@ -45,17 +45,25 @@ void MainApp::render() {
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    animator.UpdateAnimation(delta);
+
     shaderProgram.bind();
+    
+    // Set model matrix
+    glm::mat4 modelMat = glm::mat4(1.0f);
+    modelMat = glm::translate(modelMat, glm::vec3(0.0f, 1.0f, 0.0f));
+    modelMat = glm::rotate(modelMat, glm::radians(270.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    modelMat = glm::scale(modelMat, glm::vec3(0.2f, 0.2f, 0.2f));
+
+    shaderProgram.set("model", modelMat);
 
     // Update animation
-    model.Draw(shaderProgram);
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0.0f, 1.0f, 0.0f));
-    model = glm::rotate(model, glm::radians(270.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
 
-    shaderProgram.set("model", model);
-    mesh.draw();
+    auto transforms = animator.GetFinalBoneMatrices();
+	for (int i = 0; i < transforms.size(); ++i)
+		shaderProgram.set("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
+
+    model.Draw(shaderProgram);
 }
 
 void MainApp::keyCallback(Key key, Action action) {
