@@ -14,17 +14,16 @@ class Animator {
 public:
     Animator(Animation* animation);
 
-    void UpdateAnimation(float dt);
+    void updateAnimation(float dt);
+    void playAnimation(Animation* animation);
 
-    void PlayAnimation(Animation* pAnimation);
-
-    void CalculateBoneTransform(const AssimpNodeData* node, glm::mat4 parentTransform);
+    void calculateBoneTransform(const AssimpNodeData* node, const glm::mat4& parentTransform);
     
-    std::vector<glm::mat4> GetFinalBoneMatrices() { return m_FinalBoneMatrices; }
+    const std::vector<glm::mat4>& getFinalBoneMatrices() const { return m_FinalBoneMatrices; }
 
 private:
     std::vector<glm::mat4> m_FinalBoneMatrices;
     Animation* m_CurrentAnimation;
+
     float m_CurrentTime;
-    float m_DeltaTime;
 };

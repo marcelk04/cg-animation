@@ -14,7 +14,6 @@
 struct AssimpNodeData {
     glm::mat4 transformation;
     std::string name;
-    int childrenCount;
     std::vector<AssimpNodeData> children;
 };
 
@@ -23,18 +22,18 @@ public:
     Animation() = default;
     Animation(const std::string& animationPath, Model* model);
 
-    Bone* FindBone(const std::string& name);
+    Bone* findBone(const std::string& name);
 
-    float GetTicksPerSecond() { return m_TicksPerSecond; }
-    float GetDuration() { return m_Duration;}
-    const AssimpNodeData& GetRootNode() { return m_RootNode; }
-    const std::map<std::string,BoneInfo>& GetBoneIDMap() { return m_BoneInfoMap; }
+    float getTicksPerSecond() const { return m_TicksPerSecond; }
+    float getDuration() const { return m_Duration;}
+    const AssimpNodeData& getRootNode() const { return m_RootNode; }
+    const std::map<std::string,BoneInfo>& getBoneIDMap() const { return m_BoneInfoMap; }
 
 private:
-    void ReadMissingBones(const aiAnimation* animation, Model& model);
+    void readMissingBones(const aiAnimation* animation, Model& model);
+    void readHierarchyData(AssimpNodeData& dest, const aiNode* src) const;
 
-    void ReadHierarchyData(AssimpNodeData& dest, const aiNode* src);
-    
+private:
     float m_Duration;
     int m_TicksPerSecond;
     std::vector<Bone> m_Bones;

@@ -32,7 +32,6 @@ void MainApp::init() {
 }
 
 void MainApp::buildImGui() {
-    // Custom ImGui statistics window
     ImGui::StatisticsWindow(delta, resolution);
 }
 
@@ -41,10 +40,9 @@ void MainApp::render() {
         shaderProgram.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
     }
 
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    animator.UpdateAnimation(delta);
+    animator.updateAnimation(delta);
 
     shaderProgram.bind();
     
@@ -58,13 +56,13 @@ void MainApp::render() {
 
     // Update animation
 
-    const auto& transforms = animator.GetFinalBoneMatrices();
+    const auto& transforms = animator.getFinalBoneMatrices();
     
 	for (int i = 0; i < transforms.size(); i++) {
 		shaderProgram.set("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
     }
 
-    model.Draw(shaderProgram);
+    model.draw(shaderProgram);
 }
 
 void MainApp::keyCallback(Key key, Action action) {

@@ -25,36 +25,28 @@ struct BoneInfo {
 
 class Model {
 public:
-    // model data
-    std::vector<Mesh> meshes;
-
-
-    // constructor, expects a filepath to a 3D model.
     Model(const std::string& path);
 
-    // draws the model, and thus all its meshes
-    void Draw(Program& program);
+    void draw(Program& program);
 
-    auto& GetBoneInfoMap() { return m_BoneInfoMap; }
-    int& GetBoneCount() { return m_BoneCounter; }
+    std::map<std::string, BoneInfo>& getBoneInfoMap() { return m_BoneInfoMap; }
+    int& getBoneCount() { return m_BoneCounter; }
 
 private:
-    std::map<std::string, BoneInfo> m_BoneInfoMap;
-    int m_BoneCounter = 0;
-
-    // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
     void loadModel(const std::string& path);
 
-    // processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
     void processNode(aiNode* node, const aiScene* scene);
-
-    void SetVertexBoneDataToDefault(Mesh::VertexPCNTB& vertex);
-
     Mesh processMesh(aiMesh* mesh, const aiScene* scene);
 
-    void SetVertexBoneData(Mesh::VertexPCNTB& vertex, int boneID, float weight);
+    void extractBoneWeightForVertices(std::vector<Mesh::VertexPCNTB>& vertices, aiMesh* mesh, const aiScene* scene);
 
-    void ExtractBoneWeightForVertices(std::vector<Mesh::VertexPCNTB>& vertices, aiMesh* mesh, const aiScene* scene);
+    void setVertexBoneDataToDefault(Mesh::VertexPCNTB& vertex) const;
+    void setVertexBoneData(Mesh::VertexPCNTB& vertex, int boneID, float weight) const;
+
+private:
+    std::vector<Mesh> m_Meshes;
+    std::map<std::string, BoneInfo> m_BoneInfoMap;
+    int m_BoneCounter = 0;
 
   /*  unsigned int TextureFromFile(const char* path, const string& directory, bool gamma = false)
     {

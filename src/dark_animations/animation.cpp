@@ -2,8 +2,7 @@
 
 #include "framework/common.hpp"
 
-Animation::Animation(const std::string& animationPath, Model* model)
-{
+Animation::Animation(const std::string& animationPath, Model* model) {
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(animationPath, aiProcess_Triangulate);
 
@@ -18,16 +17,13 @@ Animation::Animation(const std::string& animationPath, Model* model)
 
     globalTransformation = globalTransformation.Inverse();
 
-    ReadHierarchyData(m_RootNode, scene->mRootNode);
-    ReadMissingBones(animation, *model);
+    readHierarchyData(m_RootNode, scene->mRootNode);
+    readMissingBones(animation, *model);
 }
 
-Bone *Animation::FindBone(const std::string &name)
-{
-    for (auto& bone : m_Bones)
-    {
-        if (bone.GetBoneName() == name)
-        {
+Bone* Animation::findBone(const std::string& name) {
+    for (Bone& bone : m_Bones) {
+        if (bone.getBoneName() == name) {
             return &bone;
         }
     }
@@ -35,42 +31,40 @@ Bone *Animation::FindBone(const std::string &name)
     return nullptr;
 }
 
-void Animation::ReadMissingBones(const aiAnimation* animation, Model& model)
-{
+void Animation::readMissingBones(const aiAnimation* animation, Model& model) {
     int size = animation->mNumChannels;
 
-    auto& boneInfoMap = model.GetBoneInfoMap();//getting m_BoneInfoMap from Model class
-    int& boneCount = model.GetBoneCount(); //getting the m_BoneCounter from Model class
+    auto& boneInfoMap = model.getBoneInfoMap();
+    int& boneCount = model.getBoneCount();
 
-    //reading channels(bones engaged in an animation and their keyframes)
-    for (int i = 0; i < size; i++)
-    {
-        auto channel = animation->mChannels[i];
-        std::string boneName = channel->mNodeName.data;
+    //reading channels (bones engaged in an animation and their keyframes)
+    for (int i = 0; i < size; i++) {
+        const aiNodeAnim* channel = animation->mChannels[i];
+        const std::string& boneName = channel->mNodeName.data;
 
-        if (boneInfoMap.find(boneName) == boneInfoMap.end())
-        {
+        // if bone doesn't exist yet
+        if (boneInfoMap.find(boneName) == boneInfoMap.end()) {
             boneInfoMap[boneName].id = boneCount;
             boneCount++;
         }
+
         m_Bones.push_back(Bone(channel->mNodeName.data, boneInfoMap[channel->mNodeName.data].id, channel));
     }
 
     m_BoneInfoMap = boneInfoMap;
 }
 
-void Animation::ReadHierarchyData(AssimpNodeData &dest, const aiNode *src)
-{
+void Animation::readHierarchyData(AssimpNodeData &dest, const aiNode *src) const {
     assert(src);
 
     dest.name = src->mName.data;
     dest.transformation = Common::getGLMMat(src->mTransformation);
-    dest.childrenCount = src->mNumChildren;
 
-    for (int i = 0; i < src->mNumChildren; i++)
-    {
+    for (int i = 0; i < src->mNumChildren; i++) {
         AssimpNodeData newData;
-        ReadHierarchyData(newData, src->mChildren[i]);
+
+        readHierarchyData(newData, src->mChildren[i]);
+
         dest.children.push_back(newData);
     }
 }
