@@ -1,6 +1,5 @@
 #pragma once
 
-#include "dark_animations/assimp_glm_helpers.hpp"
 #include "framework/mesh.hpp"
 #include "framework/gl/program.hpp"
 

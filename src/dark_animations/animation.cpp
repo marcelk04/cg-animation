@@ -1,4 +1,7 @@
 #include "animation.hpp"
+
+#include "framework/common.hpp"
+
 Animation::Animation(const std::string& animationPath, Model* model)
 {
     Assimp::Importer importer;
@@ -61,7 +64,7 @@ void Animation::ReadHierarchyData(AssimpNodeData &dest, const aiNode *src)
     assert(src);
 
     dest.name = src->mName.data;
-    dest.transformation = AssimpGLMHelpers::ConvertMatrixToGLMFormat(src->mTransformation);
+    dest.transformation = Common::getGLMMat(src->mTransformation);
     dest.childrenCount = src->mNumChildren;
 
     for (int i = 0; i < src->mNumChildren; i++)

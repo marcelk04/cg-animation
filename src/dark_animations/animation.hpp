@@ -1,6 +1,5 @@
 #pragma once
 
-#include "dark_animations/assimp_glm_helpers.hpp"
 #include "dark_animations/bone.hpp"
 #include "dark_animations/model_animation.hpp"
 #include "framework/mesh.hpp"

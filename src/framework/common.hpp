@@ -3,6 +3,10 @@
 #include "framework/mesh.hpp"
 
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <assimp/matrix4x4.h>
+#include <assimp/vector3.h>
+#include <assimp/quaternion.h>
 
 #include <string>
 #include <vector>
@@ -17,6 +21,11 @@ namespace Common {
 
     template <class T, typename... Rest>
     void hash_combine(std::size_t& seed, const T& v, const Rest&... rest);
+
+
+    glm::mat4 getGLMMat(const aiMatrix4x4& from);
+    glm::vec3 getGLMVec(const aiVector3D& vec);
+    glm::quat getGLMQuat(const aiQuaternion& pOrientation);
 
 }
 
