@@ -1,16 +1,13 @@
 #include "mainapp.hpp"
-
 #include "framework/imguiutil.hpp"
 #include "framework/common.hpp"
-#include "dark_animations/animator.hpp"
-
 #include <glad/glad.h>
 #include <imgui.h>
 #include <glm/gtc/type_ptr.hpp>
-
+#include <glm/gtx/string_cast.hpp>
 #include <iostream>
 
-MainApp::MainApp() : App(800, 600),  model(Common::absolutePath("rigged_model/dancing_vampire.dae")), animation(Common::absolutePath("rigged_model/dancing_vampire.dae"), &model), animator(&animation) {
+MainApp::MainApp() : App(800, 600), model(Common::absolutePath("rigged_model/ultrarigged.dae")), animation(Common::absolutePath("rigged_model/ultrarigged.dae"), &model), animator(&animation) {
     App::setTitle("cgintro"); // Set title
     App::setVSync(true); // Limit framerate
 
@@ -20,14 +17,48 @@ MainApp::MainApp() : App(800, 600),  model(Common::absolutePath("rigged_model/da
     shaderProgram.set("view", coolCamera.view());
     shaderProgram.set("projection", coolCamera.projection());
 
-
     lightDir = glm::vec3(1.0f);
 }
 
+MainApp::~MainApp() {
+    Mix_FreeMusic(music);
+    Mix_CloseAudio();
+    SDL_Quit();
+}
 
 void MainApp::init() {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
+
+    // Initialize SDL for audio
+    if (SDL_Init(SDL_INIT_AUDIO) < 0) {
+        std::cerr << "Failed to initialize SDL: " << SDL_GetError() << std::endl;
+        return;
+    }
+
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+        std::cerr << "Failed to initialize SDL_mixer: " << Mix_GetError() << std::endl;
+        SDL_Quit();
+        return;
+    }
+
+    // Load music
+    music = Mix_LoadMUS(Common::absolutePath("/home/timnogga/Downloads/rick.mp3").c_str());
+    if (!music) {
+        std::cerr << "Failed to load music: " << Mix_GetError() << std::endl;
+        Mix_CloseAudio();
+        SDL_Quit();
+        return;
+    }
+
+    // Play music
+    if (Mix_PlayMusic(music, -1) == -1) {
+        std::cerr << "Failed to play music: " << Mix_GetError() << std::endl;
+        Mix_FreeMusic(music);
+        Mix_CloseAudio();
+        SDL_Quit();
+        return;
+    }
 }
 
 void MainApp::buildImGui() {
@@ -42,26 +73,32 @@ void MainApp::render() {
         shaderProgram.set("projection", coolCamera.projection());
     }
 
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     animator.UpdateAnimation(delta);
 
     shaderProgram.bind();
-    
+
     // Set model matrix
     glm::mat4 modelMat = glm::mat4(1.0f);
-//    modelMat = glm::translate(modelMat, glm::vec3(0.0f, 1.0f, 0.0f));
-//    modelMat = glm::rotate(modelMat, glm::radians(270.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-//    modelMat = glm::scale(modelMat, glm::vec3(0.2f, 0.2f, 0.2f));
+    modelMat = glm::translate(modelMat, glm::vec3(0.0f, 1.0f, 0.0f));
+    modelMat = glm::rotate(modelMat, glm::radians(270.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    modelMat = glm::scale(modelMat, glm::vec3(0.2f, 0.2f, 0.2f));
 
     shaderProgram.set("model", modelMat);
 
-    // Update animation
-
     auto transforms = animator.GetFinalBoneMatrices();
-	for (int i = 0; i < transforms.size(); ++i)
-		shaderProgram.set("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
+
+    // Ensure the previousTransforms vector is the same size as transforms
+    if (previousTransforms.size() != transforms.size()) {
+        previousTransforms.resize(transforms.size(), glm::mat4(1.0f));
+    }
+
+    for (int i = 0; i < transforms.size(); ++i) {
+        if (previousTransforms[i] != transforms[i]) {
+            previousTransforms[i] = transforms[i];
+        }
+        shaderProgram.set("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
+    }
 
     model.Draw(shaderProgram);
 }
@@ -95,27 +132,8 @@ void MainApp::scrollCallback(float amount) {
     coolCamera.zoom(0.1f * amount);
 }
 
-void MainApp::moveCallback(const vec2& movement, bool leftButton, bool rightButton, bool middleButton) {
+void MainApp::moveCallback(const glm::vec2& movement, bool leftButton, bool rightButton, bool middleButton) {
     if (leftButton || rightButton || middleButton) {
         coolCamera.rotate(0.002f * movement);
     }
 }
-
-/*
-glm::vec3 MainApp::deCasteljau(const std::vector<glm::vec3>& spline, float t) {
-    std::vector<glm::vec3> points(spline.size());
-
-    for (int i = 0; i < spline.size(); i++) {
-        points[i] = glm::vec3(spline[i]);
-    }
-
-    int n = points.size();
-    for (int j = 1; j < n; j++) {
-        for (int i = 0; i < n - j; i++) {
-            points[i] = (1 - t) * points[i] + t * points[i + 1]);
-        }
-    }
-
-    return points[0];
-}
-*/

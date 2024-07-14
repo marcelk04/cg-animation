@@ -1,4 +1,6 @@
 #include "model_animation.hpp"
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/string_cast.hpp>
 
 Model::Model(const std::string &path)
 {
@@ -14,6 +16,7 @@ void Model::Draw(Program &program)
 
 void Model::loadModel(const std::string &path)
 {
+    std::cout << "Loading model: " << path << std::endl;
     // read file via ASSIMP
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace);
@@ -23,8 +26,11 @@ void Model::loadModel(const std::string &path)
         cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << endl;
         return;
     }
+    std::cout << "Model loaded with " << scene->mNumMeshes << " meshes in the scene." << std::endl;
+
     // process ASSIMP's root node recursively
     processNode(scene->mRootNode, scene);
+
 }
 
 void Model::processNode(aiNode *node, const aiScene *scene)
@@ -58,6 +64,8 @@ void Model::SetVertexBoneData(Mesh::VertexPCNT &vertex, int boneID, float weight
     }
 }
 
+
+
 Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     {
         vector<Mesh::VertexPCNT> vertices;
@@ -85,6 +93,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 
             vertices.push_back(vertex);
         }
+        std::cout << "Loaded " << vertices.size() << " vertices for mesh." << std::endl; // Debug print
         for (unsigned int i = 0; i < mesh->mNumFaces; i++)
         {
             aiFace face = mesh->mFaces[i];
@@ -122,6 +131,9 @@ void Model::ExtractBoneWeightForVertices(std::vector<Mesh::VertexPCNT> &vertices
             boneID = boneInfoMap[boneName].id;
         }
         assert(boneID != -1);
+
+        std::cout << "Processing bone: " << boneName << " with ID: " << boneID << std::endl;
+
         auto weights = mesh->mBones[boneIndex]->mWeights;
         int numWeights = mesh->mBones[boneIndex]->mNumWeights;
 
@@ -129,9 +141,29 @@ void Model::ExtractBoneWeightForVertices(std::vector<Mesh::VertexPCNT> &vertices
         {
             int vertexId = weights[weightIndex].mVertexId;
             float weight = weights[weightIndex].mWeight;
-            assert(vertexId <= vertices.size());
+            assert(vertexId < vertices.size());
+
+            std::cout << "Vertex ID: " << vertexId << ", Weight: " << weight << ", Bone ID: " << boneID << std::endl;
+
             SetVertexBoneData(vertices[vertexId], boneID, weight);
         }
     }
+
+    // Debugging output for vertices after bone weights have been assigned
+    for (const auto& vertex : vertices) {
+        std::cout << "Vertex Position: " << glm::to_string(vertex.position) << std::endl;
+        std::cout << "Bone IDs: ["
+                  << vertex.boneIDs[0] << ", "
+                  << vertex.boneIDs[1] << ", "
+                  << vertex.boneIDs[2] << ", "
+                  << vertex.boneIDs[3] << "]" << std::endl;
+        std::cout << "Weights: ["
+                  << vertex.weights[0] << ", "
+                  << vertex.weights[1] << ", "
+                  << vertex.weights[2] << ", "
+                  << vertex.weights[3] << "]" << std::endl;
+    }
 }
+
+
 

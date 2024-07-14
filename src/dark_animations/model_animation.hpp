@@ -32,7 +32,6 @@ public:
     // model data
     vector<Mesh>  meshes;
 
-
     // constructor, expects a filepath to a 3D model.
     Model(string const &path);
 
@@ -47,6 +46,7 @@ private:
 
     std::map<string, BoneInfo> m_BoneInfoMap;
     int m_BoneCounter = 0;
+
 
     // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
     void loadModel(string const &path);
@@ -69,6 +69,10 @@ private:
 
 
     void SetVertexBoneData(Mesh::VertexPCNT& vertex, int boneID, float weight);
+    //getter for vertices
+
+
+
 
 
     void ExtractBoneWeightForVertices(std::vector<Mesh::VertexPCNT>& vertices, aiMesh* mesh, const aiScene* scene);

@@ -34,6 +34,9 @@ public:
         int boneIDs[4];
         float weights[4];
     };
+    const std::vector<Mesh::VertexPCNT>& getVertices() const {
+        return vertices;
+    }
 
     void load(const std::vector<float>& vertices, const std::vector<unsigned int>& indices);
     void load(const std::vector<VertexPCN>& vertices, const std::vector<unsigned int>& indices);
@@ -52,6 +55,7 @@ private:
     VertexArray vao;
     Buffer vbo;
     Buffer ebo;
+    std::vector<VertexPCNT> vertices;
 
     std::map<std::string, BoneInfo> boneInfoMap;
     int boneCount = 0;
