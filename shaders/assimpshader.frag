@@ -2,9 +2,6 @@
 out vec4 FragColor;
 
 in vec2 TexCoord;
-in vec3 FragPos;
-in vec3 Normal;
-in vec3 Tangent;
 
 uniform sampler2D texture_diffuse1;
 

@@ -1,7 +1,8 @@
+#pragma once
 
-
-#ifndef MODEL_H
-#define MODEL_H
+#include "dark_animations/assimp_glm_helpers.hpp"
+#include "framework/mesh.hpp"
+#include "framework/gl/program.hpp"
 
 #include <glad/glad.h>
 
@@ -11,67 +12,50 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include "framework/mesh.hpp"
-#include "framework/gl/program.hpp"
-
 #include <string>
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include <map>
 #include <vector>
-#include "assimp_glm_helpers.hpp"
 
-using namespace std;
+struct BoneInfo {
+    int id;
+    glm::mat4 offset;
+};
 
-
-class Model
-{
-
+class Model {
 public:
     // model data
-    vector<Mesh>  meshes;
+    std::vector<Mesh> meshes;
 
 
     // constructor, expects a filepath to a 3D model.
-    Model(string const &path);
+    Model(const std::string& path);
 
     // draws the model, and thus all its meshes
-    void Draw(Program &program);
+    void Draw(Program& program);
 
     auto& GetBoneInfoMap() { return m_BoneInfoMap; }
     int& GetBoneCount() { return m_BoneCounter; }
 
-
 private:
-
-    std::map<string, BoneInfo> m_BoneInfoMap;
+    std::map<std::string, BoneInfo> m_BoneInfoMap;
     int m_BoneCounter = 0;
 
     // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
-    void loadModel(string const &path);
+    void loadModel(const std::string& path);
 
     // processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
-    void processNode(aiNode *node, const aiScene *scene);
+    void processNode(aiNode* node, const aiScene* scene);
 
-//    void SetVertexBoneDataToDefault(Vertex& vertex)
-//    {
-//        for (int i = 0; i < MAX_BONE_INFLUENCE; i++)
-//        {
-//            vertex.m_BoneIDs[i] = -1;
-//            vertex.m_Weights[i] = 0.0f;
-//        }
-//    }
-
+    void SetVertexBoneDataToDefault(Mesh::VertexPCNTB& vertex);
 
     Mesh processMesh(aiMesh* mesh, const aiScene* scene);
 
+    void SetVertexBoneData(Mesh::VertexPCNTB& vertex, int boneID, float weight);
 
-
-    void SetVertexBoneData(Mesh::VertexPCNT& vertex, int boneID, float weight);
-
-
-    void ExtractBoneWeightForVertices(std::vector<Mesh::VertexPCNT>& vertices, aiMesh* mesh, const aiScene* scene);
+    void ExtractBoneWeightForVertices(std::vector<Mesh::VertexPCNTB>& vertices, aiMesh* mesh, const aiScene* scene);
 
   /*  unsigned int TextureFromFile(const char* path, const string& directory, bool gamma = false)
     {
@@ -146,8 +130,4 @@ private:
         return textures;
     }*/
 };
-
-
-
-#endif
 

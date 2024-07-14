@@ -1,7 +1,12 @@
 #pragma once
 
+#include "framework/mesh.hpp"
+
+#include <glm/glm.hpp>
+
 #include <string>
 #include <vector>
+#include <iostream>
 
 namespace Common {
 
@@ -24,4 +29,40 @@ inline void Common::hash_combine(std::size_t& seed, const T& v, const Rest&... r
     std::hash<T> hasher;
     seed ^= hasher(v) + 0x9e3779b9 + (seed<<6) + (seed>>2);
     (hash_combine(seed, rest), ...);
+}
+
+inline std::ostream& operator<<(std::ostream& os, const glm::vec3& vec) {
+    os << "vec3(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
+    return os;
+}
+
+inline std::ostream& operator<<(std::ostream& os, const glm::vec2& vec) {
+    os << "vec2(" << vec.x << ", " << vec.y << ")";
+    return os;
+}
+
+inline std::ostream& operator<<(std::ostream& os, const Mesh::VertexPCNTB& vertex) {
+    os << "VertexPCNTB: { position: " << vertex.position << ", texCoord: " << vertex.texCoord << ", normal: " << vertex.normal << ", tangent: " << vertex.tangent << ", boneIDs: [";
+    for (int i = 0; i < 4; i++) {
+        os << vertex.boneIDs[i] << ", ";
+    }
+    os << "], weights: [";
+    for (int i = 0; i < 4; i++) {
+        os << vertex.weights[i] << ", ";
+    }
+    os << "] }";
+    return os;
+}
+
+inline std::ostream& operator<<(std::ostream& os, const glm::mat4& mat) {
+    os << "mat4(";
+    for (int i = 0; i < 4; i++) {
+        os << "[";
+        for (int j = 0; j < 4; j++) {
+            os << mat[i][j] << ", ";
+        }
+        os << "], ";
+    }
+    os << ")";
+    return os;
 }
