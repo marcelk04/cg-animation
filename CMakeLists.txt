@@ -3,32 +3,36 @@ cmake_minimum_required(VERSION 3.26)
 ####################################################################
 # Source files
 set(SRC
-    src/particlesystem.cpp  # Ensure this is included
-    src/main.cpp
-    src/mainapp.cpp
-    src/cinematic_engine/movingcamera.cpp
-    src/cinematic_engine/spline.cpp
-    src/cinematic_engine/cameracontroller.cpp
-    src/lightninggenerator.cpp
-    src/resourcemanager.cpp
-    src/renderer/renderobject.cpp
-    src/renderer/renderer.cpp
-    src/renderer/scene.cpp
-    src/renderer/light.cpp
-    src/framework/app.cpp
-    src/framework/camera.cpp
-    src/framework/common.cpp
-    src/framework/imguiutil.cpp
-    src/framework/mesh.cpp
-    src/framework/objparser.cpp
-    src/framework/series.hpp
-    src/framework/gl/buffer.cpp
-    src/framework/gl/framebuffer.cpp
-    src/framework/gl/program.cpp
-    src/framework/gl/query.cpp
-    src/framework/gl/shader.cpp
-    src/framework/gl/texture.cpp
-    src/framework/gl/vertexarray.cpp
+        src/particlesystem.cpp  # Ensure this is included
+        src/main.cpp
+        src/mainapp.cpp
+        src/cinematic_engine/movingcamera.cpp
+        src/cinematic_engine/spline.cpp
+        src/cinematic_engine/cameracontroller.cpp
+        src/lightninggenerator.cpp
+        src/resourcemanager.cpp
+        src/renderer/renderobject.cpp
+        src/renderer/renderer.cpp
+        src/renderer/scene.cpp
+        src/renderer/light.cpp
+        src/framework/app.cpp
+        src/framework/camera.cpp
+        src/framework/common.cpp
+        src/framework/imguiutil.cpp
+        src/framework/mesh.cpp
+        src/framework/objparser.cpp
+        src/framework/series.hpp
+        src/framework/gl/buffer.cpp
+        src/framework/gl/framebuffer.cpp
+        src/framework/gl/program.cpp
+        src/framework/gl/query.cpp
+        src/framework/gl/shader.cpp
+        src/framework/gl/texture.cpp
+        src/framework/gl/vertexarray.cpp
+        src/dark_animations/animation.cpp
+        src/dark_animations/animator.cpp
+        src/dark_animations/bone.cpp
+        src/dark_animations/model_animation.cpp
 )
 set(INCLUDE
         src/
@@ -165,6 +169,10 @@ add_library(stb_impl INTERFACE)
 target_compile_definitions(stb_impl INTERFACE STB_IMAGE_IMPLEMENTATION)
 target_include_directories(stb_impl INTERFACE ${stb_SOURCE_DIR})
 
+# Assimp
+find_package(assimp REQUIRED)
+include_directories(${ASSIMP_INCLUDE_DIRS})
+
 # Add executable
 add_executable(${PROJECT_NAME}
         ${SRC}
@@ -173,7 +181,7 @@ add_executable(${PROJECT_NAME}
 )
 target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE})
 
-target_link_libraries(${PROJECT_NAME} glad glfw glm imgui_glfw tinyobjloader stb_impl)
+target_link_libraries(${PROJECT_NAME} glad glfw glm imgui_glfw tinyobjloader stb_impl assimp)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_BINARY_DIR}/src/)
 
 configure_file("src/config.hpp.in" "src/config.hpp")

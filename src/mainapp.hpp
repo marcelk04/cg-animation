@@ -1,7 +1,9 @@
 #pragma once
 
 #include <glm/glm.hpp>
-using namespace glm;
+
+#include <vector>
+#include <memory>
 
 #include "cinematic_engine/movingcamera.hpp"
 #include "cinematic_engine/spline.hpp"
@@ -32,7 +34,6 @@ protected:
     void buildImGui() override;
     void render() override;
     void keyCallback(Key key, Action action) override;
-    // void clickCallback(Button button, Action action, Modifier modifier) override;
     void scrollCallback(float amount) override;
     void moveCallback(const vec2& movement, bool leftButton, bool rightButton, bool middleButton) override;
     void resizeCallback(const vec2& resolution) override;

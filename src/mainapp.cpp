@@ -1,8 +1,11 @@
 #include "mainapp.hpp"
 
+#include "framework/imguiutil.hpp"
+#include "framework/common.hpp"
+#include "dark_animations/animator.hpp"
+
 #include <glad/glad.h>
 #include <imgui.h>
-#include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 using namespace glm;
 
@@ -41,6 +44,7 @@ MainApp::MainApp()
     renderer.setScene(scene);
     renderer.updateCamUniforms();
 }
+
 
 void MainApp::init() {
     glDepthFunc(GL_LESS);
@@ -83,7 +87,7 @@ void MainApp::render() {
 }
 
 void MainApp::keyCallback(Key key, Action action) {
-    float cameraSpeed = 50.0f;
+    float cameraSpeed = 5.0f;
 
     if (action == Action::RELEASE) return;
 
@@ -184,3 +188,4 @@ void MainApp::createRenderObjects() {
     houseObj.setScale(1.0f);
     scene->addRenderObject(std::move(houseObj), texturedGeomNormalsId);
 }
+

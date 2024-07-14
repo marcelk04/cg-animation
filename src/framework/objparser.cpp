@@ -18,79 +18,79 @@ using namespace glm;
 
 ////////////////////// Obj loading without tangents //////////////////////
 
-/* Define comparison operator for use with std::unordered_map */
-bool operator==(const Mesh::VertexPCN& v1, const Mesh::VertexPCN& v2) {
-    return v1.position == v2.position && v1.texCoord == v2.texCoord && v1.normal == v2.normal;
-}
-
-/* Define hash function for use with std::unordered_map */
-template<>
-struct std::hash<Mesh::VertexPCN>
-{
-    std::size_t operator()(const Mesh::VertexPCN& vertex) const noexcept
-    {
-        size_t seed = 0;
-        Common::hash_combine(seed, vertex.position, vertex.texCoord, vertex.normal);
-        return seed;
-    }
-};
-
-void ObjParser::parse(const std::string& filepath, std::vector<Mesh::VertexPCN>& vertices, std::vector<unsigned int>& indices) {
-    // Parse OBJ file
-    std::string rawobj = Common::readFile(filepath);
-    tinyobj::ObjReader reader;
-    tinyobj::ObjReaderConfig reader_config;
-    reader_config.triangulate = true;
-    if (!reader.ParseFromString(rawobj, "", reader_config))
-        throw std::runtime_error("Failed to load OBJ file \"" + filepath + "\": " + reader.Error());
-    if (!reader.Warning().empty())
-        std::cout << "Warning loading OBJ file \"" << filepath << "\": " << reader.Warning() << std::endl;
-    
-    auto& attrib = reader.GetAttrib();
-    auto& shapes = reader.GetShapes();
-
-    size_t predictedNumVertices = attrib.vertices.size() / 3;
-    size_t predictedNumIndices = predictedNumVertices * 2 * 3; // Euler's polyhedron theorem
-
-    std::unordered_map<Mesh::VertexPCN, uint32_t> uniqueVertices;
-    uniqueVertices.reserve(predictedNumVertices);
-    vertices.reserve(predictedNumVertices);
-    indices.reserve(predictedNumIndices);
-
-    for (const auto& shape : shapes) {
-        for (const auto& index : shape.mesh.indices) {
-            Mesh::VertexPCN vertex;
-            
-            vertex.position = {
-                attrib.vertices[3 * index.vertex_index + 0],
-                attrib.vertices[3 * index.vertex_index + 1],
-                attrib.vertices[3 * index.vertex_index + 2]
-            };
-
-            if (index.texcoord_index >= 0) {
-                vertex.texCoord = {
-                    attrib.texcoords[2 * index.texcoord_index + 0],
-                    attrib.texcoords[2 * index.texcoord_index + 1]
-                };
-            }
-
-            if (index.normal_index >= 0) {
-                vertex.normal = {
-                    attrib.normals[3 * index.normal_index + 0],
-                    attrib.normals[3 * index.normal_index + 1],
-                    attrib.normals[3 * index.normal_index + 2]
-                };
-            }
-
-            if (uniqueVertices.count(vertex) == 0) {
-                uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
-                vertices.push_back(vertex);
-            }
-
-            indices.push_back(uniqueVertices[vertex]);
-        }
-    }
-}
+///* Define comparison operator for use with std::unordered_map */
+//bool operator==(const Mesh::VertexPCN& v1, const Mesh::VertexPCN& v2) {
+//    return v1.position == v2.position && v1.texCoord == v2.texCoord && v1.normal == v2.normal;
+//}
+//
+///* Define hash function for use with std::unordered_map */
+//template<>
+//struct std::hash<Mesh::VertexPCN>
+//{
+//    std::size_t operator()(const Mesh::VertexPCN& vertex) const noexcept
+//    {
+//        size_t seed = 0;
+//        Common::hash_combine(seed, vertex.position, vertex.texCoord, vertex.normal);
+//        return seed;
+//    }
+//};
+//
+//void ObjParser::parse(const std::string& filepath, std::vector<Mesh::VertexPCN>& vertices, std::vector<unsigned int>& indices) {
+//    // Parse OBJ file
+//    std::string rawobj = Common::readFile(filepath);
+//    tinyobj::ObjReader reader;
+//    tinyobj::ObjReaderConfig reader_config;
+//    reader_config.triangulate = true;
+//    if (!reader.ParseFromString(rawobj, "", reader_config))
+//        throw std::runtime_error("Failed to load OBJ file \"" + filepath + "\": " + reader.Error());
+//    if (!reader.Warning().empty())
+//        std::cout << "Warning loading OBJ file \"" << filepath << "\": " << reader.Warning() << std::endl;
+//    
+//    auto& attrib = reader.GetAttrib();
+//    auto& shapes = reader.GetShapes();
+//
+//    size_t predictedNumVertices = attrib.vertices.size() / 3;
+//    size_t predictedNumIndices = predictedNumVertices * 2 * 3; // Euler's polyhedron theorem
+//
+//    std::unordered_map<Mesh::VertexPCN, uint32_t> uniqueVertices;
+//    uniqueVertices.reserve(predictedNumVertices);
+//    vertices.reserve(predictedNumVertices);
+//    indices.reserve(predictedNumIndices);
+//
+//    for (const auto& shape : shapes) {
+//        for (const auto& index : shape.mesh.indices) {
+//            Mesh::VertexPCN vertex;
+//            
+//            vertex.position = {
+//                attrib.vertices[3 * index.vertex_index + 0],
+//                attrib.vertices[3 * index.vertex_index + 1],
+//                attrib.vertices[3 * index.vertex_index + 2]
+//            };
+//
+//            if (index.texcoord_index >= 0) {
+//                vertex.texCoord = {
+//                    attrib.texcoords[2 * index.texcoord_index + 0],
+//                    attrib.texcoords[2 * index.texcoord_index + 1]
+//                };
+//            }
+//
+//            if (index.normal_index >= 0) {
+//                vertex.normal = {
+//                    attrib.normals[3 * index.normal_index + 0],
+//                    attrib.normals[3 * index.normal_index + 1],
+//                    attrib.normals[3 * index.normal_index + 2]
+//                };
+//            }
+//
+//            if (uniqueVertices.count(vertex) == 0) {
+//                uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+//                vertices.push_back(vertex);
+//            }
+//
+//            indices.push_back(uniqueVertices[vertex]);
+//        }
+//    }
+//}
 
 /////////////////////// Obj loading with tangents ///////////////////////
 
