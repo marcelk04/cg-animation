@@ -47,6 +47,13 @@ void Program::load(const std::string& vs, const std::string& fs) {
     link();
 }
 
+void Program::load(const std::string& vs, const std::string& gs, const std::string& fs) {
+    attach(vs, Shader::Type::VERTEX_SHADER);
+    attach(gs, Shader::Type::GEOMETRY_SHADER);
+    attach(fs, Shader::Type::FRAGMENT_SHADER);
+    link();
+}
+
 void Program::attach(Shader shader) {
     glAttachShader(handle, shader.handle);
     shaders.push_back(std::move(shader));
@@ -75,7 +82,15 @@ void Program::bind() {
 }
 
 GLuint Program::uniform(const std::string& name) {
-    return glGetUniformLocation(handle, name.c_str());
+    if (uniformLocationCache.find(name) != uniformLocationCache.end()) {
+        return uniformLocationCache[name];
+    }
+
+    GLint location = glGetUniformLocation(handle, name.c_str());
+
+    uniformLocationCache[name] = location;
+
+    return location;
 }
 
 void Program::bindUBO(const std::string& loc, GLuint index) {

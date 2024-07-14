@@ -43,9 +43,36 @@ void Common::filesInDirectory(const std::string& directoryPath, const std::strin
         for (const auto& entry : std::filesystem::directory_iterator(directoryPath)) {
             if (std::filesystem::is_regular_file(entry.status()) && entry.path().extension() == extension) {
                 filenames.push_back(entry.path().relative_path().string());
-            } 
+            }
         }
     }
+}
+
+void Common::randomSeed() {
+    std::srand(std::time(0));
+}
+
+int Common::randomInt(int min, int max) {
+    return static_cast<int>(randomFloat(min, max));
+}
+
+float Common::randomFloat() {
+    return static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+}
+
+float Common::randomFloat(float min, float max) {
+    return randomFloat() * (max - min) + min;
+}
+
+glm::vec3 Common::deCasteljau(std::vector<glm::vec3> points, float t) {
+    int n = points.size();
+    for (int j = 1; j < n; j++) {
+        for (int i = 0; i < n - j; i++) {
+            points[i] = (1 - t) * points[i] + t * points[i + 1];
+        }
+    }
+
+    return points[0];
 }
 
 glm::mat4 Common::getGLMMat(const aiMatrix4x4 &from) {

@@ -7,62 +7,83 @@
 #include <glad/glad.h>
 #include <imgui.h>
 #include <glm/gtc/type_ptr.hpp>
+using namespace glm;
+
+#include "framework/app.hpp"
+
+#include "framework/imguiutil.hpp"
+#include "framework/common.hpp"
+
+#include "lightninggenerator.hpp"
 
 #include <iostream>
+#include <memory>
 
-
-MainApp::MainApp() : App(800, 600),  model(Common::absolutePath("rigged_model/dancing_vampire.dae")), animation(Common::absolutePath("rigged_model/dancing_vampire.dae"), &model), animator(&animation) {
-    App::setTitle("cgintro"); // Set title
+MainApp::MainApp()
+    : App(1200, 800),
+      cam(std::make_shared<MovingCamera>(glm::vec3(0.0f, 10.0f, 20.0f), glm::vec3(0.0f, 5.0f, 0.0f))),
+      renderer(cam, resolution),
+      lightDir(glm::vec3(1.0f, 1.0f, 1.0f)) {
+    App::setTitle("cgintro"); // set title
     App::setVSync(true); // Limit framerate
 
-    // Load shaders
-    shaderProgram.load("assimpshader.vert", "assimpshader.frag");
-    shaderProgram.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
-    shaderProgram.set("view", coolCamera.view());
-    shaderProgram.set("projection", coolCamera.projection());
+    scene = std::make_shared<Scene>();
 
+    cam->setResolution(resolution);
 
-    lightDir = glm::vec3(1.0f);
+    loadShaders();
+    loadObjects();
+    loadTextures();
+
+    initParticleSystem();
+
+    createMaterials();
+    createLights();
+    createRenderObjects();
+
+    renderer.setScene(scene);
+    renderer.updateCamUniforms();
 }
 
 
 void MainApp::init() {
-    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
     glEnable(GL_CULL_FACE);
+
+    Common::randomSeed();
 }
 
 void MainApp::buildImGui() {
     ImGui::StatisticsWindow(delta, resolution);
+
+    if (scene->getDirLight().has_value()) {
+        if (ImGui::SphericalSlider("Light direction", lightDir)) {
+            scene->getDirLight()->setDirection(lightDir);
+            renderer.updateLightingUniforms();
+        }
+    }
+
+    float exposure = renderer.getExposure();
+    ImGui::SliderFloat("Exposure", &exposure, 0.0f, 2.0f);
+    renderer.setExposure(exposure);
+
+    float gamma = renderer.getGamma();
+    ImGui::SliderFloat("Gamma", &gamma, 0.5f, 5.0f);
+    renderer.setGamma(gamma);
+
+    int blurAmount = renderer.getBlurAmount();
+    ImGui::SliderInt("Blur Amount", &blurAmount, 2, 20);
+    renderer.setBlurAmount(blurAmount);
 }
 
 void MainApp::render() {
-    if (coolCamera.updateIfChanged()) {
-        shaderProgram.set("uWorldToClip", coolCamera.projection() * coolCamera.view());
+    renderer.update(delta);
+
+    if (cam->updateIfChanged()) {
+        renderer.updateCamUniforms();
     }
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    animator.updateAnimation(delta);
-
-    shaderProgram.bind();
-    
-    // Set model matrix
-    glm::mat4 modelMat = glm::mat4(1.0f);
-//    modelMat = glm::translate(modelMat, glm::vec3(0.0f, 1.0f, 0.0f));
-//    modelMat = glm::rotate(modelMat, glm::radians(270.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    modelMat = glm::scale(modelMat, glm::vec3(0.5f));
-
-    shaderProgram.set("uLocalToWorld", modelMat);
-
-    // Update animation
-
-    const auto& transforms = animator.getFinalBoneMatrices();
-    
-	for (int i = 0; i < transforms.size(); i++) {
-		shaderProgram.set("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
-    }
-
-    model.draw(shaderProgram);
+    renderer.draw();
 }
 
 void MainApp::keyCallback(Key key, Action action) {
@@ -71,50 +92,100 @@ void MainApp::keyCallback(Key key, Action action) {
     if (action == Action::RELEASE) return;
 
     if (key == Key::W) {
-        coolCamera.move(delta * cameraSpeed * coolCamera.m_Direction);
+        cam->move(delta * cameraSpeed * cam->getDirection());
     }
     else if (key == Key::S) {
-        coolCamera.move(-delta * cameraSpeed * coolCamera.m_Direction);
+        cam->move(-delta * cameraSpeed * cam->getDirection());
     }
     else if (key == Key::A) {
-        coolCamera.move(-delta * cameraSpeed * coolCamera.m_Right);
+        cam->move(-delta * cameraSpeed * cam->getRight());
     }
     else if (key == Key::D) {
-        coolCamera.move(delta * cameraSpeed * coolCamera.m_Right);
+        cam->move(delta * cameraSpeed * cam->getRight());
     }
     else if (key == Key::SPACE) {
-        coolCamera.move(delta * cameraSpeed * coolCamera.m_Up);
+        cam->move(delta * cameraSpeed * glm::vec3(0.0f, 1.0f, 0.0f));
     }
     else if (key == Key::LEFT_SHIFT) {
-        coolCamera.move(-delta * cameraSpeed * coolCamera.m_Up);
+        cam->move(delta * cameraSpeed * glm::vec3(0.0f, -1.0f, 0.0f));
     }
 }
 
 void MainApp::scrollCallback(float amount) {
-    coolCamera.zoom(0.1f * amount);
+    cam->zoom(0.1f * amount);
 }
 
 void MainApp::moveCallback(const vec2& movement, bool leftButton, bool rightButton, bool middleButton) {
     if (leftButton || rightButton || middleButton) {
-        coolCamera.rotate(0.002f * movement);
+        cam->rotate(0.002f * movement);
     }
 }
 
-/*
-glm::vec3 MainApp::deCasteljau(const std::vector<glm::vec3>& spline, float t) {
-    std::vector<glm::vec3> points(spline.size());
-
-    for (int i = 0; i < spline.size(); i++) {
-        points[i] = glm::vec3(spline[i]);
-    }
-
-    int n = points.size();
-    for (int j = 1; j < n; j++) {
-        for (int i = 0; i < n - j; i++) {
-            points[i] = (1 - t) * points[i] + t * points[i + 1]);
-        }
-    }
-
-    return points[0];
+void MainApp::resizeCallback(const glm::vec2& resolution) {
+    cam->setResolution(resolution);
+    renderer.setResolution(resolution);
 }
-*/
+
+void MainApp::loadShaders() {
+    simpleGeom = std::make_shared<Program>();
+    simpleGeom->load("simple_geometry.vert", "simple_geometry.frag");
+    simpleGeomId = renderer.addProgram(simpleGeom);
+
+    texturedGeomNormals = std::make_shared<Program>();
+    texturedGeomNormals->load("textured_geometry_normals.vert", "textured_geometry_normals.frag");
+    texturedGeomNormals->bindTextureUnit("uDiffuseTexture", 0);
+    texturedGeomNormals->bindTextureUnit("uNormalTexture", 1);
+    texturedGeomNormalsId = renderer.addProgram(texturedGeomNormals);
+
+    texturedGeom = std::make_shared<Program>();
+    texturedGeom->load("textured_geometry.vert", "textured_geometry.frag");
+    texturedGeom->bindTextureUnit("uDiffuseTexture", 0);
+    texturedGeomId = renderer.addProgram(texturedGeom);
+}
+
+void MainApp::loadObjects() {
+    ResourceManager::loadMesh("meshes/cube.obj", "cube");
+    ResourceManager::loadMesh("meshes/plane.obj", "plane");
+    ResourceManager::loadMesh("meshes/highpolysphere.obj", "sphere");
+    ResourceManager::loadMesh("meshes/bunny.obj", "bunny");
+    ResourceManager::loadMeshWithTangents("meshes/cottage.obj", "house");
+}
+
+void MainApp::loadTextures() {
+    ResourceManager::loadTexture("textures/cottage_diffuse.png", "diffuse");
+    ResourceManager::loadTexture("textures/cottage_normal.png", "normal");
+}
+
+void MainApp::initParticleSystem() {
+    ParticleSystem ps;
+    ps.init();
+
+    scene->setParticleSystem(std::move(ps));
+}
+
+void MainApp::createMaterials() {
+
+}
+
+void MainApp::createLights() {
+    lightDir = glm::vec3(0.1f, 1.0f, 0.5f);
+
+    DirLight dirLight;
+    dirLight.setDirection(lightDir);
+    dirLight.setColor(glm::vec3(0.5f));
+    scene->setDirLight(std::move(dirLight));
+
+    PointLight light0;
+    light0.setPosition(glm::vec3(0.0f, 1.0f, 0.0f));
+    light0.setColor(glm::vec3(1.0f));
+    scene->addPointLight(std::move(light0));
+}
+
+void MainApp::createRenderObjects() {
+    RenderObject houseObj("house");
+    houseObj.setDiffuseTexture("diffuse");
+    houseObj.setNormalTexture("normal");
+    houseObj.setScale(1.0f);
+    scene->addRenderObject(std::move(houseObj), texturedGeomNormalsId);
+}
+

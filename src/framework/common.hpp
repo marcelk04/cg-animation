@@ -10,6 +10,10 @@
 
 #include <string>
 #include <vector>
+#include <cmath>
+#include <iostream>
+
+#include <glm/glm.hpp>
 #include <iostream>
 
 namespace Common {
@@ -22,6 +26,12 @@ namespace Common {
     template <class T, typename... Rest>
     void hash_combine(std::size_t& seed, const T& v, const Rest&... rest);
 
+    void randomSeed();
+    int randomInt(int min, int max);
+    float randomFloat();
+    float randomFloat(float min, float max);
+
+    glm::vec3 deCasteljau(std::vector<glm::vec3> points, float t);
 
     glm::mat4 getGLMMat(const aiMatrix4x4& from);
     glm::vec3 getGLMVec(const aiVector3D& vec);

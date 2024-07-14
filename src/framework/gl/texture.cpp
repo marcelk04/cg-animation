@@ -138,7 +138,7 @@ void Texture::load(Format format, const std::string& filename, GLsizei mipmaps) 
     GLenum type;
     void* data;
 
-    auto rawfile = Common::readFile(filename);
+    //auto rawfile = Common::readFile(filename);
 
     // Load image from file and read format
     stbi_set_flip_vertically_on_load(true);
@@ -147,12 +147,14 @@ void Texture::load(Format format, const std::string& filename, GLsizei mipmaps) 
         case Format::SRGB8:
         case Format::NORMAL8:
             type = GL_UNSIGNED_BYTE;
-            data = stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(rawfile.c_str()), rawfile.size(), &width, &height, &channels, 0);
+            //data = stbi_load_from_memory(reinterpret_cast<const stbi_uc*>(rawfile.c_str()), rawfile.size(), &width, &height, &channels, 0);
+            data = stbi_load(filename.c_str(), &width, &height, &channels, 0);
             break;
         case Format::FLOAT16:
         case Format::FLOAT32:
             type = GL_FLOAT;
-            data = stbi_loadf_from_memory(reinterpret_cast<const stbi_uc*>(rawfile.c_str()), rawfile.size(), &width, &height, &channels, 0);
+            //data = stbi_loadf_from_memory(reinterpret_cast<const stbi_uc*>(rawfile.c_str()), rawfile.size(), &width, &height, &channels, 0);
+            data = stbi_loadf(filename.c_str(), &width, &height, &channels, 0);
             break;
         default: assert(false);
     }
@@ -169,6 +171,9 @@ void Texture::load(Format format, const std::string& filename, GLsizei mipmaps) 
     // glTexStorage2D(GL_TEXTURE_2D, mipmaps, internalformat, width, height);
     // glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, baseformat, type, data);
     glTexImage2D(GL_TEXTURE_2D, 0, internalformat, width, height, 0, baseformat, type, data);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     // Free image data
     stbi_image_free(data);

@@ -3,9 +3,18 @@ cmake_minimum_required(VERSION 3.26)
 ####################################################################
 # Source files
 set(SRC
+        src/particlesystem.cpp  # Ensure this is included
         src/main.cpp
         src/mainapp.cpp
-        src/movingcamera.cpp
+        src/cinematic_engine/movingcamera.cpp
+        src/cinematic_engine/spline.cpp
+        src/cinematic_engine/cameracontroller.cpp
+        src/lightninggenerator.cpp
+        src/resourcemanager.cpp
+        src/renderer/renderobject.cpp
+        src/renderer/renderer.cpp
+        src/renderer/scene.cpp
+        src/renderer/light.cpp
         src/framework/app.cpp
         src/framework/camera.cpp
         src/framework/common.cpp
