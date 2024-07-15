@@ -28,14 +28,14 @@ size_t Scene::addRenderObject(RenderObject&& renderObject, size_t programId) {
 	return id;
 }
 
-size_t Scene::addAnimationModel(AnimationModel&& animationModel, size_t programId) {
+size_t Scene::addAnimationModel(const std::string& animationModel, size_t programId) {
 	while (programId >= m_AnimationModels.size()) {
-		m_AnimationModels.push_back(std::vector<AnimationModel>());
+		m_AnimationModels.push_back(std::vector<std::string>());
 	}
 
 	size_t id = m_AnimationModels[programId].size();
 
-	m_AnimationModels[programId].push_back(std::move(animationModel));
+	m_AnimationModels[programId].push_back(animationModel);
 
 	return id;
 }
@@ -78,19 +78,19 @@ RenderObject& Scene::getRenderObject(size_t programId, size_t objectId) {
 	return getRenderObjects(programId)[objectId];
 }
 
-std::vector<std::vector<AnimationModel>>& Scene::getAnimationModels() {
+std::vector<std::vector<std::string>>& Scene::getAnimationModels() {
 	return m_AnimationModels;
 }
 
-std::vector<AnimationModel>& Scene::getAnimationModels(size_t programId) {
+std::vector<std::string>& Scene::getAnimationModels(size_t programId) {
 	while (programId >= m_AnimationModels.size()) {
-		m_AnimationModels.push_back(std::vector<AnimationModel>());
+		m_AnimationModels.push_back(std::vector<std::string>());
 	}
 
 	return m_AnimationModels[programId];
 }
 
-AnimationModel& Scene::getAnimationModel(size_t programId, size_t objectId) {
+std::string& Scene::getAnimationModel(size_t programId, size_t objectId) {
 	return getAnimationModels(programId)[objectId];
 }
 

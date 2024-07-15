@@ -12,6 +12,7 @@
 
 class Animator {
 public:
+    Animator();
     Animator(Animation* animation);
 
     void update(float dt);

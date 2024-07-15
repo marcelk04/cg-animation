@@ -21,10 +21,7 @@ MainApp::MainApp()
     : App(1200, 800),
       cam(std::make_shared<MovingCamera>(glm::vec3(0.0f, 10.0f, 20.0f), glm::vec3(0.0f, 5.0f, 0.0f))),
       renderer(cam, resolution),
-      lightDir(glm::vec3(1.0f, 1.0f, 1.0f)),
-      model("rigged_model/dancing_vampire.dae"),
-      animation("rigged_model/dancing_vampire.dae", &model),
-      animator(&animation) {
+      lightDir(glm::vec3(1.0f, 1.0f, 1.0f)) {
     App::setTitle("cgintro"); // set title
     App::setVSync(true); // Limit framerate
 
@@ -42,7 +39,11 @@ MainApp::MainApp()
     createLights();
     createRenderObjects();
 
-    scene->addAnimationModel(std::move(model), animatedId);
+    ResourceManager::loadAnimationModel("rigged_model/dancing_vampire.dae", "model");
+    ResourceManager::loadAnimation("rigged_model/dancing_vampire.dae", "model", "model_anim");
+    animator = Animator(&ResourceManager::getAnimation("model_anim"));
+
+    scene->addAnimationModel("model", animatedId);
 
     renderer.setScene(scene);
     renderer.updateCamUniforms();

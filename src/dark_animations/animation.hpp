@@ -20,7 +20,7 @@ struct AssimpNodeData {
 class Animation {
 public:
     Animation() = default;
-    Animation(const std::string& animationPath, AnimationModel* model);
+    Animation(const std::string& animationPath, AnimationModel& model);
 
     Bone* findBone(const std::string& name);
 

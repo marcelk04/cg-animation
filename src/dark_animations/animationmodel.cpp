@@ -4,7 +4,7 @@
 #include "framework/common.hpp"
 
 AnimationModel::AnimationModel(const std::string &path) {
-    loadModel(Common::absolutePath(path));
+    loadModel(path);
 }
 
 void AnimationModel::draw(Program &program) {

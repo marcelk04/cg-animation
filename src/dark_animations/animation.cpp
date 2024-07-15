@@ -2,7 +2,7 @@
 
 #include "framework/common.hpp"
 
-Animation::Animation(const std::string& animationPath, AnimationModel* model) {
+Animation::Animation(const std::string& animationPath, AnimationModel& model) {
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(Common::absolutePath(animationPath), aiProcess_Triangulate);
 
@@ -14,7 +14,7 @@ Animation::Animation(const std::string& animationPath, AnimationModel* model) {
     m_TicksPerSecond = animation->mTicksPerSecond;
 
     readHierarchyData(m_RootNode, scene->mRootNode);
-    readMissingBones(animation, *model);
+    readMissingBones(animation, model);
 }
 
 Bone* Animation::findBone(const std::string& name) {

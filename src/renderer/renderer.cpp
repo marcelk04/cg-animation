@@ -302,8 +302,8 @@ void Renderer::drawScene(Scene& scene) {
 		}
 
 		// draw all animated models that use this shader
-		for (AnimationModel& model : scene.getAnimationModels(i)) {
-			model.draw(*program);
+		for (const std::string& modelId : scene.getAnimationModels(i)) {
+			ResourceManager::getAnimationModel(modelId).draw(*program);
 		}
 	}
 }
