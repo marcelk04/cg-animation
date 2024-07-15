@@ -55,6 +55,8 @@ private:
 	int blurPass(int amount);
 	void hdrPass(int blurBuffer, float exposure, float gamma);
 
+	void drawScene(Scene& scene);
+
 	void generateTextures();
 	void generateTexture(Texture& texture, GLint internalformat, GLenum format, GLenum type) const;
 	void generateTexture(Texture& texture, GLint internalformat, GLenum format, GLenum type, const glm::vec2& resolution) const;

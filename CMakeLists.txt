@@ -6,11 +6,15 @@ set(SRC
         src/particlesystem.cpp  # Ensure this is included
         src/main.cpp
         src/mainapp.cpp
+        src/lightninggenerator.cpp
+        src/resourcemanager.cpp
+        src/dark_animations/animation.cpp
+        src/dark_animations/animator.cpp
+        src/dark_animations/bone.cpp
+        src/dark_animations/animationmodel.cpp
         src/cinematic_engine/movingcamera.cpp
         src/cinematic_engine/spline.cpp
         src/cinematic_engine/cameracontroller.cpp
-        src/lightninggenerator.cpp
-        src/resourcemanager.cpp
         src/renderer/renderobject.cpp
         src/renderer/renderer.cpp
         src/renderer/scene.cpp
@@ -29,10 +33,6 @@ set(SRC
         src/framework/gl/shader.cpp
         src/framework/gl/texture.cpp
         src/framework/gl/vertexarray.cpp
-        src/dark_animations/animation.cpp
-        src/dark_animations/animator.cpp
-        src/dark_animations/bone.cpp
-        src/dark_animations/model_animation.cpp
 )
 set(INCLUDE
         src/

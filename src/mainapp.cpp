@@ -2,7 +2,6 @@
 
 #include "framework/imguiutil.hpp"
 #include "framework/common.hpp"
-#include "dark_animations/animator.hpp"
 #include "renderer/renderobject.hpp"
 
 #include <glad/glad.h>
@@ -22,7 +21,10 @@ MainApp::MainApp()
     : App(1200, 800),
       cam(std::make_shared<MovingCamera>(glm::vec3(0.0f, 10.0f, 20.0f), glm::vec3(0.0f, 5.0f, 0.0f))),
       renderer(cam, resolution),
-      lightDir(glm::vec3(1.0f, 1.0f, 1.0f)) {
+      lightDir(glm::vec3(1.0f, 1.0f, 1.0f)),
+      model("rigged_model/dancing_vampire.dae"),
+      animation("rigged_model/dancing_vampire.dae", &model),
+      animator(&animation) {
     App::setTitle("cgintro"); // set title
     App::setVSync(true); // Limit framerate
 
@@ -39,6 +41,8 @@ MainApp::MainApp()
     createMaterials();
     createLights();
     createRenderObjects();
+
+    scene->addAnimationModel(std::move(model), animatedId);
 
     renderer.setScene(scene);
     renderer.updateCamUniforms();
@@ -61,7 +65,7 @@ void MainApp::buildImGui() {
         }
     }
 
-    float exposure = renderer.getExposure();
+    float exposure= renderer.getExposure();
     ImGui::SliderFloat("Exposure", &exposure, 0.0f, 2.0f);
     renderer.setExposure(exposure);
 
@@ -76,9 +80,16 @@ void MainApp::buildImGui() {
 
 void MainApp::render() {
     renderer.update(delta);
+    animator.update(delta);
 
     if (cam->updateIfChanged()) {
         renderer.updateCamUniforms();
+    }
+
+    const auto& transforms = animator.getFinalBoneMatrices();
+
+    for (int i = 0; i < transforms.size(); i++) {
+		animated->set("uFinalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
     }
 
     renderer.draw();
@@ -139,6 +150,10 @@ void MainApp::loadShaders() {
     texturedGeom->load("textured_geometry.vert", "textured_geometry.frag");
     texturedGeom->bindTextureUnit("uDiffuseTexture", 0);
     texturedGeomId = renderer.addProgram(texturedGeom);
+
+    animated = std::make_shared<Program>();
+    animated->load("assimpshader.vert", "assimpshader.frag");
+    animatedId = renderer.addProgram(animated);
 }
 
 void MainApp::loadObjects() {
@@ -158,7 +173,7 @@ void MainApp::initParticleSystem() {
     ParticleSystem ps;
     ps.init();
 
-    scene->setParticleSystem(std::move(ps));
+    //scene->setParticleSystem(std::move(ps));
 }
 
 void MainApp::createMaterials() {
@@ -174,7 +189,7 @@ void MainApp::createLights() {
     scene->setDirLight(std::move(dirLight));
 
     PointLight light0;
-    light0.setPosition(glm::vec3(0.0f, 1.0f, 0.0f));
+    light0.setPosition(glm::vec3(20.0f, 20.0f, 20.0f));
     light0.setColor(glm::vec3(1.0f));
     scene->addPointLight(std::move(light0));
 }
@@ -184,6 +199,6 @@ void MainApp::createRenderObjects() {
     houseObj.setDiffuseTexture("diffuse");
     houseObj.setNormalTexture("normal");
     houseObj.setScale(1.0f);
-    scene->addRenderObject(std::move(houseObj), texturedGeomNormalsId);
+    //scene->addRenderObject(std::move(houseObj), texturedGeomNormalsId);
 }
 

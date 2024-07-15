@@ -1,12 +1,12 @@
-#include "model_animation.hpp"
+#include "dark_animations/animationmodel.hpp"
 
 #include "framework/common.hpp"
 
-Model::Model(const std::string &path) {
-    loadModel(path);
+AnimationModel::AnimationModel(const std::string &path) {
+    loadModel(Common::absolutePath(path));
 }
 
-void Model::draw(Program &program) {
+void AnimationModel::draw(Program &program) {
     program.bind();
 
     for (auto& mesh : m_Meshes) {
@@ -14,7 +14,7 @@ void Model::draw(Program &program) {
     }
 }
 
-void Model::loadModel(const std::string& path) {
+void AnimationModel::loadModel(const std::string& path) {
     Assimp::Importer importer;
 
     const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace);
@@ -29,7 +29,7 @@ void Model::loadModel(const std::string& path) {
     processNode(scene->mRootNode, scene);
 }
 
-void Model::processNode(aiNode* node, const aiScene* scene) {
+void AnimationModel::processNode(aiNode* node, const aiScene* scene) {
     // process each mesh located at the current node
     for (uint32_t i = 0; i < node->mNumMeshes; i++) {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
@@ -43,7 +43,7 @@ void Model::processNode(aiNode* node, const aiScene* scene) {
     }
 }
 
-Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
+Mesh AnimationModel::processMesh(aiMesh *mesh, const aiScene *scene) {
     std::vector<Mesh::VertexPCNTB> vertices;
     std::vector<uint32_t> indices;
 
@@ -84,7 +84,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
     return meshObj;
 }
 
-void Model::extractBoneWeightForVertices(std::vector<Mesh::VertexPCNTB> &vertices, aiMesh *mesh, const aiScene *scene) {
+void AnimationModel::extractBoneWeightForVertices(std::vector<Mesh::VertexPCNTB> &vertices, aiMesh *mesh, const aiScene *scene) {
     for (int boneIndex = 0; boneIndex < mesh->mNumBones; boneIndex++) {
         int boneID = -1;
         std::string boneName = mesh->mBones[boneIndex]->mName.C_Str();
@@ -119,14 +119,14 @@ void Model::extractBoneWeightForVertices(std::vector<Mesh::VertexPCNTB> &vertice
     }
 }
 
-void Model::setVertexBoneDataToDefault(Mesh::VertexPCNTB& vertex) const {
+void AnimationModel::setVertexBoneDataToDefault(Mesh::VertexPCNTB& vertex) const {
     for (int i = 0; i < 4; i++) {
         vertex.boneIDs[i] = -1;
         vertex.weights[i] = 0.0f;
     }
 }
 
-void Model::setVertexBoneData(Mesh::VertexPCNTB& vertex, int boneID, float weight) const {
+void AnimationModel::setVertexBoneData(Mesh::VertexPCNTB& vertex, int boneID, float weight) const {
     for (int i = 0; i < 4; i++) {
         if (vertex.boneIDs[i] < 0) {
             vertex.weights[i] = weight;

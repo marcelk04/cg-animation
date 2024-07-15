@@ -186,11 +186,7 @@ void Renderer::directionalShadowPass(Scene& scene) {
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glCullFace(GL_FRONT);
 
-	for (size_t i = 0; i < m_Programs.size(); i++) {
-		for (RenderObject& object : scene.getRenderObjects(i)) {
-			object.draw(m_DepthShader);
-		}
-	}
+	drawScene(scene);
 
 	glViewport(0, 0, m_Resolution.x, m_Resolution.y);
 	glCullFace(GL_BACK);
@@ -203,11 +199,7 @@ void Renderer::omnidirectionalShadowPass(Scene& scene) {
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glCullFace(GL_FRONT);
 
-	for (size_t i = 0; i < m_Programs.size(); i++) {
-		for (RenderObject& object : scene.getRenderObjects(i)) {
-			object.draw(m_CubeDepthShader);
-		}
-	}
+	drawScene(scene);
 
 	glViewport(0, 0, m_Resolution.x, m_Resolution.y);
 	glCullFace(GL_BACK);
@@ -219,16 +211,11 @@ void Renderer::geometryPass(Scene& scene) {
 	glEnable(GL_BLEND);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	for (size_t i = 0; i < m_Programs.size(); i++) {
-		std::shared_ptr<Program> program = m_Programs[i];
+	drawScene(scene);
 
-		// draw all objects that use this shader
-		for (RenderObject& object : scene.getRenderObjects(i)) {
-			object.draw(*program);
-		}
+	if (scene.getParticleSystem().has_value()) {
+		scene.getParticleSystem()->render(m_Cam->projection() * m_Cam->view());
 	}
-
-	scene.getParticleSystem()->render(m_Cam->projection() * m_Cam->view());
 
 	// draw camera control points
 	if (m_ShowCameraControlPoints && m_Scene->getCameraController().has_value()) {
@@ -303,6 +290,22 @@ void Renderer::hdrPass(int blurBuffer, float exposure, float gamma) {
 	m_HdrShader.bind();
 
 	m_Quad.draw();
+}
+
+void Renderer::drawScene(Scene& scene) {
+	for (size_t i = 0; i < m_Programs.size(); i++) {
+		std::shared_ptr<Program> program = m_Programs[i];
+
+		// draw all render objects that use this shader
+		for (RenderObject& object : scene.getRenderObjects(i)) {
+			object.draw(*program);
+		}
+
+		// draw all animated models that use this shader
+		for (AnimationModel& model : scene.getAnimationModels(i)) {
+			model.draw(*program);
+		}
+	}
 }
 
 void Renderer::generateTextures() {

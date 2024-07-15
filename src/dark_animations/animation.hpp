@@ -1,7 +1,7 @@
 #pragma once
 
 #include "dark_animations/bone.hpp"
-#include "dark_animations/model_animation.hpp"
+#include "dark_animations/animationmodel.hpp"
 #include "framework/mesh.hpp"
 
 #include <glm/glm.hpp>
@@ -20,7 +20,7 @@ struct AssimpNodeData {
 class Animation {
 public:
     Animation() = default;
-    Animation(const std::string& animationPath, Model* model);
+    Animation(const std::string& animationPath, AnimationModel* model);
 
     Bone* findBone(const std::string& name);
 
@@ -30,7 +30,7 @@ public:
     const std::map<std::string,BoneInfo>& getBoneIDMap() const { return m_BoneInfoMap; }
 
 private:
-    void readMissingBones(const aiAnimation* animation, Model& model);
+    void readMissingBones(const aiAnimation* animation, AnimationModel& model);
     void readHierarchyData(AssimpNodeData& dest, const aiNode* src) const;
 
 private:

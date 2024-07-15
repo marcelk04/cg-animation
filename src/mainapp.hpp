@@ -5,15 +5,18 @@
 #include <vector>
 #include <memory>
 
+#include "lightninggenerator.hpp"
+#include "resourcemanager.hpp"
+#include "particlesystem.hpp"
+#include "dark_animations/animation.hpp"
+#include "dark_animations/animationmodel.hpp"
+#include "dark_animations/animator.hpp"
 #include "cinematic_engine/movingcamera.hpp"
 #include "cinematic_engine/spline.hpp"
 #include "cinematic_engine/cameracontroller.hpp"
 #include "renderer/renderobject.hpp"
 #include "renderer/renderer.hpp"
 #include "renderer/light.hpp"
-#include "lightninggenerator.hpp"
-#include "resourcemanager.hpp"
-#include "particlesystem.hpp"
 
 #include "framework/app.hpp"
 #include "framework/mesh.hpp"
@@ -65,4 +68,11 @@ private:
 
     std::shared_ptr<Program> texturedGeom;
     size_t texturedGeomId;
+
+    std::shared_ptr<Program> animated;
+    size_t animatedId;
+
+    AnimationModel model;
+    Animation animation;
+    Animator animator;
 };

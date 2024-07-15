@@ -11,7 +11,9 @@ void Scene::update(float dt) {
 		m_CameraController->update(dt);
 	}
 
-	m_ParticleSystem->update(static_cast<float>(glfwGetTime()));
+	if (m_ParticleSystem.has_value()) {
+		m_ParticleSystem->update(static_cast<float>(glfwGetTime()));
+	}
 }
 
 size_t Scene::addRenderObject(RenderObject&& renderObject, size_t programId) {
@@ -22,6 +24,18 @@ size_t Scene::addRenderObject(RenderObject&& renderObject, size_t programId) {
 	size_t id = m_RenderObjects[programId].size();
 
 	m_RenderObjects[programId].push_back(renderObject);
+
+	return id;
+}
+
+size_t Scene::addAnimationModel(AnimationModel&& animationModel, size_t programId) {
+	while (programId >= m_AnimationModels.size()) {
+		m_AnimationModels.push_back(std::vector<AnimationModel>());
+	}
+
+	size_t id = m_AnimationModels[programId].size();
+
+	m_AnimationModels[programId].push_back(std::move(animationModel));
 
 	return id;
 }
@@ -62,6 +76,22 @@ std::vector<RenderObject>& Scene::getRenderObjects(size_t programId) {
 
 RenderObject& Scene::getRenderObject(size_t programId, size_t objectId) {
 	return getRenderObjects(programId)[objectId];
+}
+
+std::vector<std::vector<AnimationModel>>& Scene::getAnimationModels() {
+	return m_AnimationModels;
+}
+
+std::vector<AnimationModel>& Scene::getAnimationModels(size_t programId) {
+	while (programId >= m_AnimationModels.size()) {
+		m_AnimationModels.push_back(std::vector<AnimationModel>());
+	}
+
+	return m_AnimationModels[programId];
+}
+
+AnimationModel& Scene::getAnimationModel(size_t programId, size_t objectId) {
+	return getAnimationModels(programId)[objectId];
 }
 
 std::optional<DirLight>& Scene::getDirLight() {

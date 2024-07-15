@@ -23,9 +23,10 @@ struct BoneInfo {
     glm::mat4 offset;
 };
 
-class Model {
+class AnimationModel {
 public:
-    Model(const std::string& path);
+    AnimationModel() = default;
+    AnimationModel(const std::string& path);
 
     void draw(Program& program);
 

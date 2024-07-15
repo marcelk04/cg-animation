@@ -2,9 +2,9 @@
 
 #include "framework/common.hpp"
 
-Animation::Animation(const std::string& animationPath, Model* model) {
+Animation::Animation(const std::string& animationPath, AnimationModel* model) {
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(animationPath, aiProcess_Triangulate);
+    const aiScene* scene = importer.ReadFile(Common::absolutePath(animationPath), aiProcess_Triangulate);
 
     assert(scene && scene->mRootNode);
 
@@ -31,7 +31,7 @@ Bone* Animation::findBone(const std::string& name) {
     return nullptr;
 }
 
-void Animation::readMissingBones(const aiAnimation* animation, Model& model) {
+void Animation::readMissingBones(const aiAnimation* animation, AnimationModel& model) {
     int size = animation->mNumChannels;
 
     auto& boneInfoMap = model.getBoneInfoMap();
