@@ -13,6 +13,12 @@
 
 class Mesh {
 public:
+    struct VertexPCN {
+        glm::vec3 position;
+        glm::vec2 texCoord;
+        glm::vec3 normal;
+    };
+
     struct VertexPCNT {
         glm::vec3 position;
         glm::vec2 texCoord;
@@ -30,6 +36,7 @@ public:
     };
 
     void load(const std::vector<float>& vertices, const std::vector<unsigned int>& indices);
+    void load(const std::vector<VertexPCN>& vertices, const std::vector<unsigned int>& indices);
     void load(const std::vector<VertexPCNT>& vertices, const std::vector<unsigned int>& indices);
     void load(const std::vector<VertexPCNTB>& vertices, const std::vector<unsigned int>& indices);
     void load(const std::string& filepath);

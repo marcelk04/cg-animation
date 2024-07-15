@@ -22,13 +22,6 @@ void ResourceManager::loadMesh(const std::string& filepath, const std::string& n
 	s_Meshes[name] = std::move(mesh);
 }
 
-void ResourceManager::loadMeshWithTangents(const std::string& filepath, const std::string& name) {
-	Mesh mesh;
-	mesh.loadWithTangents(filepath);
-
-	s_Meshes[name] = std::move(mesh);
-}
-
 Mesh& ResourceManager::getMesh(const std::string& name) {
 	return s_Meshes[name];
 }

@@ -3,6 +3,7 @@
 #include "framework/imguiutil.hpp"
 #include "framework/common.hpp"
 #include "dark_animations/animator.hpp"
+#include "renderer/renderobject.hpp"
 
 #include <glad/glad.h>
 #include <imgui.h>
@@ -11,13 +12,11 @@ using namespace glm;
 
 #include "framework/app.hpp"
 
-#include "framework/imguiutil.hpp"
-#include "framework/common.hpp"
-
 #include "lightninggenerator.hpp"
 
 #include <iostream>
 #include <memory>
+#include <typeinfo>
 
 MainApp::MainApp()
     : App(1200, 800),
@@ -44,7 +43,6 @@ MainApp::MainApp()
     renderer.setScene(scene);
     renderer.updateCamUniforms();
 }
-
 
 void MainApp::init() {
     glDepthFunc(GL_LESS);
@@ -148,7 +146,7 @@ void MainApp::loadObjects() {
     ResourceManager::loadMesh("meshes/plane.obj", "plane");
     ResourceManager::loadMesh("meshes/highpolysphere.obj", "sphere");
     ResourceManager::loadMesh("meshes/bunny.obj", "bunny");
-    ResourceManager::loadMeshWithTangents("meshes/cottage.obj", "house");
+    ResourceManager::loadMesh("meshes/cottage.obj", "house");
 }
 
 void MainApp::loadTextures() {

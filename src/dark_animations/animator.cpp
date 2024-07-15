@@ -8,7 +8,7 @@ Animator::Animator(Animation* animation) {
     m_FinalBoneMatrices.resize(100, glm::mat4(1.0f));
 }
 
-void Animator::updateAnimation(float dt) {
+void Animator::update(float dt) {
     if (m_CurrentAnimation) {
         m_CurrentTime += m_CurrentAnimation->getTicksPerSecond() * dt;
         m_CurrentTime = fmod(m_CurrentTime, m_CurrentAnimation->getDuration()); // loop animation

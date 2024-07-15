@@ -34,6 +34,28 @@ void Mesh::load(const std::vector<float>& vertices, const std::vector<unsigned i
     vao.unbind();
 }
 
+void Mesh::load(const std::vector<VertexPCN>& vertices, const std::vector<unsigned int>& indices) {
+    numIndices = indices.size();
+    vbo.load(Buffer::Type::ARRAY_BUFFER, vertices);
+    ebo.load(Buffer::Type::INDEX_BUFFER, indices);
+
+    vao.bind();
+    vbo.bind(Buffer::Type::ARRAY_BUFFER);
+    ebo.bind(Buffer::Type::INDEX_BUFFER);
+
+    size_t stride = sizeof(VertexPCN);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)offsetof(VertexPCNT, position));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (void*)offsetof(VertexPCNT, texCoord));
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, stride, (void*)offsetof(VertexPCNT, normal));
+
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+
+    vao.unbind();
+}
+
 void Mesh::load(const std::vector<VertexPCNT>& vertices, const std::vector<unsigned int>& indices) {
     numIndices = indices.size();
     vbo.load(Buffer::Type::ARRAY_BUFFER, vertices);

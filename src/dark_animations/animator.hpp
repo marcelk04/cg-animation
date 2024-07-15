@@ -14,7 +14,8 @@ class Animator {
 public:
     Animator(Animation* animation);
 
-    void updateAnimation(float dt);
+    void update(float dt);
+
     void playAnimation(Animation* animation);
 
     void calculateBoneTransform(const AssimpNodeData* node, const glm::mat4& parentTransform);
