@@ -1,5 +1,6 @@
 #include "dark_animations/animationmodel.hpp"
 
+#include "resourcemanager.hpp"
 #include "framework/common.hpp"
 
 AnimationModel::AnimationModel(const std::string &path) {
@@ -9,8 +10,8 @@ AnimationModel::AnimationModel(const std::string &path) {
 void AnimationModel::draw(Program &program) {
     program.bind();
 
-    for (auto& mesh : m_Meshes) {
-        mesh.draw();
+    for (const auto& meshName : m_Meshes) {
+        ResourceManager::getMesh(meshName).draw();
     }
 }
 
@@ -43,7 +44,7 @@ void AnimationModel::processNode(aiNode* node, const aiScene* scene) {
     }
 }
 
-Mesh AnimationModel::processMesh(aiMesh *mesh, const aiScene *scene) {
+std::string AnimationModel::processMesh(aiMesh* mesh, const aiScene* scene) {
     std::vector<Mesh::VertexPCNTB> vertices;
     std::vector<uint32_t> indices;
 
@@ -81,7 +82,12 @@ Mesh AnimationModel::processMesh(aiMesh *mesh, const aiScene *scene) {
 
     Mesh meshObj;
     meshObj.load(vertices, indices);
-    return meshObj;
+
+    std::string id = mesh->mName.C_Str();
+
+    ResourceManager::addMesh(std::move(meshObj), id);
+
+    return id;
 }
 
 void AnimationModel::extractBoneWeightForVertices(std::vector<Mesh::VertexPCNTB> &vertices, aiMesh *mesh, const aiScene *scene) {

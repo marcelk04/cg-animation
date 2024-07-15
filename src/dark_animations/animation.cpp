@@ -13,10 +13,6 @@ Animation::Animation(const std::string& animationPath, AnimationModel* model) {
     m_Duration = animation->mDuration;
     m_TicksPerSecond = animation->mTicksPerSecond;
 
-    aiMatrix4x4 globalTransformation = scene->mRootNode->mTransformation;
-
-    globalTransformation = globalTransformation.Inverse();
-
     readHierarchyData(m_RootNode, scene->mRootNode);
     readMissingBones(animation, *model);
 }
@@ -34,7 +30,7 @@ Bone* Animation::findBone(const std::string& name) {
 void Animation::readMissingBones(const aiAnimation* animation, AnimationModel& model) {
     int size = animation->mNumChannels;
 
-    auto& boneInfoMap = model.getBoneInfoMap();
+    std::map<std::string, BoneInfo>& boneInfoMap = model.getBoneInfoMap();
     int& boneCount = model.getBoneCount();
 
     //reading channels (bones engaged in an animation and their keyframes)
@@ -54,7 +50,7 @@ void Animation::readMissingBones(const aiAnimation* animation, AnimationModel& m
     m_BoneInfoMap = boneInfoMap;
 }
 
-void Animation::readHierarchyData(AssimpNodeData &dest, const aiNode *src) const {
+void Animation::readHierarchyData(AssimpNodeData& dest, const aiNode* src) const {
     assert(src);
 
     dest.name = src->mName.data;
