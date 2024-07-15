@@ -2,6 +2,7 @@
 
 #include "resourcemanager.hpp"
 #include "cinematic_engine/movingcamera.hpp"
+#include "dark_animations/animationmodel.hpp"
 #include "framework/mesh.hpp"
 #include "framework/gl/program.hpp"
 #include "framework/gl/texture.hpp"
@@ -20,8 +21,7 @@ struct Material {
 
 class RenderObject {
 public:
-	RenderObject(Mesh& mesh);
-	RenderObject(const std::string& meshname);
+	RenderObject();
 
 	void draw(Program& program);
 
@@ -30,6 +30,8 @@ public:
 	std::optional<std::string> getDiffuseTexture() { return m_DiffuseTexture; }
 	std::optional<std::string> getNormalTexture() { return m_NormalTexture; }
 
+	void setMesh(const std::string& meshname);
+	void setAnimationModel(const std::string& modelname);
 	void setPosition(const glm::vec3& position);
 	void setScale(const float scale);
 	void setRotation(const float angle, const glm::vec3& axis);
@@ -43,7 +45,8 @@ private:
 	void recalculateModelMatrix();
 
 private:
-	Mesh& m_Mesh;
+	std::optional<std::string> m_Mesh;
+	std::optional<std::string> m_AnimationModel;
 
 	glm::vec3 m_Position;
 	float m_Scale;

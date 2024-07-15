@@ -29,6 +29,10 @@ MainApp::MainApp()
 
     cam->setResolution(resolution);
 
+    ResourceManager::loadAnimationModel("rigged_model/dancing_vampire.dae", "model");
+    ResourceManager::loadAnimation("rigged_model/dancing_vampire.dae", "model", "model_anim");
+    animator = Animator(&ResourceManager::getAnimation("model_anim"));
+
     loadShaders();
     loadObjects();
     loadTextures();
@@ -38,12 +42,6 @@ MainApp::MainApp()
     createMaterials();
     createLights();
     createRenderObjects();
-
-    ResourceManager::loadAnimationModel("rigged_model/dancing_vampire.dae", "model");
-    ResourceManager::loadAnimation("rigged_model/dancing_vampire.dae", "model", "model_anim");
-    animator = Animator(&ResourceManager::getAnimation("model_anim"));
-
-    scene->addAnimationModel("model", animatedId);
 
     renderer.setScene(scene);
     renderer.updateCamUniforms();
@@ -196,10 +194,15 @@ void MainApp::createLights() {
 }
 
 void MainApp::createRenderObjects() {
-    RenderObject houseObj("house");
+    RenderObject houseObj;
+    houseObj.setMesh("house");
     houseObj.setDiffuseTexture("diffuse");
     houseObj.setNormalTexture("normal");
     houseObj.setScale(1.0f);
     //scene->addRenderObject(std::move(houseObj), texturedGeomNormalsId);
+
+    RenderObject vampire;
+    vampire.setAnimationModel("model");
+    scene->addRenderObject(std::move(vampire), animatedId);
 }
 
