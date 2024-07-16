@@ -1,6 +1,6 @@
 #include "music.hpp"
 #include <iostream>
-
+#include "framework/common.hpp"
 SoundPlayer::SoundPlayer() : initialized(false), playing(false) {}
 
 SoundPlayer::~SoundPlayer() {
@@ -34,7 +34,7 @@ void SoundPlayer::playSound(const std::string& file) {
     }
 
     playing = true;
-    playbackThread = std::thread(&SoundPlayer::playSoundInternal, this, file);
+    playbackThread = std::thread(&SoundPlayer::playSoundInternal, this, Common::absolutePath(file));
 }
 
 void SoundPlayer::stopSound() {

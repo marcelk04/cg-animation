@@ -24,7 +24,7 @@
 #include "framework/gl/program.hpp"
 #include "framework/gl/texture.hpp"
 #include "framework/gl/framebuffer.hpp"
-
+#include "music.hpp"
 #include <vector>
 #include <memory>
 
@@ -79,4 +79,7 @@ private:
 
     float elapsedTime;
     float renderDuration;
+
+    SoundPlayer soundPlayer;
+    bool soundPlayed;
 };

@@ -18,16 +18,18 @@ using namespace glm;
 #include <typeinfo>
 
 MainApp::MainApp()
-    : App(1200, 800),
-      cam(std::make_shared<MovingCamera>(glm::vec3(0.0f, 10.0f, 20.0f), glm::vec3(0.0f, 5.0f, 0.0f))),
-      renderer(cam, resolution),
-      lightDir(glm::vec3(1.0f, 1.0f, 1.0f)),
-      model("rigged_model/sadly.dae"),
-      animation("rigged_model/sadly.dae", &model),
-      animator(&animation),
-      elapsedTime(0.0f),
-      renderDuration(100.0f)
-      {
+        : App(1200, 800),
+          cam(std::make_shared<MovingCamera>(glm::vec3(0.0f, 10.0f, 20.0f), glm::vec3(0.0f, 5.0f, 0.0f))),
+          renderer(cam, resolution),
+          lightDir(glm::vec3(1.0f, 1.0f, 1.0f)),
+          model("rigged_model/sadly.dae"),
+          animation("rigged_model/sadly.dae", &model),
+          animator(&animation),
+          elapsedTime(0.0f),
+          renderDuration(100.0f),
+          soundPlayer(),
+          soundPlayed(false)
+{
     App::setTitle("cgintro"); // set title
     App::setVSync(true); // Limit framerate
 
@@ -49,6 +51,10 @@ MainApp::MainApp()
 
     renderer.setScene(scene);
     renderer.updateCamUniforms();
+
+    if (!soundPlayer.init()) {
+        std::cerr << "Failed to initialize SoundPlayer" << std::endl;
+    }
 }
 
 void MainApp::init() {
@@ -57,10 +63,13 @@ void MainApp::init() {
 
     Common::randomSeed();
 }
+
 void MainApp::resetRenderTimer(float duration) {
     elapsedTime = 0.0f;
     renderDuration = duration;
+    soundPlayed = false; // Reset soundPlayed flag
 }
+
 void MainApp::buildImGui() {
     ImGui::StatisticsWindow(delta, resolution);
 
@@ -71,7 +80,7 @@ void MainApp::buildImGui() {
         }
     }
 
-    float exposure= renderer.getExposure();
+    float exposure = renderer.getExposure();
     ImGui::SliderFloat("Exposure", &exposure, 0.0f, 2.0f);
     renderer.setExposure(exposure);
 
@@ -85,28 +94,32 @@ void MainApp::buildImGui() {
 }
 
 void MainApp::render() {
-    if (elapsedTime < renderDuration) {
-    renderer.update(delta);
-    animator.update(delta);
+    std::cout << "elapsedTime: " << elapsedTime << std::endl;
+    if (elapsedTime < 50) {
+        if (!soundPlayed) {
+            soundPlayer.playSound("/home/timnogga/CLionProjects/cg-animation/music/music.mp3"); // Start music playback
+            soundPlayed = true;
+        }
+        renderer.update(delta);
+        animator.update(delta);
 
-    if (cam->updateIfChanged()) {
-        renderer.updateCamUniforms();
-    }
+        if (cam->updateIfChanged()) {
+            renderer.updateCamUniforms();
+        }
 
-    const auto& transforms = animator.getFinalBoneMatrices();
+        const auto& transforms = animator.getFinalBoneMatrices();
 
+        for (int i = 0; i < transforms.size(); i++) {
+            animated->set("uFinalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
+        }
 
-    for (int i = 0; i < transforms.size(); i++) {
-		animated->set("uFinalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
-    }
-
-    renderer.draw();
-    elapsedTime += delta;
-    }
-    else {
+        renderer.draw();
+        elapsedTime += delta;
+    } else {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    }
+        soundPlayer.stopSound();
 
+    }
 }
 
 void MainApp::keyCallback(Key key, Action action) {
@@ -116,20 +129,15 @@ void MainApp::keyCallback(Key key, Action action) {
 
     if (key == Key::W) {
         cam->move(delta * cameraSpeed * cam->getDirection());
-    }
-    else if (key == Key::S) {
+    } else if (key == Key::S) {
         cam->move(-delta * cameraSpeed * cam->getDirection());
-    }
-    else if (key == Key::A) {
+    } else if (key == Key::A) {
         cam->move(-delta * cameraSpeed * cam->getRight());
-    }
-    else if (key == Key::D) {
+    } else if (key == Key::D) {
         cam->move(delta * cameraSpeed * cam->getRight());
-    }
-    else if (key == Key::SPACE) {
+    } else if (key == Key::SPACE) {
         cam->move(delta * cameraSpeed * glm::vec3(0.0f, 1.0f, 0.0f));
-    }
-    else if (key == Key::LEFT_SHIFT) {
+    } else if (key == Key::LEFT_SHIFT) {
         cam->move(delta * cameraSpeed * glm::vec3(0.0f, -1.0f, 0.0f));
     }
 }
@@ -215,4 +223,3 @@ void MainApp::createRenderObjects() {
     houseObj.setScale(1.0f);
     //scene->addRenderObject(std::move(houseObj), texturedGeomNormalsId);
 }
-
