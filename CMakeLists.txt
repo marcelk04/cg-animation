@@ -33,6 +33,7 @@ set(SRC
         src/framework/gl/shader.cpp
         src/framework/gl/texture.cpp
         src/framework/gl/vertexarray.cpp
+        src/music.cpp
 )
 set(INCLUDE
         src/
@@ -170,6 +171,10 @@ include_directories(${ASSIMP_INCLUDE_DIRS})
 
 # SDL2 and SDL2_mixer
 # SDL2 and SDL2_mixer
+find_package(SDL2 REQUIRED)
+find_package(SDL2_mixer REQUIRED)
+include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_MIXER_INCLUDE_DIRS})
+
 find_package(SDL2 REQUIRED)
 find_package(SDL2_mixer REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_MIXER_INCLUDE_DIRS})
