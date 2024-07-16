@@ -20,7 +20,7 @@ float generateLifetime() {
 }
 
 void ParticleSystem::init() {
-    particles.resize(200000);
+    particles.resize(60000);
 
     int i = 0;
 

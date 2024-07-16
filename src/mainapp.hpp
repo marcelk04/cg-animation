@@ -34,7 +34,7 @@ public:
 
 protected:
     void init() override;
-    void buildImGui() override;
+    //void buildImGui() override;
     void render() override;
     void keyCallback(Key key, Action action) override;
     void scrollCallback(float amount) override;
@@ -46,6 +46,7 @@ protected:
     void loadObjects();
     void loadTextures();
     void initParticleSystem();
+    void createCameraPaths();
     void createMaterials();
     void createLights();
     void createRenderObjects();
@@ -55,14 +56,20 @@ private:
     bool showControlPoints = false;
 
     Renderer renderer;
-    uint32_t sceneIdx = 0;
+    int sceneIdx = -1;
     std::vector<std::shared_ptr<Scene>> scenes;
 
-    std::shared_ptr<Scene> houseScene;
-    std::shared_ptr<Scene> lightningScene;
-    std::shared_ptr<Scene> sadScene;
+    std::shared_ptr<Scene> scene0; // normal house
+    std::shared_ptr<Scene> scene1; // lightning strikes
+    std::shared_ptr<Scene> scene2; // fire
+    std::shared_ptr<Scene> scene3; // ruined house
+    std::shared_ptr<Scene> scene4; // opengl super bible
+    std::shared_ptr<Scene> scene5; // happy end
+    std::shared_ptr<Scene> scene6; // happy end part 2
 
+    Material groundMaterial;
     Material lightningMaterial;
+    Material bookMaterial;
 
     glm::vec3 lightDir;
 

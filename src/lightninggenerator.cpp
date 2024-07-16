@@ -11,7 +11,7 @@ std::vector<LightningGenerator::Segment> LightningGenerator::genBolt(glm::vec3 s
 	Segment s{ startpoint, endpoint };
 	segmentList.push_back(s);
 
-	float offsetAmount = 0.2f;
+	float offsetAmount = 5.0f;
 	float offshootOffsetAmount = 1.25f * offsetAmount;
 	float lengthScale = 0.7f;
 	float offshotChance = 0.3f;

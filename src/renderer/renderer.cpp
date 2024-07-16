@@ -188,7 +188,7 @@ void Renderer::directionalShadowPass(Scene& scene) {
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glCullFace(GL_FRONT);
-
+	
 	drawScene(scene);
 
 	glViewport(0, 0, m_Resolution.x, m_Resolution.y);
@@ -212,6 +212,7 @@ void Renderer::geometryPass(Scene& scene) {
 	m_GBuffer.bind();
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
+	glClearColor(0.2f, 0.3f, 0.8f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	drawScene(scene);
@@ -228,6 +229,8 @@ void Renderer::geometryPass(Scene& scene) {
 			controlPoint.draw(m_SimpleGeometryShader);
 		}
 	}
+
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
 void Renderer::lightingPass(bool enableDShadows, bool enableOShadows) {
