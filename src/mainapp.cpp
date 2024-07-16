@@ -22,9 +22,6 @@ MainApp::MainApp()
           cam(std::make_shared<MovingCamera>(glm::vec3(0.0f, 10.0f, 20.0f), glm::vec3(0.0f, 5.0f, 0.0f))),
           renderer(cam, resolution),
           lightDir(glm::vec3(1.0f, 1.0f, 1.0f)),
-          model("rigged_model/sadly.dae"),
-          animation("rigged_model/sadly.dae", &model),
-          animator(&animation),
           elapsedTime(0.0f),
           renderDuration(100.0f),
           soundPlayer(),
@@ -37,6 +34,10 @@ MainApp::MainApp()
 
     cam->setResolution(resolution);
 
+    ResourceManager::loadAnimationModel("rigged_model/dancing_vampire.dae", "model");
+    ResourceManager::loadAnimation("rigged_model/dancing_vampire.dae", "model", "model_anim");
+    animator = Animator(&ResourceManager::getAnimation("model_anim"));
+
     loadShaders();
     loadObjects();
     loadTextures();
@@ -46,8 +47,6 @@ MainApp::MainApp()
     createMaterials();
     createLights();
     createRenderObjects();
-
-    scene->addAnimationModel(std::move(model), animatedId);
 
     renderer.setScene(scene);
     renderer.updateCamUniforms();
@@ -217,9 +216,14 @@ void MainApp::createLights() {
 }
 
 void MainApp::createRenderObjects() {
-    RenderObject houseObj("house");
+    RenderObject houseObj;
+    houseObj.setMesh("house");
     houseObj.setDiffuseTexture("diffuse");
     houseObj.setNormalTexture("normal");
     houseObj.setScale(1.0f);
     //scene->addRenderObject(std::move(houseObj), texturedGeomNormalsId);
+
+    RenderObject vampire;
+    vampire.setAnimationModel("model");
+    scene->addRenderObject(std::move(vampire), animatedId);
 }

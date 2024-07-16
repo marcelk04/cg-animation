@@ -2,6 +2,10 @@
 
 #include "framework/common.hpp"
 
+Animator::Animator() 
+    : Animator(nullptr) {
+}
+
 Animator::Animator(Animation* animation) {
     m_CurrentAnimation = animation;
     m_CurrentTime = 0.0f;

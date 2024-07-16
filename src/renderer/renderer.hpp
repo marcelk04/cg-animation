@@ -71,7 +71,6 @@ private:
 	std::vector<std::shared_ptr<Program>> m_Programs;
 
 	Mesh m_Quad;
-	Mesh m_Sphere;
 
 	bool m_ShowCameraControlPoints;
 	Program m_SimpleGeometryShader;

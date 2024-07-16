@@ -5,13 +5,15 @@
 
 #include <iostream>
 
-RenderObject::RenderObject(Mesh& mesh)
-	: m_Mesh(mesh), m_Material(std::nullopt), m_Position(glm::vec3(0.0f)), m_Scale(1.0f), m_Rotation(glm::angleAxis(0.0f, glm::vec3(1.0f))), m_DiffuseTexture(std::nullopt), m_NormalTexture(std::nullopt) {
+RenderObject::RenderObject()
+	: m_Mesh(std::nullopt),
+	  m_AnimationModel(std::nullopt),
+	  m_Position(glm::vec3(0.0f)),
+	  m_Scale(1.0f),
+	  m_Rotation(glm::angleAxis(0.0f, glm::vec3(1.0f))),
+	  m_DiffuseTexture(std::nullopt),
+	  m_NormalTexture(std::nullopt) {
 	setModelMatrix(glm::mat4(1.0f));
-}
-
-RenderObject::RenderObject(const std::string& meshname)
-	: RenderObject(ResourceManager::getMesh(meshname)) {
 }
 
 void RenderObject::draw(Program& program) {
@@ -32,7 +34,21 @@ void RenderObject::draw(Program& program) {
 		ResourceManager::getTexture(m_NormalTexture.value()).bind(Texture::Type::TEX2D, 1);
 	}
 
-	m_Mesh.draw();
+	if (m_Mesh.has_value()) {
+		ResourceManager::getMesh(*m_Mesh).draw();
+	}
+
+	if (m_AnimationModel.has_value()) {
+		ResourceManager::getAnimationModel(*m_AnimationModel).draw(program);
+	}
+}
+
+void RenderObject::setMesh(const std::string& meshname) {
+	m_Mesh = std::make_optional<std::string>(meshname);
+}
+
+void RenderObject::setAnimationModel(const std::string& modelname) {
+	m_AnimationModel = std::make_optional<std::string>(modelname);
 }
 
 void RenderObject::setPosition(const glm::vec3& position) {

@@ -1,5 +1,6 @@
 #include "renderer/renderer.hpp"
 
+#include "resourcemanager.hpp"
 #include "framework/common.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -42,7 +43,7 @@ Renderer::Renderer(std::shared_ptr<MovingCamera> cam, const glm::vec2& resolutio
 
 	m_Quad.load(vertices, indices);
 
-	m_Sphere.load("meshes/highpolysphere.obj");
+	ResourceManager::loadMesh("meshes/highpolysphere.obj", "sphere");
 }
 
 void Renderer::update(float dt) {
@@ -300,11 +301,6 @@ void Renderer::drawScene(Scene& scene) {
 		for (RenderObject& object : scene.getRenderObjects(i)) {
 			object.draw(*program);
 		}
-
-		// draw all animated models that use this shader
-		for (AnimationModel& model : scene.getAnimationModels(i)) {
-			model.draw(*program);
-		}
 	}
 }
 
@@ -410,7 +406,8 @@ void Renderer::regenerateCameraControlRenderObjects() {
 	// movement control points
 	for (const auto& curve : camController.getMovementControlPoints()) {
 		for (const auto& point : curve) {
-			RenderObject obj(m_Sphere);
+			RenderObject obj;
+			obj.setMesh("sphere");
 			obj.setPosition(point);
 			obj.setScale(0.1f);
 			obj.setMaterial(movementPointMaterial);
@@ -421,7 +418,8 @@ void Renderer::regenerateCameraControlRenderObjects() {
 	// target control points
 	for (const auto& curve : camController.getTargetControlPoints()) {
 		for (const auto& point : curve) {
-			RenderObject obj(m_Sphere);
+			RenderObject obj;
+			obj.setMesh("sphere");
 			obj.setPosition(point);
 			obj.setScale(0.1f);
 			obj.setMaterial(targetPointMaterial);

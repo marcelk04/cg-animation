@@ -37,7 +37,7 @@ private:
     void loadModel(const std::string& path);
 
     void processNode(aiNode* node, const aiScene* scene);
-    Mesh processMesh(aiMesh* mesh, const aiScene* scene);
+    std::string processMesh(aiMesh* mesh, const aiScene* scene);
 
     void extractBoneWeightForVertices(std::vector<Mesh::VertexPCNTB>& vertices, aiMesh* mesh, const aiScene* scene);
 
@@ -45,7 +45,7 @@ private:
     void setVertexBoneData(Mesh::VertexPCNTB& vertex, int boneID, float weight) const;
 
 private:
-    std::vector<Mesh> m_Meshes;
+    std::vector<std::string> m_Meshes;
     std::map<std::string, BoneInfo> m_BoneInfoMap;
     int m_BoneCounter = 0;
 };
