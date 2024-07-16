@@ -19,7 +19,7 @@ using namespace glm;
 
 MainApp::MainApp()
         : App(1200, 800),
-          cam(std::make_shared<MovingCamera>(glm::vec3(0.0f, 10.0f, 20.0f), glm::vec3(0.0f, 5.0f, 0.0f))),
+          cam(std::make_shared<MovingCamera>(glm::vec3(10.0f, 10.0f, 40.0f), glm::vec3(0.0f, 5.0f, 10.0f))),
           renderer(cam, resolution),
           lightDir(glm::vec3(1.0f, 1.0f, 1.0f)),
           elapsedTime(0.0f),
@@ -29,6 +29,9 @@ MainApp::MainApp()
 {
     App::setTitle("cgintro"); // set title
     App::setVSync(true); // Limit framerate
+
+    houseScene = std::make_shared<Scene>();
+    sadScene = std::make_shared<Scene>();
 
     cam->setResolution(resolution);
 
@@ -93,6 +96,12 @@ void MainApp::render() {
 //            soundPlayer.playSound("music/music.mp3"); // Start music playback
 //            soundPlayed = true;
 //        }
+
+    if (elapsedTime > 8.0f && elapsedTime < 8.5f) {
+        sceneIdx = 1;
+        Animation* anim = &ResourceManager::getAnimation("sadly_anim");
+        animator.playAnimation(anim);
+    }
 
     renderer.setScene(scenes[sceneIdx]);
 
@@ -202,15 +211,20 @@ void MainApp::createMaterials() {
 void MainApp::createLights() {
     lightDir = glm::vec3(0.1f, 1.0f, 0.5f);
 
-    DirLight dirLight;
-    dirLight.setDirection(lightDir);
-    dirLight.setColor(glm::vec3(0.5f));
-    houseScene->setDirLight(std::move(dirLight));
+    DirLight dirLight0;
+    dirLight0.setDirection(lightDir);
+    dirLight0.setColor(glm::vec3(0.5f));
+    houseScene->setDirLight(std::move(dirLight0));
+
+    DirLight dirLight1;
+    dirLight1.setDirection(lightDir);
+    dirLight1.setColor(glm::vec3(0.5f));
+    sadScene->setDirLight(std::move(dirLight1));
 
     PointLight light0;
     light0.setPosition(glm::vec3(20.0f, 20.0f, 20.0f));
     light0.setColor(glm::vec3(1.0f));
-    houseScene->addPointLight(std::move(light0));
+    //houseScene->addPointLight(std::move(light0));
 }
 
 void MainApp::createRenderObjects() {
@@ -230,6 +244,7 @@ void MainApp::createRenderObjects() {
 
     RenderObject sadly;
     sadly.setAnimationModel("sadly");
-    sadly.setPosition(glm::vec3(3.0f, 0.0f, 3.0f));
+    sadly.setPosition(glm::vec3(0.0f, 0.0f, 30.0f));
+    sadly.setRotation(glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     sadScene->addRenderObject(std::move(sadly), animatedId);
 }

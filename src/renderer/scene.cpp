@@ -29,7 +29,7 @@ size_t Scene::addRenderObject(RenderObject&& renderObject, size_t programId) {
 }
 
 void Scene::setDirLight(DirLight&& dirLight) {
-	m_DirLight = std::make_optional<DirLight>(dirLight);
+	m_DirLight = std::make_optional<DirLight>(std::move(dirLight));
 }
 
 bool Scene::addPointLight(PointLight&& pointLight) {

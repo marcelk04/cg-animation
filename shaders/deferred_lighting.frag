@@ -45,7 +45,8 @@ uniform vec3 uShadowLightPos;
 uniform float uFar;
 uniform vec3 uCamPos;
 uniform mat4 uLightSpaceMatrix;
-uniform bool uEnableShadows;
+uniform bool uEnableDShadows;
+uniform bool uEnableOShadows;
 
 float dShadowCalculation(vec4 lightSpaceFragPos, float bias) {
 	vec3 projCoords = lightSpaceFragPos.xyz / lightSpaceFragPos.w;
@@ -157,15 +158,18 @@ void main() {
 	// shadow casting
 	float shadow = 0.0;
 
-	if (uEnableShadows) {
+	if (uEnableDShadows) {
 		float dBias = max(0.05 * (1.0 - dot(normal, uDirLight.direction)), 0.005);
 		vec4 lightSpaceFragPos = uLightSpaceMatrix * vec4(fragPos, 1.0);
 
 		shadow += 0.75 * dShadowCalculation(lightSpaceFragPos, dBias);
-		shadow += 0.75 * oShadowCalculation(fragPos);
-
-		shadow = min(shadow, 0.9);
 	}
+
+	if (uEnableOShadows) {
+		shadow += 0.75 * oShadowCalculation(fragPos);
+	}
+
+	shadow = min(shadow, 0.9);
 
 	result = (1 - shadow) * result;
 

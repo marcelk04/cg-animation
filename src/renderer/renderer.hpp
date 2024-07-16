@@ -51,7 +51,7 @@ private:
 	void directionalShadowPass(Scene& scene);
 	void omnidirectionalShadowPass(Scene& scene);
 	void geometryPass(Scene& scene);
-	void lightingPass(bool enableShadows);
+	void lightingPass(bool enableDShadows, bool enableOShadows);
 	int blurPass(int amount);
 	void hdrPass(int blurBuffer, float exposure, float gamma);
 

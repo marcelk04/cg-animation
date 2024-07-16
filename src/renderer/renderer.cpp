@@ -64,7 +64,7 @@ void Renderer::draw() {
 
 	geometryPass(*m_Scene);
 
-	lightingPass(m_Scene->getDirLight().has_value());
+	lightingPass(m_Scene->getDirLight().has_value(), m_Scene->getRenderObjects().size() > 0);
 
 	int blurBuffer = blurPass(m_BlurAmount);
 
@@ -230,7 +230,7 @@ void Renderer::geometryPass(Scene& scene) {
 	}
 }
 
-void Renderer::lightingPass(bool enableShadows) {
+void Renderer::lightingPass(bool enableDShadows, bool enableOShadows) {
 	m_ColorBuffer.bind();
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
@@ -243,7 +243,8 @@ void Renderer::lightingPass(bool enableShadows) {
 	m_OShadowCubeMap.bind(Texture::Type::CUBE_MAP, 4);
 
 	m_LightingShader.set("uCamPos", m_Cam->getPosition());
-	m_LightingShader.set("uEnableShadows", enableShadows);
+	m_LightingShader.set("uEnableDShadows", enableDShadows);
+	m_LightingShader.set("uEnableOShadows", enableOShadows);
 	m_LightingShader.bind();
 
 	m_Quad.draw();
