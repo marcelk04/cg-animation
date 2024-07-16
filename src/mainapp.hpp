@@ -73,8 +73,6 @@ private:
     std::shared_ptr<Program> animated;
     size_t animatedId;
 
-    AnimationModel model;
-    Animation animation;
     Animator animator;
 
     float elapsedTime;

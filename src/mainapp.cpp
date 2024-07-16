@@ -34,9 +34,9 @@ MainApp::MainApp()
 
     cam->setResolution(resolution);
 
-    ResourceManager::loadAnimationModel("rigged_model/dancing_vampire.dae", "model");
-    ResourceManager::loadAnimation("rigged_model/dancing_vampire.dae", "model", "model_anim");
-    animator = Animator(&ResourceManager::getAnimation("model_anim"));
+    ResourceManager::loadAnimationModel("rigged_model/sadly.dae", "sadly");
+    ResourceManager::loadAnimation("rigged_model/sadly.dae", "sadly", "sadly_anim");
+    animator = Animator(&ResourceManager::getAnimation("sadly_anim"));
 
     loadShaders();
     loadObjects();
@@ -96,7 +96,7 @@ void MainApp::render() {
     std::cout << "elapsedTime: " << elapsedTime << std::endl;
     if (elapsedTime < 50) {
         if (!soundPlayed) {
-            soundPlayer.playSound("/home/timnogga/CLionProjects/cg-animation/music/music.mp3"); // Start music playback
+            soundPlayer.playSound("music/music.mp3"); // Start music playback
             soundPlayed = true;
         }
         renderer.update(delta);
@@ -223,7 +223,7 @@ void MainApp::createRenderObjects() {
     houseObj.setScale(1.0f);
     //scene->addRenderObject(std::move(houseObj), texturedGeomNormalsId);
 
-    RenderObject vampire;
-    vampire.setAnimationModel("model");
-    scene->addRenderObject(std::move(vampire), animatedId);
+    RenderObject sadly;
+    sadly.setAnimationModel("sadly");
+    scene->addRenderObject(std::move(sadly), animatedId);
 }
