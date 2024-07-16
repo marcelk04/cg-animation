@@ -40,6 +40,7 @@ protected:
     void scrollCallback(float amount) override;
     void moveCallback(const vec2& movement, bool leftButton, bool rightButton, bool middleButton) override;
     void resizeCallback(const vec2& resolution) override;
+    void resetRenderTimer(float duration);
 
     void loadShaders();
     void loadObjects();
@@ -75,4 +76,7 @@ private:
     AnimationModel model;
     Animation animation;
     Animator animator;
+
+    float elapsedTime;
+    float renderDuration;
 };

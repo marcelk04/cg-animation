@@ -24,7 +24,10 @@ MainApp::MainApp()
       lightDir(glm::vec3(1.0f, 1.0f, 1.0f)),
       model("rigged_model/dancing_vampire.dae"),
       animation("rigged_model/dancing_vampire.dae", &model),
-      animator(&animation) {
+      animator(&animation),
+      elapsedTime(0.0f),
+      renderDuration(5.0f)
+      {
     App::setTitle("cgintro"); // set title
     App::setVSync(true); // Limit framerate
 
@@ -54,7 +57,10 @@ void MainApp::init() {
 
     Common::randomSeed();
 }
-
+void MainApp::resetRenderTimer(float duration) {
+    elapsedTime = 0.0f;
+    renderDuration = duration;
+}
 void MainApp::buildImGui() {
     ImGui::StatisticsWindow(delta, resolution);
 
@@ -79,6 +85,7 @@ void MainApp::buildImGui() {
 }
 
 void MainApp::render() {
+    if (elapsedTime < renderDuration) {
     renderer.update(delta);
     animator.update(delta);
 
@@ -88,11 +95,18 @@ void MainApp::render() {
 
     const auto& transforms = animator.getFinalBoneMatrices();
 
+
     for (int i = 0; i < transforms.size(); i++) {
 		animated->set("uFinalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
     }
 
     renderer.draw();
+    elapsedTime += delta;
+    }
+    else {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+
 }
 
 void MainApp::keyCallback(Key key, Action action) {
