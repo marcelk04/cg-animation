@@ -38,8 +38,8 @@ MainApp::MainApp()
 
     cam->setResolution(resolution);
 
-    ResourceManager::loadAnimationModel("rigged_model/sadly.dae", "sadly");
-    ResourceManager::loadAnimation("rigged_model/sadly.dae", "sadly", "sadly_anim");
+    ResourceManager::loadAnimationModel("rigged_model/happy.dae", "sadly");
+    ResourceManager::loadAnimation("rigged_model/happy.dae", "sadly", "sadly_anim");
     animator = Animator(&ResourceManager::getAnimation("sadly_anim"));
 
     loadShaders();
@@ -64,6 +64,8 @@ MainApp::MainApp()
     }
 }
 
+
+
 void MainApp::init() {
     glDepthFunc(GL_LESS);
     glEnable(GL_CULL_FACE);
@@ -75,7 +77,7 @@ void MainApp::resetRenderTimer(float duration) {
     soundPlayed = false; // Reset soundPlayed flag
 }
 
-void MainApp::buildImGui() {
+/*void MainApp::buildImGui() {
     ImGui::StatisticsWindow(delta, resolution);
 
     float exposure = renderer.getExposure();
@@ -89,7 +91,7 @@ void MainApp::buildImGui() {
     int blurAmount = renderer.getBlurAmount();
     ImGui::SliderInt("Blur Amount", &blurAmount, 2, 20);
     renderer.setBlurAmount(blurAmount);
-}
+}*/
 
 void MainApp::render() {
 //    std::cout << "elapsedTime: " << elapsedTime << std::endl;
