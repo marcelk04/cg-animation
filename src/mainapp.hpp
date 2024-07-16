@@ -24,7 +24,7 @@
 #include "framework/gl/program.hpp"
 #include "framework/gl/texture.hpp"
 #include "framework/gl/framebuffer.hpp"
-
+#include "music.hpp"
 #include <vector>
 #include <memory>
 
@@ -40,6 +40,7 @@ protected:
     void scrollCallback(float amount) override;
     void moveCallback(const vec2& movement, bool leftButton, bool rightButton, bool middleButton) override;
     void resizeCallback(const vec2& resolution) override;
+    void resetRenderTimer(float duration);
 
     void loadShaders();
     void loadObjects();
@@ -75,4 +76,10 @@ private:
     AnimationModel model;
     Animation animation;
     Animator animator;
+
+    float elapsedTime;
+    float renderDuration;
+
+    SoundPlayer soundPlayer;
+    bool soundPlayed;
 };

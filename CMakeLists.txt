@@ -33,6 +33,7 @@ set(SRC
         src/framework/gl/shader.cpp
         src/framework/gl/texture.cpp
         src/framework/gl/vertexarray.cpp
+        src/music.cpp
 )
 set(INCLUDE
         src/
@@ -91,7 +92,6 @@ include(FetchContent)
 # GLFW
 FetchContent_Declare(
         glfw
-        #GIT_REPOSITORY https://github.com/glfw/glfw.git
         GIT_TAG 3.3
         URL https://github.com/glfw/glfw/archive/refs/tags/3.3.tar.gz
         EXCLUDE_FROM_ALL
@@ -105,7 +105,6 @@ FetchContent_MakeAvailable(glfw)
 # GLAD
 FetchContent_Declare(
         glad
-        #GIT_REPOSITORY https://github.com/Dav1dde/glad.git
         GIT_TAG v0.1.36
         URL https://github.com/Dav1dde/glad/archive/v0.1.36.tar.gz
         EXCLUDE_FROM_ALL
@@ -116,7 +115,6 @@ FetchContent_MakeAvailable(glad)
 add_compile_definitions(GLM_FORCE_RADIANS)
 FetchContent_Declare(
         glm
-        #GIT_REPOSITORY https://github.com/g-truc/glm.git
         GIT_TAG 1.0.1
         URL https://github.com/g-truc/glm/archive/1.0.1.tar.gz
         EXCLUDE_FROM_ALL
@@ -126,7 +124,6 @@ FetchContent_MakeAvailable(glm)
 # ImGui
 FetchContent_Declare(
         imgui
-        #GIT_REPOSITORY https://github.com/ocornut/imgui.git
         GIT_TAG v1.90.4
         URL https://github.com/ocornut/imgui/archive/v1.90.4.tar.gz
         EXCLUDE_FROM_ALL
@@ -149,7 +146,6 @@ target_link_libraries(imgui_glfw glfw)
 # tinyobjloader
 FetchContent_Declare(
         tinyobjloader
-        #GIT_REPOSITORY https://github.com/tinyobjloader/tinyobjloader.git
         GIT_TAG v2.0.0rc13
         URL https://github.com/tinyobjloader/tinyobjloader/archive/v2.0.0rc13.tar.gz
         EXCLUDE_FROM_ALL
@@ -173,6 +169,16 @@ target_include_directories(stb_impl INTERFACE ${stb_SOURCE_DIR})
 find_package(assimp REQUIRED)
 include_directories(${ASSIMP_INCLUDE_DIRS})
 
+# SDL2 and SDL2_mixer
+# SDL2 and SDL2_mixer
+find_package(SDL2 REQUIRED)
+find_package(SDL2_mixer REQUIRED)
+include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_MIXER_INCLUDE_DIRS})
+
+find_package(SDL2 REQUIRED)
+find_package(SDL2_mixer REQUIRED)
+include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_MIXER_INCLUDE_DIRS})
+
 # Add executable
 add_executable(${PROJECT_NAME}
         ${SRC}
@@ -181,8 +187,9 @@ add_executable(${PROJECT_NAME}
 )
 target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE})
 
-target_link_libraries(${PROJECT_NAME} glad glfw glm imgui_glfw tinyobjloader stb_impl assimp)
+target_link_libraries(${PROJECT_NAME} glad glfw glm imgui_glfw tinyobjloader stb_impl assimp ${SDL2_LIBRARIES} SDL2_mixer)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_BINARY_DIR}/src/)
+
 
 configure_file("src/config.hpp.in" "src/config.hpp")
 
