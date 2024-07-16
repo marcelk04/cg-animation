@@ -59,7 +59,10 @@ private:
     std::vector<std::shared_ptr<Scene>> scenes;
 
     std::shared_ptr<Scene> houseScene;
+    std::shared_ptr<Scene> lightningScene;
     std::shared_ptr<Scene> sadScene;
+
+    Material lightningMaterial;
 
     glm::vec3 lightDir;
 

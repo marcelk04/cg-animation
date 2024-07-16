@@ -27,10 +27,13 @@ MainApp::MainApp()
           soundPlayer(),
           soundPlayed(false)
 {
+    Common::randomSeed();
+
     App::setTitle("cgintro"); // set title
     App::setVSync(true); // Limit framerate
 
     houseScene = std::make_shared<Scene>();
+    lightningScene = std::make_shared<Scene>();
     sadScene = std::make_shared<Scene>();
 
     cam->setResolution(resolution);
@@ -50,6 +53,7 @@ MainApp::MainApp()
     createRenderObjects();
 
     scenes.push_back(houseScene);
+    scenes.push_back(lightningScene);
     scenes.push_back(sadScene);
 
     renderer.setScene(scenes[sceneIdx]);
@@ -63,8 +67,6 @@ MainApp::MainApp()
 void MainApp::init() {
     glDepthFunc(GL_LESS);
     glEnable(GL_CULL_FACE);
-
-    Common::randomSeed();
 }
 
 void MainApp::resetRenderTimer(float duration) {
@@ -97,8 +99,12 @@ void MainApp::render() {
 //            soundPlayed = true;
 //        }
 
-    if (elapsedTime > 8.0f && elapsedTime < 8.5f) {
+    if (elapsedTime > 5.0f && elapsedTime < 5.5f) {
         sceneIdx = 1;
+    }
+
+    if (elapsedTime > 6.0f && elapsedTime < 6.5f) {
+        sceneIdx = 2;
         Animation* anim = &ResourceManager::getAnimation("sadly_anim");
         animator.playAnimation(anim);
     }
@@ -190,6 +196,12 @@ void MainApp::loadObjects() {
     ResourceManager::loadMesh("meshes/highpolysphere.obj", "sphere");
     ResourceManager::loadMesh("meshes/bunny.obj", "bunny");
     ResourceManager::loadMesh("meshes/cottage.obj", "house");
+
+    auto lightningData = LightningGenerator::genBolt(glm::vec3(-5.0f, 25.0f, 15.0f), glm::vec3(0.0f, 10.0f, 5.0f), 6, cam->getDirection());
+    auto lightningMeshData = LightningGenerator::genMeshData(lightningData, cam->getDirection());
+    Mesh lightningMesh;
+    lightningMesh.load(lightningMeshData.first, lightningMeshData.second);
+    ResourceManager::addMesh(std::move(lightningMesh), "lightning");
 }
 
 void MainApp::loadTextures() {
@@ -201,11 +213,14 @@ void MainApp::initParticleSystem() {
     ParticleSystem ps;
     ps.init();
 
-    //scene->setParticleSystem(std::move(ps));
+    sadScene->setParticleSystem(std::move(ps));
 }
 
 void MainApp::createMaterials() {
-
+    lightningMaterial = {
+        glm::vec3(5.0f, 5.0f, 7.0f),
+        0.0f
+    };
 }
 
 void MainApp::createLights() {
@@ -219,7 +234,12 @@ void MainApp::createLights() {
     DirLight dirLight1;
     dirLight1.setDirection(lightDir);
     dirLight1.setColor(glm::vec3(0.5f));
-    sadScene->setDirLight(std::move(dirLight1));
+    lightningScene->setDirLight(std::move(dirLight1));
+
+    DirLight dirLight2;
+    dirLight2.setDirection(lightDir);
+    dirLight2.setColor(glm::vec3(0.5f));
+    sadScene->setDirLight(std::move(dirLight2));
 
     PointLight light0;
     light0.setPosition(glm::vec3(20.0f, 20.0f, 20.0f));
@@ -234,6 +254,18 @@ void MainApp::createRenderObjects() {
     houseObj.setNormalTexture("house_normal");
     houseObj.setScale(1.0f);
     houseScene->addRenderObject(std::move(houseObj), texturedGeomNormalsId);
+
+    RenderObject houseObj1;
+    houseObj1.setMesh("house");
+    houseObj1.setDiffuseTexture("house_diffuse");
+    houseObj1.setNormalTexture("house_normal");
+    houseObj1.setScale(1.0f);
+    lightningScene->addRenderObject(std::move(houseObj1), texturedGeomNormalsId);
+
+    RenderObject lightningObj;
+    lightningObj.setMesh("lightning");
+    lightningObj.setMaterial(lightningMaterial);
+    lightningScene->addRenderObject(std::move(lightningObj), simpleGeomId);
 
     RenderObject houseObj2;
     houseObj2.setMesh("house");

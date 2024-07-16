@@ -58,7 +58,7 @@ std::vector<LightningGenerator::Segment> LightningGenerator::genBolt(glm::vec3 s
 }
 
 LightningGenerator::MeshData LightningGenerator::genMeshData(const std::vector<Segment>& segments, const glm::vec3& camDir) {
-	float halfwidth = 0.02f;
+	float halfwidth = 0.1f;
 
 	std::vector<Mesh::VertexPCN> vertices(segments.size() * 4);
 	std::vector<uint32_t> indices(segments.size() * 6);
