@@ -194,6 +194,7 @@ void App::resizeCallback(const vec2& resolution) {}
 void App::buildImGui() {}
 
 void App::run() {
+    int i = 0;
     init();
     resizeCallback(resolution);
     frames = 0;
