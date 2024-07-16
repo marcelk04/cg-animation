@@ -30,8 +30,6 @@ MainApp::MainApp()
     App::setTitle("cgintro"); // set title
     App::setVSync(true); // Limit framerate
 
-    scene = std::make_shared<Scene>();
-
     cam->setResolution(resolution);
 
     ResourceManager::loadAnimationModel("rigged_model/sadly.dae", "sadly");
@@ -48,7 +46,10 @@ MainApp::MainApp()
     createLights();
     createRenderObjects();
 
-    renderer.setScene(scene);
+    scenes.push_back(houseScene);
+    scenes.push_back(sadScene);
+
+    renderer.setScene(scenes[sceneIdx]);
     renderer.updateCamUniforms();
 
     if (!soundPlayer.init()) {
@@ -72,13 +73,6 @@ void MainApp::resetRenderTimer(float duration) {
 void MainApp::buildImGui() {
     ImGui::StatisticsWindow(delta, resolution);
 
-    if (scene->getDirLight().has_value()) {
-        if (ImGui::SphericalSlider("Light direction", lightDir)) {
-            scene->getDirLight()->setDirection(lightDir);
-            renderer.updateLightingUniforms();
-        }
-    }
-
     float exposure = renderer.getExposure();
     ImGui::SliderFloat("Exposure", &exposure, 0.0f, 2.0f);
     renderer.setExposure(exposure);
@@ -93,32 +87,36 @@ void MainApp::buildImGui() {
 }
 
 void MainApp::render() {
-    std::cout << "elapsedTime: " << elapsedTime << std::endl;
-    if (elapsedTime < 50) {
-        if (!soundPlayed) {
-            soundPlayer.playSound("music/music.mp3"); // Start music playback
-            soundPlayed = true;
-        }
-        renderer.update(delta);
-        animator.update(delta);
+//    std::cout << "elapsedTime: " << elapsedTime << std::endl;
+//    if (elapsedTime < 50) {
+//        if (!soundPlayed) {
+//            soundPlayer.playSound("music/music.mp3"); // Start music playback
+//            soundPlayed = true;
+//        }
 
-        if (cam->updateIfChanged()) {
-            renderer.updateCamUniforms();
-        }
+    renderer.setScene(scenes[sceneIdx]);
 
-        const auto& transforms = animator.getFinalBoneMatrices();
+    renderer.update(delta);
+    animator.update(delta);
 
-        for (int i = 0; i < transforms.size(); i++) {
-            animated->set("uFinalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
-        }
-
-        renderer.draw();
-        elapsedTime += delta;
-    } else {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        soundPlayer.stopSound();
-
+    if (cam->updateIfChanged()) {
+        renderer.updateCamUniforms();
     }
+
+    const auto& transforms = animator.getFinalBoneMatrices();
+
+    for (int i = 0; i < transforms.size(); i++) {
+        animated->set("uFinalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
+    }
+
+    renderer.draw();
+    elapsedTime += delta;
+
+//    } else {
+//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//        soundPlayer.stopSound();
+//
+//    }
 }
 
 void MainApp::keyCallback(Key key, Action action) {
@@ -186,8 +184,8 @@ void MainApp::loadObjects() {
 }
 
 void MainApp::loadTextures() {
-    ResourceManager::loadTexture("textures/cottage_diffuse.png", "diffuse");
-    ResourceManager::loadTexture("textures/cottage_normal.png", "normal");
+    ResourceManager::loadTexture("textures/cottage_diffuse.png", "house_diffuse");
+    ResourceManager::loadTexture("textures/cottage_normal.png", "house_normal");
 }
 
 void MainApp::initParticleSystem() {
@@ -207,23 +205,31 @@ void MainApp::createLights() {
     DirLight dirLight;
     dirLight.setDirection(lightDir);
     dirLight.setColor(glm::vec3(0.5f));
-    scene->setDirLight(std::move(dirLight));
+    houseScene->setDirLight(std::move(dirLight));
 
     PointLight light0;
     light0.setPosition(glm::vec3(20.0f, 20.0f, 20.0f));
     light0.setColor(glm::vec3(1.0f));
-    scene->addPointLight(std::move(light0));
+    houseScene->addPointLight(std::move(light0));
 }
 
 void MainApp::createRenderObjects() {
     RenderObject houseObj;
     houseObj.setMesh("house");
-    houseObj.setDiffuseTexture("diffuse");
-    houseObj.setNormalTexture("normal");
+    houseObj.setDiffuseTexture("house_diffuse");
+    houseObj.setNormalTexture("house_normal");
     houseObj.setScale(1.0f);
-    //scene->addRenderObject(std::move(houseObj), texturedGeomNormalsId);
+    houseScene->addRenderObject(std::move(houseObj), texturedGeomNormalsId);
+
+    RenderObject houseObj2;
+    houseObj2.setMesh("house");
+    houseObj2.setDiffuseTexture("house_diffuse");
+    houseObj2.setNormalTexture("house_normal");
+    houseObj2.setScale(1.0f);
+    sadScene->addRenderObject(std::move(houseObj2), texturedGeomNormalsId);
 
     RenderObject sadly;
     sadly.setAnimationModel("sadly");
-    scene->addRenderObject(std::move(sadly), animatedId);
+    sadly.setPosition(glm::vec3(3.0f, 0.0f, 3.0f));
+    sadScene->addRenderObject(std::move(sadly), animatedId);
 }

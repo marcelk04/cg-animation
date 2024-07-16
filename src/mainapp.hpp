@@ -55,7 +55,11 @@ private:
     bool showControlPoints = false;
 
     Renderer renderer;
-    std::shared_ptr<Scene> scene;
+    uint32_t sceneIdx = 0;
+    std::vector<std::shared_ptr<Scene>> scenes;
+
+    std::shared_ptr<Scene> houseScene;
+    std::shared_ptr<Scene> sadScene;
 
     glm::vec3 lightDir;
 

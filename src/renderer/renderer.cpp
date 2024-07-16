@@ -47,7 +47,9 @@ Renderer::Renderer(std::shared_ptr<MovingCamera> cam, const glm::vec2& resolutio
 }
 
 void Renderer::update(float dt) {
-	m_Scene->update(dt);
+	if (m_Scene != nullptr) {
+		m_Scene->update(dt);
+	}
 }
 
 void Renderer::draw() {
