@@ -22,11 +22,11 @@ MainApp::MainApp()
       cam(std::make_shared<MovingCamera>(glm::vec3(0.0f, 10.0f, 20.0f), glm::vec3(0.0f, 5.0f, 0.0f))),
       renderer(cam, resolution),
       lightDir(glm::vec3(1.0f, 1.0f, 1.0f)),
-      model("rigged_model/dancing_vampire.dae"),
-      animation("rigged_model/dancing_vampire.dae", &model),
+      model("rigged_model/sadly.dae"),
+      animation("rigged_model/sadly.dae", &model),
       animator(&animation),
       elapsedTime(0.0f),
-      renderDuration(5.0f)
+      renderDuration(100.0f)
       {
     App::setTitle("cgintro"); // set title
     App::setVSync(true); // Limit framerate
