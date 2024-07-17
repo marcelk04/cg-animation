@@ -50,6 +50,20 @@ void Scene::setParticleSystem(ParticleSystem&& particleSystem) {
 	m_ParticleSystem = std::make_optional<ParticleSystem>(std::move(particleSystem));
 }
 
+bool Scene::removeRenderObject(size_t programId, size_t objectId) {
+	if (programId >= m_RenderObjects.size()) {
+		return false;
+	}
+
+	if (objectId >= m_RenderObjects[programId].size()) {
+		return false;
+	}
+
+	m_RenderObjects[programId].erase(m_RenderObjects[programId].begin() + objectId);
+
+	return true;
+}
+
 std::vector<std::vector<RenderObject>>& Scene::getRenderObjects() {
 	return m_RenderObjects;
 }

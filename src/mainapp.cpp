@@ -98,41 +98,54 @@ void MainApp::render() {
 //            soundPlayed = true;
 //        }
 
-    if (elapsedTime > 82.0f && sceneIdx == 5) {
+    if (sceneIdx == 5 && elapsedTime > currSceneStart + sceneDuration[sceneIdx]) {
         sceneIdx = 6;
+        currSceneStart = elapsedTime;
         std::cout << "Loading scene 6\n";
 
         animator.playAnimation(&ResourceManager::getAnimation("happy_boy_anim"));
     }
-    else if (elapsedTime > 72.0f && sceneIdx == 4) {
+    else if (sceneIdx == 4 && elapsedTime > currSceneStart + sceneDuration[sceneIdx]) {
         sceneIdx = 5;
+        currSceneStart = elapsedTime;
         std::cout << "Loading scene 5\n";
 
         animator.playAnimation(&ResourceManager::getAnimation("happy_boy_anim"));
     }
-    else if (elapsedTime > 51.0f && sceneIdx == 2) {
+    else if (sceneIdx == 2 && elapsedTime > currSceneStart + sceneDuration[sceneIdx]) {
         sceneIdx = 4;
+        currSceneStart = elapsedTime;
         std::cout << "Loading scene 4\n";
 
         animator.playAnimation(nullptr);
     }
-    else if (elapsedTime > 31.0f && sceneIdx == 1) {
+    else if (sceneIdx == 1 && elapsedTime > currSceneStart + sceneDuration[sceneIdx]) {
         sceneIdx = 2;
+        currSceneStart = elapsedTime;
         std::cout << "Loading scene 2\n";
 
         animator.playAnimation(&ResourceManager::getAnimation("sad_boy_anim"));
     }
-    else if (elapsedTime > 30.0f && sceneIdx == 0) {
+    else if (sceneIdx == 0 && elapsedTime > currSceneStart + sceneDuration[sceneIdx]) {
         sceneIdx = 1;
+        currSceneStart = elapsedTime;
         std::cout << "Loading scene 1\n";
 
         animator.playAnimation(nullptr);
     }
     else if (elapsedTime >= 0.0f && sceneIdx == -1) {
         sceneIdx = 0;
+        currSceneStart = elapsedTime;
         std::cout << "Loading scene 0\n";
 
         animator.playAnimation(&ResourceManager::getAnimation("happy_boy_anim"));
+    }
+
+    // update lightning meshes
+    if (sceneIdx == 1) {
+        if (elapsedTime - currSceneStart > 0.3f) scene1->getRenderObject(simpleGeomId, lightningObjId).setMesh("lightning1");
+        if (elapsedTime - currSceneStart > 0.6f) scene1->getRenderObject(simpleGeomId, lightningObjId).setMesh("lightning2");
+        if (elapsedTime - currSceneStart > 0.9f) scene1->removeRenderObject(simpleGeomId, lightningObjId);
     }
 
     renderer.setScene(scenes[sceneIdx]);
@@ -237,11 +250,13 @@ void MainApp::loadObjects() {
     ResourceManager::loadMesh("meshes/cottage.obj", "house");
     ResourceManager::loadMesh("meshes/ruined_building.obj", "ruin");
 
-    auto lightningData = LightningGenerator::genBolt(glm::vec3(-5.0f, 60.0f, 15.0f), glm::vec3(0.0f, 10.0f, 5.0f), 7, cam->getDirection());
-    auto lightningMeshData = LightningGenerator::genMeshData(lightningData, cam->getDirection());
-    Mesh lightningMesh;
-    lightningMesh.load(lightningMeshData.first, lightningMeshData.second);
-    ResourceManager::addMesh(std::move(lightningMesh), "lightning");
+    for (uint32_t i = 0; i < 3; i++) { // generate 3 bolts
+        auto lightningMeshData = LightningGenerator::genMeshData(glm::vec3(-5.0f, 60.0f, 15.0f), glm::vec3(0.0f, 10.0f, 5.0f), 7, cam->getDirection());
+        Mesh lightningMesh;
+        lightningMesh.load(lightningMeshData.first, lightningMeshData.second);
+        ResourceManager::addMesh(std::move(lightningMesh), "lightning" + std::to_string(i));
+    }
+
 }
 
 void MainApp::loadTextures() {
@@ -292,10 +307,27 @@ void MainApp::createCameraPaths() {
 
     scene0->setCameraController(std::move(c0));
 
+    // scene 1
+    Spline sc1;
+    sc1.addCurve({
+        glm::vec3(-10.0f, 20.0f, 40.0f),
+        glm::vec3(-12.0f, 15.0f, 39.0f)
+    });
+
+    Spline se1;
+    se1.addCurve({
+        glm::vec3(0.0f, 30.0f, 0.0f),
+        glm::vec3(0.0f, 25.0f, 0.0f)
+    });
+
+    CameraController c1(cam, std::move(sc1), std::move(se1), 1.5f);
+
+    scene1->setCameraController(std::move(c1));
+
     // scene 2
     Spline sc2;
     sc2.addCurve({
-        glm::vec3(-10.0f, 20.0f, 40.0f),
+        glm::vec3(-12.0f, 15.0f, 39.0f),
         glm::vec3(-30.0f, 10.0f, 30.0f),
         glm::vec3(-40.0f, 0.0f, 30.0f),
         glm::vec3(-20.0f, 3.0f, 20.0f)
@@ -303,7 +335,7 @@ void MainApp::createCameraPaths() {
 
     Spline se2;
     se2.addCurve({
-        glm::vec3(0.0f, 30.0f, 0.0f),
+        glm::vec3(0.0f, 25.0f, 0.0f),
         glm::vec3(0.0f, -10.0f, 0.0f),
         glm::vec3(0.0f, 0.0f, 10.0f),
         glm::vec3(0.0f, 5.0f, 40.0f)
@@ -463,9 +495,9 @@ void MainApp::createRenderObjects() {
     scene1->addRenderObject(std::move(sad0), animatedId);
 
     RenderObject lightning0;
-    lightning0.setMesh("lightning");
+    lightning0.setMesh("lightning0");
     lightning0.setMaterial("lightning");
-    scene1->addRenderObject(std::move(lightning0), simpleGeomId);
+    lightningObjId = scene1->addRenderObject(std::move(lightning0), simpleGeomId);
 
     // scene 2
     RenderObject house2;
