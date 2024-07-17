@@ -67,10 +67,6 @@ private:
     std::shared_ptr<Scene> scene5; // happy end
     std::shared_ptr<Scene> scene6; // happy end part 2
 
-    Material groundMaterial;
-    Material lightningMaterial;
-    Material bookMaterial;
-
     glm::vec3 lightDir;
 
     std::shared_ptr<Texture> tex;

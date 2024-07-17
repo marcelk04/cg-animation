@@ -2,6 +2,7 @@
 
 #include "dark_animations/animationmodel.hpp"
 #include "dark_animations/animation.hpp"
+#include "renderer/renderobject.hpp"
 #include "framework/mesh.hpp"
 #include "framework/gl/texture.hpp"
 #include "framework/gl/shader.hpp"
@@ -28,9 +29,13 @@ public:
 	static void addAnimation(Animation&& animation, const std::string& name);
 	static Animation& getAnimation(const std::string& name);
 
+	static void addMaterial(const Material& material, const std::string& name);
+	static Material& getMaterial(const std::string& name);
+
 private:
 	static std::unordered_map<std::string, Texture> s_Textures;
 	static std::unordered_map<std::string, Mesh> s_Meshes;
 	static std::unordered_map<std::string, AnimationModel> s_AnimationModels;
 	static std::unordered_map<std::string, Animation> s_Animations;
+	static std::unordered_map<std::string, Material> s_Materials;
 };

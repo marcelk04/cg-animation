@@ -26,7 +26,7 @@ public:
 	void draw(Program& program);
 
 	glm::mat4& getModelMatrix() { return m_Model; }
-	std::optional<Material> getMaterial() const { return m_Material; }
+	std::optional<std::string> getMaterial() const { return m_Material; }
 	std::optional<std::string> getDiffuseTexture() { return m_DiffuseTexture; }
 	std::optional<std::string> getNormalTexture() { return m_NormalTexture; }
 
@@ -37,7 +37,7 @@ public:
 	void setRotation(const float angle, const glm::vec3& axis);
 	void setRotation(const glm::quat& rotation);
 	void setModelMatrix(const glm::mat4& model);
-	void setMaterial(const Material& material);
+	void setMaterial(const std::string& material);
 	void setDiffuseTexture(const std::string& texturename);
 	void setNormalTexture(const std::string& texturename);
 
@@ -52,7 +52,7 @@ private:
 	float m_Scale;
 	glm::quat m_Rotation;
 
-	std::optional<Material> m_Material;
+	std::optional<std::string> m_Material;
 
 	std::optional<std::string> m_DiffuseTexture;
 	std::optional<std::string> m_NormalTexture;

@@ -360,20 +360,9 @@ void MainApp::createCameraPaths() {
 }
 
 void MainApp::createMaterials() {
-    groundMaterial = {
-        glm::vec3(0.4f, 1.0f, 0.5f),
-        0.0f
-    };
-
-    lightningMaterial = {
-        glm::vec3(5.0f, 5.0f, 7.0f),
-        0.0f
-    };
-
-    bookMaterial = {
-        glm::vec3(10.0f),
-        1.0f
-    };
+    ResourceManager::addMaterial({ glm::vec3(0.4f, 1.0f, 0.5f), 0.0f }, "ground");
+    ResourceManager::addMaterial({ glm::vec3(5.0f, 5.0f, 10.0f), 0.0f }, "lightning");
+    ResourceManager::addMaterial({ glm::vec3(10.0f), 1.0f }, "book");
 }
 
 void MainApp::createLights() {
@@ -462,7 +451,7 @@ void MainApp::createRenderObjects() {
 
     RenderObject lightning0;
     lightning0.setMesh("lightning");
-    lightning0.setMaterial(lightningMaterial);
+    lightning0.setMaterial("lightning");
     scene1->addRenderObject(std::move(lightning0), simpleGeomId);
 
     // scene 2
