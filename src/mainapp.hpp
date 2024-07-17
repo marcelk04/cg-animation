@@ -86,6 +86,9 @@ private:
     std::shared_ptr<Program> animated;
     size_t animatedId;
 
+    std::shared_ptr<Program> tiledGeom;
+    size_t tiledGeomId;
+
     Animator animator;
 
     float elapsedTime;

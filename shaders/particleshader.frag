@@ -21,8 +21,8 @@ void main()
 //        u_StartColor = vec4(1.0, 0.5, 0.0, 1.0); // Orange
 //        u_EndColor = vec4(1.0, 0.0, 0.0, 1.0);   // Red
 //    }
-    u_StartColor = vec4(1.0, 0.5, 0.0, 1.0); // Orange
-    u_EndColor = vec4(1.0, 0.0, 0.0, 1.0);   // Red
+    u_StartColor = vec4(2.0, 1.0, 0.0, 1.0); // Orange
+    u_EndColor = vec4(2.0, 0.0, 0.0, 1.0);   // Red
 
     //o_Color = mix(u_EndColor, u_StartColor, v_Lifetime);
 

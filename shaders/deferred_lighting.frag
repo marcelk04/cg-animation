@@ -162,14 +162,12 @@ void main() {
 		float dBias = max(0.05 * (1.0 - dot(normal, uDirLight.direction)), 0.005);
 		vec4 lightSpaceFragPos = uLightSpaceMatrix * vec4(fragPos, 1.0);
 
-		shadow += 0.75 * dShadowCalculation(lightSpaceFragPos, dBias);
+		shadow += 0.5 * dShadowCalculation(lightSpaceFragPos, dBias);
 	}
 
 	if (uEnableOShadows) {
-		shadow += 0.75 * oShadowCalculation(fragPos);
+		shadow += 0.5 * oShadowCalculation(fragPos);
 	}
-
-	shadow = min(shadow, 0.9);
 
 	result = (1 - shadow) * result;
 

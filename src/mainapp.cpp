@@ -240,6 +240,12 @@ void MainApp::loadShaders() {
     animated = std::make_shared<Program>();
     animated->load("assimpshader.vert", "assimpshader.frag");
     animatedId = renderer.addProgram(animated);
+
+    tiledGeom = std::make_shared<Program>();
+    tiledGeom->load("tiled_textured_geometry.vert", "tiled_textured_geometry.frag");
+    tiledGeom->bindTextureUnit("uDiffuseTexture", 0);
+    tiledGeom->set("uTileFactor", 40.0f);
+    tiledGeomId = renderer.addProgram(tiledGeom);
 }
 
 void MainApp::loadObjects() {
@@ -265,7 +271,7 @@ void MainApp::loadTextures() {
     ResourceManager::loadTexture("textures/text.jpg", "ruin_diffuse");
     ResourceManager::loadTexture("textures/normalmap.jpg", "ruin_normal");
     ResourceManager::loadTexture("textures/superbible.jpg", "superbible");
-    ResourceManager::loadTexture("textures/grass.jpg", "grass");
+    ResourceManager::loadTexture("textures/grass_tileable.jpg", "grass");
 }
 
 void MainApp::initParticleSystem() {
@@ -406,7 +412,7 @@ void MainApp::createCameraPaths() {
 
 void MainApp::createMaterials() {
     ResourceManager::addMaterial({ glm::vec3(0.4f, 1.0f, 0.5f), 0.0f }, "ground");
-    ResourceManager::addMaterial({ glm::vec3(5.0f, 5.0f, 10.0f), 0.0f }, "lightning");
+    ResourceManager::addMaterial({ glm::vec3(8.0f, 8.0f, 15.0f), 0.0f }, "lightning");
     ResourceManager::addMaterial({ glm::vec3(10.0f), 1.0f }, "book");
 }
 
@@ -425,11 +431,31 @@ void MainApp::createLights() {
     dir1.setColor(glm::vec3(0.5f));
     scene1->setDirLight(std::move(dir1));
 
+    PointLight p1;
+    p1.setPosition(glm::vec3(0.0f, 12.5f, 5.0f));
+    p1.setColor(glm::vec3(10.0f, 9.0f, 15.0f));
+    scene1->addPointLight(std::move(p1));
+
     // scene 2
     DirLight dir2;
     dir2.setDirection(lightDir);
     dir2.setColor(glm::vec3(0.5f));
     scene2->setDirLight(std::move(dir2));
+
+    PointLight p2;
+    p2.setPosition(glm::vec3(-3.0f, 4.0f, 7.0f));
+    p2.setColor(glm::vec3(3.0f, 1.0f, 0.0f));
+    scene2->addPointLight(std::move(p2));
+
+    PointLight p20;
+    p20.setPosition(glm::vec3(-8.0f, 3.0f, 7.0f));
+    p20.setColor(glm::vec3(2.6f, 0.9f, 0.0f));
+    scene2->addPointLight(std::move(p20));
+
+    PointLight p21;
+    p21.setPosition(glm::vec3(2.0f, 3.0f, 7.0f));
+    p21.setColor(glm::vec3(3.1f, 1.1f, 0.0f));
+    scene2->addPointLight(std::move(p21));
 
     // scene 4
     DirLight dir4;
@@ -439,14 +465,19 @@ void MainApp::createLights() {
 
     PointLight p4;
     p4.setPosition(glm::vec3(0.5f, 0.5f, 0.5f));
-    p4.setColor(glm::vec3(0.0f));
-    //scene4->addPointLight(std::move(p4));
+    p4.setColor(glm::vec3(5.0f));
+    scene4->addPointLight(std::move(p4));
 
     // scene 5
     DirLight dir5;
     dir5.setDirection(lightDir);
     dir5.setColor(glm::vec3(0.5f));
     scene5->setDirLight(std::move(dir5));
+
+    PointLight p5;
+    p5.setPosition(glm::vec3(0.5f, 0.5f, 0.5f));
+    p5.setColor(glm::vec3(5.0f));
+    scene5->addPointLight(std::move(p5));
 
     // scene 6
     DirLight dir6;
@@ -467,7 +498,7 @@ void MainApp::createRenderObjects() {
     ground0.setMesh("plane");
     ground0.setDiffuseTexture("grass");
     ground0.setScale(200.0f);
-    scene0->addRenderObject(std::move(ground0), texturedGeomId);
+    scene0->addRenderObject(std::move(ground0), tiledGeomId);
 
     RenderObject happy0;
     happy0.setAnimationModel("happy_boy");
@@ -486,7 +517,7 @@ void MainApp::createRenderObjects() {
     ground1.setMesh("plane");
     ground1.setDiffuseTexture("grass");
     ground1.setScale(200.0f);
-    scene1->addRenderObject(std::move(ground1), texturedGeomId);
+    scene1->addRenderObject(std::move(ground1), tiledGeomId);
 
     RenderObject sad0;
     sad0.setAnimationModel("sad_boy");
@@ -510,7 +541,7 @@ void MainApp::createRenderObjects() {
     ground2.setMesh("plane");
     ground2.setDiffuseTexture("grass");
     ground2.setScale(200.0f);
-    scene2->addRenderObject(std::move(ground2), texturedGeomId);
+    scene2->addRenderObject(std::move(ground2), tiledGeomId);
 
     RenderObject sad1;
     sad1.setAnimationModel("sad_boy");
@@ -531,7 +562,7 @@ void MainApp::createRenderObjects() {
     ground4.setMesh("plane");
     ground4.setDiffuseTexture("grass");
     ground4.setScale(200.0f);
-    scene4->addRenderObject(std::move(ground4), texturedGeomId);
+    scene4->addRenderObject(std::move(ground4), tiledGeomId);
 
     RenderObject sad3;
     sad3.setAnimationModel("sad_boy");
@@ -559,7 +590,7 @@ void MainApp::createRenderObjects() {
     ground5.setMesh("plane");
     ground5.setDiffuseTexture("grass");
     ground5.setScale(200.0f);
-    scene5->addRenderObject(std::move(ground5), texturedGeomId);
+    scene5->addRenderObject(std::move(ground5), tiledGeomId);
 
     RenderObject happy5;
     happy5.setAnimationModel("happy_boy");
@@ -585,7 +616,7 @@ void MainApp::createRenderObjects() {
     ground6.setMesh("plane");
     ground6.setDiffuseTexture("grass");
     ground6.setScale(200.0f);
-    scene6->addRenderObject(std::move(ground6), texturedGeomId);
+    scene6->addRenderObject(std::move(ground6), tiledGeomId);
 
     RenderObject happy6;
     happy6.setAnimationModel("happy_boy");
