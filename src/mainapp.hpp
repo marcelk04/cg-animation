@@ -90,4 +90,6 @@ private:
 
     SoundPlayer soundPlayer;
     bool soundPlayed;
+
+    bool animationRunning = false;
 };

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "resourcemanager.hpp"
+#include "renderer/material.hpp"
 #include "cinematic_engine/movingcamera.hpp"
 #include "dark_animations/animationmodel.hpp"
 #include "framework/mesh.hpp"
@@ -14,10 +15,6 @@
 #include <optional>
 #include <string>
 
-struct Material {
-	glm::vec3 diffuse;
-	float specular;
-};
 
 class RenderObject {
 public:

@@ -136,6 +136,7 @@ void MainApp::render() {
     }
 
     renderer.setScene(scenes[sceneIdx]);
+    scenes[sceneIdx]->getCameraController()->setEnabled(animationRunning);
 
     renderer.update(delta);
     animator.update(delta);
@@ -151,7 +152,9 @@ void MainApp::render() {
     }
 
     renderer.draw();
-    elapsedTime += delta;
+    if (animationRunning) {
+        elapsedTime += delta;
+    }
 
 //    } else {
 //        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -177,6 +180,8 @@ void MainApp::keyCallback(Key key, Action action) {
         cam->move(delta * cameraSpeed * glm::vec3(0.0f, 1.0f, 0.0f));
     } else if (key == Key::LEFT_SHIFT) {
         cam->move(delta * cameraSpeed * glm::vec3(0.0f, -1.0f, 0.0f));
+    } else if (key == Key::F) {
+        animationRunning = !animationRunning;
     }
 }
 

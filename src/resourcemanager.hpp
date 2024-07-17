@@ -2,7 +2,7 @@
 
 #include "dark_animations/animationmodel.hpp"
 #include "dark_animations/animation.hpp"
-#include "renderer/renderobject.hpp"
+#include "renderer/material.hpp"
 #include "framework/mesh.hpp"
 #include "framework/gl/texture.hpp"
 #include "framework/gl/shader.hpp"

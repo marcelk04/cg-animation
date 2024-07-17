@@ -396,15 +396,8 @@ void Renderer::regenerateCameraControlRenderObjects() {
 
 	CameraController& camController = m_Scene->getCameraController().value();
 
-	Material movementPointMaterial{
-		glm::vec3(0.1f, 0.9f, 0.2f),
-		0.0f
-	};
-
-	Material targetPointMaterial{
-		glm::vec3(1.0f, 0.1f, 0.2f),
-		0.0f
-	};
+	ResourceManager::addMaterial({ glm::vec3(0.1f, 0.9f, 0.2f), 0.0f }, "movementPoint");
+	ResourceManager::addMaterial({ glm::vec3(1.0f, 0.1f, 0.2f), 0.0f }, "targetPoint");
 
 	// remove old points
 	m_CameraControlRenderObjects.clear();
@@ -416,7 +409,7 @@ void Renderer::regenerateCameraControlRenderObjects() {
 			obj.setMesh("sphere");
 			obj.setPosition(point);
 			obj.setScale(0.1f);
-			obj.setMaterial(movementPointMaterial);
+			obj.setMaterial("movementPoint");
 			m_CameraControlRenderObjects.push_back(std::move(obj));
 		}
 	}
@@ -428,7 +421,7 @@ void Renderer::regenerateCameraControlRenderObjects() {
 			obj.setMesh("sphere");
 			obj.setPosition(point);
 			obj.setScale(0.1f);
-			obj.setMaterial(targetPointMaterial);
+			obj.setMaterial("targetPoint");
 			m_CameraControlRenderObjects.push_back(std::move(obj));
 		}
 	}
