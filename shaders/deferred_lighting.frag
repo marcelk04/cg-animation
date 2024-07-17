@@ -53,12 +53,12 @@ float dShadowCalculation(vec4 lightSpaceFragPos, float bias) {
 
 	projCoords = projCoords * 0.5 + 0.5;
 
+	float currentDepth = projCoords.z;
+
 	// if outside of shadow map, skip fragment
-	if (projCoords.z > 1.0) {
+	if (currentDepth > 1.0) {
 		return 0.0;
 	}
-
-	float currentDepth = projCoords.z;
 
 	float shadow = 0.0;
 	vec2 texelSize = 1.0 / textureSize(uDShadowMap, 0);

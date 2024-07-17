@@ -163,6 +163,14 @@ void MainApp::render() {
 //    }
 }
 
+
+//void MainApp::buildImGui() {
+//    if (ImGui::SphericalSlider("Light direction", lightDir)) {
+//        scene0->getDirLight()->setDirection(lightDir);
+//        renderer.updateLightingUniforms();
+//    }
+//}
+
 void MainApp::keyCallback(Key key, Action action) {
     float cameraSpeed = 25.0f;
 
@@ -371,7 +379,7 @@ void MainApp::createMaterials() {
 }
 
 void MainApp::createLights() {
-    lightDir = glm::normalize(glm::vec3(0.1f, 1.0f, 0.5f));
+    lightDir = glm::normalize(glm::vec3(-0.5f, 0.9f, -0.5f));
 
     // scene 0
     DirLight dir0;
