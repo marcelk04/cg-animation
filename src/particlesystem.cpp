@@ -27,9 +27,9 @@ void ParticleSystem::init() {
     for (auto& p : particles) {
         i++;
 
-        float x = Common::randomFloat(-17.0f, 13.0f);
+        float x = Common::randomFloat(-19.0f, 13.0f);
         float y = Common::randomFloat(0.0f, 15.0f);
-        float z = Common::randomFloat(-15.0f, 15.0f);
+        float z = Common::randomFloat(-15.0f, 17.0f);
 
         float vx = Common::randomFloat(-0.25f, 0.25f);
         float vy = Common::randomFloat(0.0f, 0.5f);

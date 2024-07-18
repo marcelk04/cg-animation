@@ -148,16 +148,23 @@ void MainApp::render() {
         sceneIdx = 0;
         currSceneStart = elapsedTime;
         std::cout << "Loading scene 0\n";
-        soundPlayer.playSound("music/music.mp3");
 
         animator.playAnimation(&ResourceManager::getAnimation("happy_boy_anim"));
     }
-  
+
+    if(elapsedTime > 0.0f && sceneIdx == 0 && animationRunning && !soundPlayed){
+        soundPlayer.playSound("music/music.mp3");
+        soundPlayed = true;
+
+    }
     // update lightning meshes
     if (sceneIdx == 1) {
         if (elapsedTime - currSceneStart > 0.3f) scene1->getRenderObject(simpleGeomId, lightningObjId).setMesh("lightning1");
         if (elapsedTime - currSceneStart > 0.6f) scene1->getRenderObject(simpleGeomId, lightningObjId).setMesh("lightning2");
-        if (elapsedTime - currSceneStart > 0.9f) scene1->removeRenderObject(simpleGeomId, lightningObjId);
+        if (elapsedTime - currSceneStart > 0.9f)  {
+            scene1->removeRenderObject(simpleGeomId, lightningObjId);
+            scene1->removePointLight(0);
+        }
     }
 
     renderer.setScene(scenes[sceneIdx]);
@@ -266,7 +273,7 @@ void MainApp::loadShaders() {
 }
 
 void MainApp::loadObjects() {
-    ResourceManager::loadMesh("meshes/cube.obj", "cube");
+    ResourceManager::loadMesh("meshes/static_book.obj", "cube");
     ResourceManager::loadMesh("meshes/plane.obj", "plane");
     ResourceManager::loadMesh("meshes/highpolysphere.obj", "sphere");
     ResourceManager::loadMesh("meshes/bunny.obj", "bunny");
@@ -343,7 +350,7 @@ void MainApp::createCameraPaths() {
         glm::vec3(0.0f, 25.0f, 0.0f)
     });
 
-    CameraController c1(cam, std::move(sc1), std::move(se1), 1.5f);
+    CameraController c1(cam, std::move(sc1), std::move(se1), 3.0f);
 
     scene1->setCameraController(std::move(c1));
 
@@ -590,8 +597,9 @@ void MainApp::createRenderObjects() {
     RenderObject book0;
     book0.setMesh("cube");
     book0.setDiffuseTexture("superbible");
-    book0.setPosition(glm::vec3(0.5f, 0.5f, 0.5f));
-    book0.setScale(0.4f);
+    book0.setPosition(glm::vec3(1.0f, 0.2f, 0.5f));
+    book0.setScale(1.0f);
+    book0.setRotation(glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     scene4->addRenderObject(std::move(book0), texturedGeomId);
 
     // scene 5
@@ -618,8 +626,9 @@ void MainApp::createRenderObjects() {
     RenderObject book1;
     book1.setMesh("cube");
     book1.setDiffuseTexture("superbible");
-    book1.setPosition(glm::vec3(0.5f, 0.5f, 0.5f));
-    book1.setScale(0.4f);
+    book1.setPosition(glm::vec3(1.0f, 0.2f, 0.5f));
+    book1.setScale(1.0f);
+    book1.setRotation(glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     scene5->addRenderObject(std::move(book1), texturedGeomId);
 
     // scene 6

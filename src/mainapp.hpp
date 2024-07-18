@@ -67,7 +67,7 @@ private:
     std::shared_ptr<Scene> scene5; // happy end
     std::shared_ptr<Scene> scene6; // happy end part 2
 
-    std::vector<float> sceneDuration = {30.0f, 1.5f, 20.0f, 0.0f, 21.0f, 20.0f};
+    std::vector<float> sceneDuration = {30.0f, 3.0f, 20.0f, 0.0f, 21.0f, 10.0f};
     float currSceneStart = 0.0f;
 
     glm::vec3 lightDir;

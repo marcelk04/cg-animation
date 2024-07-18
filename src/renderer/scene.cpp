@@ -64,6 +64,16 @@ bool Scene::removeRenderObject(size_t programId, size_t objectId) {
 	return true;
 }
 
+bool Scene::removePointLight(size_t lightId) {
+    if (lightId >= m_PointLights.size()) {
+        return false;
+    }
+
+    m_PointLights.erase(m_PointLights.begin() + lightId);
+
+    return true;
+}
+
 std::vector<std::vector<RenderObject>>& Scene::getRenderObjects() {
 	return m_RenderObjects;
 }
