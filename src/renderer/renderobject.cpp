@@ -22,8 +22,8 @@ void RenderObject::draw(Program& program) {
 	program.set("uNormalMatrix", m_NormalMatrix);
 
 	if (m_Material.has_value()) {
-		program.set("uMaterial.diffuse", m_Material->diffuse);
-		program.set("uMaterial.specular", m_Material->specular);
+		program.set("uMaterial.diffuse", ResourceManager::getMaterial(*m_Material).diffuse);
+		program.set("uMaterial.specular", ResourceManager::getMaterial(*m_Material).specular);
 	}
 
 	if (m_DiffuseTexture.has_value()) {
@@ -80,8 +80,8 @@ void RenderObject::setModelMatrix(const glm::mat4& model) {
 	m_NormalMatrix = glm::mat3(glm::transpose(glm::inverse(model)));
 }
 
-void RenderObject::setMaterial(const Material& material) {
-	m_Material = std::make_optional<Material>(material);
+void RenderObject::setMaterial(const std::string& material) {
+	m_Material = std::make_optional<std::string>(material);
 }
 
 void RenderObject::setDiffuseTexture(const std::string& texturename) {

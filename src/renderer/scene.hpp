@@ -26,6 +26,8 @@ public:
 	void setCameraController(CameraController&& cameraController);
 	void setParticleSystem(ParticleSystem&& particleSystem);
 
+	bool removeRenderObject(size_t programId, size_t objectId); // dangerous, breaks object ids! use at own risk!
+
 	std::vector<std::vector<RenderObject>>& getRenderObjects();
 	std::vector<RenderObject>& getRenderObjects(size_t programId);
 	RenderObject& getRenderObject(size_t programId, size_t objectId);

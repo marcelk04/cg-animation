@@ -56,6 +56,7 @@ private:
 	void hdrPass(int blurBuffer, float exposure, float gamma);
 
 	void drawScene(Scene& scene);
+	void drawScene(Scene& scene, Program& program);
 
 	void generateTextures();
 	void generateTexture(Texture& texture, GLint internalformat, GLenum format, GLenum type) const;
@@ -111,5 +112,5 @@ private:
 
 	float m_Exposure = 1.0f;
 	float m_Gamma = 2.2f;
-	int m_BlurAmount = 6;
+	int m_BlurAmount = 8;
 };

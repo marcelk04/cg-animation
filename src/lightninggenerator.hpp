@@ -16,4 +16,5 @@ namespace LightningGenerator {
 
 	std::vector<Segment> genBolt(glm::vec3 startpoint, glm::vec3 endpoint, int generations, const glm::vec3& camDir);
 	MeshData genMeshData(const std::vector<Segment>& segments, const glm::vec3& camDir);
+	MeshData genMeshData(glm::vec3 startpoint, glm::vec3 endpoint, int generations, const glm::vec3& camDir);
 };

@@ -53,12 +53,12 @@ float dShadowCalculation(vec4 lightSpaceFragPos, float bias) {
 
 	projCoords = projCoords * 0.5 + 0.5;
 
+	float currentDepth = projCoords.z;
+
 	// if outside of shadow map, skip fragment
-	if (projCoords.z > 1.0) {
+	if (currentDepth > 1.0) {
 		return 0.0;
 	}
-
-	float currentDepth = projCoords.z;
 
 	float shadow = 0.0;
 	vec2 texelSize = 1.0 / textureSize(uDShadowMap, 0);
@@ -162,14 +162,12 @@ void main() {
 		float dBias = max(0.05 * (1.0 - dot(normal, uDirLight.direction)), 0.005);
 		vec4 lightSpaceFragPos = uLightSpaceMatrix * vec4(fragPos, 1.0);
 
-		shadow += 0.75 * dShadowCalculation(lightSpaceFragPos, dBias);
+		shadow += 0.5 * dShadowCalculation(lightSpaceFragPos, dBias);
 	}
 
 	if (uEnableOShadows) {
-		shadow += 0.75 * oShadowCalculation(fragPos);
+		shadow += 0.5 * oShadowCalculation(fragPos);
 	}
-
-	shadow = min(shadow, 0.9);
 
 	result = (1 - shadow) * result;
 

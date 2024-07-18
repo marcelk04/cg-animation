@@ -98,56 +98,70 @@ void MainApp::render() {
 //            soundPlayed = true;
 //        }
 
-    if (elapsedTime > 82.0f && sceneIdx == 5) {
+    if (sceneIdx == 5 && elapsedTime > currSceneStart + sceneDuration[sceneIdx]) {
         sceneIdx = 6;
+        currSceneStart = elapsedTime;
         std::cout << "Loading scene 6\n";
 
         animator.playAnimation(&ResourceManager::getAnimation("happy_boy_anim"));
     }
-    else if (elapsedTime > 72.0f && sceneIdx == 4) {
+    else if (sceneIdx == 4 && elapsedTime > currSceneStart + sceneDuration[sceneIdx]) {
         sceneIdx = 5;
+        currSceneStart = elapsedTime;
         std::cout << "Loading scene 5\n";
         soundPlayer.stopSound();
         soundPlayer.playSound("music/party.mp3");
 
         animator.playAnimation(&ResourceManager::getAnimation("happy_boy_anim"));
     }
-
-    else if (elapsedTime > 51.0f && sceneIdx == 2) {
+    else if (sceneIdx == 2 && elapsedTime > currSceneStart + sceneDuration[sceneIdx]) {
         sceneIdx = 4;
+        currSceneStart = elapsedTime;
         std::cout << "Loading scene 4\n";
         soundPlayer.stopSound();
         soundPlayer.playSound("music/hope.mp3");
         animator.playAnimation(nullptr);
     }
-    else if (elapsedTime > 31.0f && sceneIdx == 1) {
+    else if (sceneIdx == 1 && elapsedTime > currSceneStart + sceneDuration[sceneIdx]) {
         sceneIdx = 2;
+        currSceneStart = elapsedTime;
+      
         soundPlayer.stopSound();
         soundPlayer.playSound("music/sad.mp3");
+      
         std::cout << "Loading scene 2\n";
 
         animator.playAnimation(&ResourceManager::getAnimation("sad_boy_anim"));
     }
-
-    else if (elapsedTime > 30.0f && sceneIdx == 0) {
+    else if (sceneIdx == 0 && elapsedTime > currSceneStart + sceneDuration[sceneIdx]) {
+        sceneIdx = 1;
+        currSceneStart = elapsedTime;
+      
         soundPlayer.stopSound();
         soundPlayer.playSound("music/storm lightning and thunder sound effect.mp3");
-        sceneIdx = 1;
+
         std::cout << "Loading scene 1\n";
 
         animator.playAnimation(nullptr);
     }
     else if (elapsedTime >= 0.0f && sceneIdx == -1) {
         sceneIdx = 0;
+        currSceneStart = elapsedTime;
         std::cout << "Loading scene 0\n";
         soundPlayer.playSound("music/music.mp3");
 
         animator.playAnimation(&ResourceManager::getAnimation("happy_boy_anim"));
     }
-
-
+  
+    // update lightning meshes
+    if (sceneIdx == 1) {
+        if (elapsedTime - currSceneStart > 0.3f) scene1->getRenderObject(simpleGeomId, lightningObjId).setMesh("lightning1");
+        if (elapsedTime - currSceneStart > 0.6f) scene1->getRenderObject(simpleGeomId, lightningObjId).setMesh("lightning2");
+        if (elapsedTime - currSceneStart > 0.9f) scene1->removeRenderObject(simpleGeomId, lightningObjId);
+    }
 
     renderer.setScene(scenes[sceneIdx]);
+    scenes[sceneIdx]->getCameraController()->setEnabled(animationRunning);
 
     renderer.update(delta);
     animator.update(delta);
@@ -163,16 +177,29 @@ void MainApp::render() {
     }
 
     renderer.draw();
-    elapsedTime += delta;
+  
+    if (animationRunning) {
+        elapsedTime += delta;
+    }
+  
     if (elapsedTime > 100.0f) {
         soundPlayer.stopSound();
     }
+
 //    } else {
 //        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 //        soundPlayer.stopSound();
 //
 //    }
 }
+
+
+//void MainApp::buildImGui() {
+//    if (ImGui::SphericalSlider("Light direction", lightDir)) {
+//        scene0->getDirLight()->setDirection(lightDir);
+//        renderer.updateLightingUniforms();
+//    }
+//}
 
 void MainApp::keyCallback(Key key, Action action) {
     float cameraSpeed = 25.0f;
@@ -191,6 +218,8 @@ void MainApp::keyCallback(Key key, Action action) {
         cam->move(delta * cameraSpeed * glm::vec3(0.0f, 1.0f, 0.0f));
     } else if (key == Key::LEFT_SHIFT) {
         cam->move(delta * cameraSpeed * glm::vec3(0.0f, -1.0f, 0.0f));
+    } else if (key == Key::F) {
+        animationRunning = !animationRunning;
     }
 }
 
@@ -228,6 +257,12 @@ void MainApp::loadShaders() {
     animated = std::make_shared<Program>();
     animated->load("assimpshader.vert", "assimpshader.frag");
     animatedId = renderer.addProgram(animated);
+
+    tiledGeom = std::make_shared<Program>();
+    tiledGeom->load("tiled_textured_geometry.vert", "tiled_textured_geometry.frag");
+    tiledGeom->bindTextureUnit("uDiffuseTexture", 0);
+    tiledGeom->set("uTileFactor", 40.0f);
+    tiledGeomId = renderer.addProgram(tiledGeom);
 }
 
 void MainApp::loadObjects() {
@@ -238,11 +273,13 @@ void MainApp::loadObjects() {
     ResourceManager::loadMesh("meshes/cottage.obj", "house");
     ResourceManager::loadMesh("meshes/ruined_building.obj", "ruin");
 
-    auto lightningData = LightningGenerator::genBolt(glm::vec3(-5.0f, 60.0f, 15.0f), glm::vec3(0.0f, 10.0f, 5.0f), 7, cam->getDirection());
-    auto lightningMeshData = LightningGenerator::genMeshData(lightningData, cam->getDirection());
-    Mesh lightningMesh;
-    lightningMesh.load(lightningMeshData.first, lightningMeshData.second);
-    ResourceManager::addMesh(std::move(lightningMesh), "lightning");
+    for (uint32_t i = 0; i < 3; i++) { // generate 3 bolts
+        auto lightningMeshData = LightningGenerator::genMeshData(glm::vec3(-5.0f, 60.0f, 15.0f), glm::vec3(0.0f, 10.0f, 5.0f), 7, cam->getDirection());
+        Mesh lightningMesh;
+        lightningMesh.load(lightningMeshData.first, lightningMeshData.second);
+        ResourceManager::addMesh(std::move(lightningMesh), "lightning" + std::to_string(i));
+    }
+
 }
 
 void MainApp::loadTextures() {
@@ -251,7 +288,7 @@ void MainApp::loadTextures() {
     ResourceManager::loadTexture("textures/text.jpg", "ruin_diffuse");
     ResourceManager::loadTexture("textures/normalmap.jpg", "ruin_normal");
     ResourceManager::loadTexture("textures/superbible.jpg", "superbible");
-    ResourceManager::loadTexture("textures/grass.jpg", "grass");
+    ResourceManager::loadTexture("textures/grass_tileable.jpg", "grass");
 }
 
 void MainApp::initParticleSystem() {
@@ -293,10 +330,27 @@ void MainApp::createCameraPaths() {
 
     scene0->setCameraController(std::move(c0));
 
+    // scene 1
+    Spline sc1;
+    sc1.addCurve({
+        glm::vec3(-10.0f, 20.0f, 40.0f),
+        glm::vec3(-12.0f, 15.0f, 39.0f)
+    });
+
+    Spline se1;
+    se1.addCurve({
+        glm::vec3(0.0f, 30.0f, 0.0f),
+        glm::vec3(0.0f, 25.0f, 0.0f)
+    });
+
+    CameraController c1(cam, std::move(sc1), std::move(se1), 1.5f);
+
+    scene1->setCameraController(std::move(c1));
+
     // scene 2
     Spline sc2;
     sc2.addCurve({
-        glm::vec3(-10.0f, 20.0f, 40.0f),
+        glm::vec3(-12.0f, 15.0f, 39.0f),
         glm::vec3(-30.0f, 10.0f, 30.0f),
         glm::vec3(-40.0f, 0.0f, 30.0f),
         glm::vec3(-20.0f, 3.0f, 20.0f)
@@ -304,7 +358,7 @@ void MainApp::createCameraPaths() {
 
     Spline se2;
     se2.addCurve({
-        glm::vec3(0.0f, 30.0f, 0.0f),
+        glm::vec3(0.0f, 25.0f, 0.0f),
         glm::vec3(0.0f, -10.0f, 0.0f),
         glm::vec3(0.0f, 0.0f, 10.0f),
         glm::vec3(0.0f, 5.0f, 40.0f)
@@ -374,24 +428,13 @@ void MainApp::createCameraPaths() {
 }
 
 void MainApp::createMaterials() {
-    groundMaterial = {
-        glm::vec3(0.4f, 1.0f, 0.5f),
-        0.0f
-    };
-
-    lightningMaterial = {
-        glm::vec3(5.0f, 5.0f, 7.0f),
-        0.0f
-    };
-
-    bookMaterial = {
-        glm::vec3(10.0f),
-        1.0f
-    };
+    ResourceManager::addMaterial({ glm::vec3(0.4f, 1.0f, 0.5f), 0.0f }, "ground");
+    ResourceManager::addMaterial({ glm::vec3(8.0f, 8.0f, 15.0f), 0.0f }, "lightning");
+    ResourceManager::addMaterial({ glm::vec3(10.0f), 1.0f }, "book");
 }
 
 void MainApp::createLights() {
-    lightDir = glm::normalize(glm::vec3(0.1f, 1.0f, 0.5f));
+    lightDir = glm::normalize(glm::vec3(-0.5f, 0.9f, -0.5f));
 
     // scene 0
     DirLight dir0;
@@ -405,11 +448,31 @@ void MainApp::createLights() {
     dir1.setColor(glm::vec3(0.5f));
     scene1->setDirLight(std::move(dir1));
 
+    PointLight p1;
+    p1.setPosition(glm::vec3(0.0f, 12.5f, 5.0f));
+    p1.setColor(glm::vec3(10.0f, 9.0f, 15.0f));
+    scene1->addPointLight(std::move(p1));
+
     // scene 2
     DirLight dir2;
     dir2.setDirection(lightDir);
     dir2.setColor(glm::vec3(0.5f));
     scene2->setDirLight(std::move(dir2));
+
+    PointLight p2;
+    p2.setPosition(glm::vec3(-3.0f, 4.0f, 7.0f));
+    p2.setColor(glm::vec3(3.0f, 1.0f, 0.0f));
+    scene2->addPointLight(std::move(p2));
+
+    PointLight p20;
+    p20.setPosition(glm::vec3(-8.0f, 3.0f, 7.0f));
+    p20.setColor(glm::vec3(2.6f, 0.9f, 0.0f));
+    scene2->addPointLight(std::move(p20));
+
+    PointLight p21;
+    p21.setPosition(glm::vec3(2.0f, 3.0f, 7.0f));
+    p21.setColor(glm::vec3(3.1f, 1.1f, 0.0f));
+    scene2->addPointLight(std::move(p21));
 
     // scene 4
     DirLight dir4;
@@ -419,14 +482,19 @@ void MainApp::createLights() {
 
     PointLight p4;
     p4.setPosition(glm::vec3(0.5f, 0.5f, 0.5f));
-    p4.setColor(glm::vec3(0.0f));
-    //scene4->addPointLight(std::move(p4));
+    p4.setColor(glm::vec3(5.0f));
+    scene4->addPointLight(std::move(p4));
 
     // scene 5
     DirLight dir5;
     dir5.setDirection(lightDir);
     dir5.setColor(glm::vec3(0.5f));
     scene5->setDirLight(std::move(dir5));
+
+    PointLight p5;
+    p5.setPosition(glm::vec3(0.5f, 0.5f, 0.5f));
+    p5.setColor(glm::vec3(5.0f));
+    scene5->addPointLight(std::move(p5));
 
     // scene 6
     DirLight dir6;
@@ -447,7 +515,7 @@ void MainApp::createRenderObjects() {
     ground0.setMesh("plane");
     ground0.setDiffuseTexture("grass");
     ground0.setScale(200.0f);
-    scene0->addRenderObject(std::move(ground0), texturedGeomId);
+    scene0->addRenderObject(std::move(ground0), tiledGeomId);
 
     RenderObject happy0;
     happy0.setAnimationModel("happy_boy");
@@ -466,7 +534,7 @@ void MainApp::createRenderObjects() {
     ground1.setMesh("plane");
     ground1.setDiffuseTexture("grass");
     ground1.setScale(200.0f);
-    scene1->addRenderObject(std::move(ground1), texturedGeomId);
+    scene1->addRenderObject(std::move(ground1), tiledGeomId);
 
     RenderObject sad0;
     sad0.setAnimationModel("sad_boy");
@@ -475,9 +543,9 @@ void MainApp::createRenderObjects() {
     scene1->addRenderObject(std::move(sad0), animatedId);
 
     RenderObject lightning0;
-    lightning0.setMesh("lightning");
-    lightning0.setMaterial(lightningMaterial);
-    scene1->addRenderObject(std::move(lightning0), simpleGeomId);
+    lightning0.setMesh("lightning0");
+    lightning0.setMaterial("lightning");
+    lightningObjId = scene1->addRenderObject(std::move(lightning0), simpleGeomId);
 
     // scene 2
     RenderObject house2;
@@ -490,7 +558,7 @@ void MainApp::createRenderObjects() {
     ground2.setMesh("plane");
     ground2.setDiffuseTexture("grass");
     ground2.setScale(200.0f);
-    scene2->addRenderObject(std::move(ground2), texturedGeomId);
+    scene2->addRenderObject(std::move(ground2), tiledGeomId);
 
     RenderObject sad1;
     sad1.setAnimationModel("sad_boy");
@@ -511,7 +579,7 @@ void MainApp::createRenderObjects() {
     ground4.setMesh("plane");
     ground4.setDiffuseTexture("grass");
     ground4.setScale(200.0f);
-    scene4->addRenderObject(std::move(ground4), texturedGeomId);
+    scene4->addRenderObject(std::move(ground4), tiledGeomId);
 
     RenderObject sad3;
     sad3.setAnimationModel("sad_boy");
@@ -539,7 +607,7 @@ void MainApp::createRenderObjects() {
     ground5.setMesh("plane");
     ground5.setDiffuseTexture("grass");
     ground5.setScale(200.0f);
-    scene5->addRenderObject(std::move(ground5), texturedGeomId);
+    scene5->addRenderObject(std::move(ground5), tiledGeomId);
 
     RenderObject happy5;
     happy5.setAnimationModel("happy_boy");
@@ -565,7 +633,7 @@ void MainApp::createRenderObjects() {
     ground6.setMesh("plane");
     ground6.setDiffuseTexture("grass");
     ground6.setScale(200.0f);
-    scene6->addRenderObject(std::move(ground6), texturedGeomId);
+    scene6->addRenderObject(std::move(ground6), tiledGeomId);
 
     RenderObject happy6;
     happy6.setAnimationModel("happy_boy");

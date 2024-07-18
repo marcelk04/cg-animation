@@ -60,7 +60,16 @@ Animation& ResourceManager::getAnimation(const std::string& name) {
 	return s_Animations[name];
 }
 
+void ResourceManager::addMaterial(const Material& material, const std::string& name) {
+	s_Materials[name] = material;
+}
+
+Material& ResourceManager::getMaterial(const std::string& name) {
+	return s_Materials[name];
+}
+
 std::unordered_map<std::string, Texture> ResourceManager::s_Textures;
 std::unordered_map<std::string, Mesh> ResourceManager::s_Meshes;
 std::unordered_map<std::string, AnimationModel> ResourceManager::s_AnimationModels;
 std::unordered_map<std::string, Animation> ResourceManager::s_Animations;
+std::unordered_map<std::string, Material> ResourceManager::s_Materials;

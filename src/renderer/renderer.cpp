@@ -58,13 +58,13 @@ void Renderer::draw() {
 		directionalShadowPass(*m_Scene);
 	}
 
-	if (m_Scene->getRenderObjects().size() > 0) {
+	if (m_Scene->getPointLights().size() > 0) {
 		omnidirectionalShadowPass(*m_Scene);
 	}
 
 	geometryPass(*m_Scene);
 
-	lightingPass(m_Scene->getDirLight().has_value(), m_Scene->getRenderObjects().size() > 0);
+	lightingPass(m_Scene->getDirLight().has_value(), m_Scene->getPointLights().size() > 0);
 
 	int blurBuffer = blurPass(m_BlurAmount);
 
@@ -106,9 +106,11 @@ void Renderer::updateLightingUniforms() {
 		m_LightingShader.set("uDirLight.direction", dirLight.getDirection());
 		m_LightingShader.set("uDirLight.color", dirLight.getColor());
 
-		float nearPlane = 1.0f, farPlane = 7.5f;
-		glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, nearPlane, farPlane);
-		glm::mat4 lightView = glm::lookAt(5.0f * dirLight.getDirection(), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		float nearPlane = 1.0f, farPlane = 50.0f;
+		float borderSize = 40.0f;
+		float camDist = 20.0f;
+		glm::mat4 lightProjection = glm::ortho(-borderSize, borderSize, -borderSize, borderSize, nearPlane, farPlane);
+		glm::mat4 lightView = glm::lookAt(camDist * dirLight.getDirection(), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
 		glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 
@@ -119,6 +121,7 @@ void Renderer::updateLightingUniforms() {
 		m_LightingShader.set("uDirLight.color", glm::vec3(0.0f));
 	}
 
+	// omni directional light
 	if (m_Scene->getPointLights().size() > 0) {
 		PointLight& light = m_Scene->getPointLight(0);
 
@@ -189,7 +192,7 @@ void Renderer::directionalShadowPass(Scene& scene) {
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glCullFace(GL_FRONT);
 	
-	drawScene(scene);
+	drawScene(scene, m_DepthShader);
 
 	glViewport(0, 0, m_Resolution.x, m_Resolution.y);
 	glCullFace(GL_BACK);
@@ -202,7 +205,7 @@ void Renderer::omnidirectionalShadowPass(Scene& scene) {
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glCullFace(GL_FRONT);
 
-	drawScene(scene);
+	drawScene(scene, m_CubeDepthShader);
 
 	glViewport(0, 0, m_Resolution.x, m_Resolution.y);
 	glCullFace(GL_BACK);
@@ -310,6 +313,14 @@ void Renderer::drawScene(Scene& scene) {
 	}
 }
 
+void Renderer::drawScene(Scene& scene, Program& program) {
+	for (size_t i = 0; i < m_Programs.size(); i++) {
+		for (RenderObject& object : scene.getRenderObjects(i)) {
+			object.draw(program);
+		}
+	}
+}
+
 void Renderer::generateTextures() {
 	// directional shadows
 	m_DShadowBuffer.bind();
@@ -396,15 +407,8 @@ void Renderer::regenerateCameraControlRenderObjects() {
 
 	CameraController& camController = m_Scene->getCameraController().value();
 
-	Material movementPointMaterial{
-		glm::vec3(0.1f, 0.9f, 0.2f),
-		0.0f
-	};
-
-	Material targetPointMaterial{
-		glm::vec3(1.0f, 0.1f, 0.2f),
-		0.0f
-	};
+	ResourceManager::addMaterial({ glm::vec3(0.1f, 0.9f, 0.2f), 0.0f }, "movementPoint");
+	ResourceManager::addMaterial({ glm::vec3(1.0f, 0.1f, 0.2f), 0.0f }, "targetPoint");
 
 	// remove old points
 	m_CameraControlRenderObjects.clear();
@@ -416,7 +420,7 @@ void Renderer::regenerateCameraControlRenderObjects() {
 			obj.setMesh("sphere");
 			obj.setPosition(point);
 			obj.setScale(0.1f);
-			obj.setMaterial(movementPointMaterial);
+			obj.setMaterial("movementPoint");
 			m_CameraControlRenderObjects.push_back(std::move(obj));
 		}
 	}
@@ -428,7 +432,7 @@ void Renderer::regenerateCameraControlRenderObjects() {
 			obj.setMesh("sphere");
 			obj.setPosition(point);
 			obj.setScale(0.1f);
-			obj.setMaterial(targetPointMaterial);
+			obj.setMaterial("targetPoint");
 			m_CameraControlRenderObjects.push_back(std::move(obj));
 		}
 	}

@@ -101,3 +101,8 @@ LightningGenerator::MeshData LightningGenerator::genMeshData(const std::vector<S
 
 	return MeshData(vertices, indices);
 }
+
+LightningGenerator::MeshData LightningGenerator::genMeshData(glm::vec3 startpoint, glm::vec3 endpoint, int generations, const glm::vec3& camDir) {
+	auto segments = genBolt(startpoint, endpoint, generations, camDir);
+	return genMeshData(segments, camDir);
+}

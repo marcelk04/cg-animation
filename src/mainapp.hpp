@@ -67,9 +67,8 @@ private:
     std::shared_ptr<Scene> scene5; // happy end
     std::shared_ptr<Scene> scene6; // happy end part 2
 
-    Material groundMaterial;
-    Material lightningMaterial;
-    Material bookMaterial;
+    std::vector<float> sceneDuration = {30.0f, 1.5f, 20.0f, 0.0f, 21.0f, 20.0f};
+    float currSceneStart = 0.0f;
 
     glm::vec3 lightDir;
 
@@ -87,6 +86,9 @@ private:
     std::shared_ptr<Program> animated;
     size_t animatedId;
 
+    std::shared_ptr<Program> tiledGeom;
+    size_t tiledGeomId;
+
     Animator animator;
 
     float elapsedTime;
@@ -94,4 +96,7 @@ private:
 
     SoundPlayer soundPlayer;
     bool soundPlayed;
+
+    bool animationRunning = false;
+    size_t lightningObjId;
 };
