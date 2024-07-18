@@ -107,22 +107,31 @@ void MainApp::render() {
     else if (elapsedTime > 72.0f && sceneIdx == 4) {
         sceneIdx = 5;
         std::cout << "Loading scene 5\n";
+        soundPlayer.stopSound();
+        soundPlayer.playSound("music/party.mp3");
 
         animator.playAnimation(&ResourceManager::getAnimation("happy_boy_anim"));
     }
+
     else if (elapsedTime > 51.0f && sceneIdx == 2) {
         sceneIdx = 4;
         std::cout << "Loading scene 4\n";
-
+        soundPlayer.stopSound();
+        soundPlayer.playSound("music/hope.mp3");
         animator.playAnimation(nullptr);
     }
     else if (elapsedTime > 31.0f && sceneIdx == 1) {
         sceneIdx = 2;
+        soundPlayer.stopSound();
+        soundPlayer.playSound("music/sad.mp3");
         std::cout << "Loading scene 2\n";
 
         animator.playAnimation(&ResourceManager::getAnimation("sad_boy_anim"));
     }
+
     else if (elapsedTime > 30.0f && sceneIdx == 0) {
+        soundPlayer.stopSound();
+        soundPlayer.playSound("music/storm lightning and thunder sound effect.mp3");
         sceneIdx = 1;
         std::cout << "Loading scene 1\n";
 
@@ -131,9 +140,12 @@ void MainApp::render() {
     else if (elapsedTime >= 0.0f && sceneIdx == -1) {
         sceneIdx = 0;
         std::cout << "Loading scene 0\n";
+        soundPlayer.playSound("music/music.mp3");
 
         animator.playAnimation(&ResourceManager::getAnimation("happy_boy_anim"));
     }
+
+
 
     renderer.setScene(scenes[sceneIdx]);
 
@@ -152,7 +164,9 @@ void MainApp::render() {
 
     renderer.draw();
     elapsedTime += delta;
-
+    if (elapsedTime > 100.0f) {
+        soundPlayer.stopSound();
+    }
 //    } else {
 //        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 //        soundPlayer.stopSound();
