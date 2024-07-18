@@ -98,45 +98,48 @@ void MainApp::render() {
 //            soundPlayed = true;
 //        }
 
-    if (sceneIdx == 5 && elapsedTime > currSceneStart + sceneDuration[sceneIdx]) {
+    if (elapsedTime > 82.0f && sceneIdx == 5) {
         sceneIdx = 6;
-        currSceneStart = elapsedTime;
         std::cout << "Loading scene 6\n";
 
         animator.playAnimation(&ResourceManager::getAnimation("happy_boy_anim"));
     }
-    else if (sceneIdx == 4 && elapsedTime > currSceneStart + sceneDuration[sceneIdx]) {
+    else if (elapsedTime > 72.0f && sceneIdx == 4) {
         sceneIdx = 5;
-        currSceneStart = elapsedTime;
         std::cout << "Loading scene 5\n";
+        soundPlayer.stopSound();
+        soundPlayer.playSound("music/party.mp3");
 
         animator.playAnimation(&ResourceManager::getAnimation("happy_boy_anim"));
     }
-    else if (sceneIdx == 2 && elapsedTime > currSceneStart + sceneDuration[sceneIdx]) {
+    else if (elapsedTime > 51.0f && sceneIdx == 2) {
         sceneIdx = 4;
-        currSceneStart = elapsedTime;
         std::cout << "Loading scene 4\n";
-
+        soundPlayer.stopSound();
+        soundPlayer.playSound("music/hope.mp3");
         animator.playAnimation(nullptr);
     }
-    else if (sceneIdx == 1 && elapsedTime > currSceneStart + sceneDuration[sceneIdx]) {
+    else if (elapsedTime > 31.0f && sceneIdx == 1) {
         sceneIdx = 2;
-        currSceneStart = elapsedTime;
+        soundPlayer.stopSound();
+        soundPlayer.playSound("music/sad.mp3");
         std::cout << "Loading scene 2\n";
 
         animator.playAnimation(&ResourceManager::getAnimation("sad_boy_anim"));
     }
-    else if (sceneIdx == 0 && elapsedTime > currSceneStart + sceneDuration[sceneIdx]) {
+
+    else if (elapsedTime > 30.0f && sceneIdx == 0) {
+        soundPlayer.stopSound();
+        soundPlayer.playSound("music/storm lightning and thunder sound effect.mp3");
         sceneIdx = 1;
-        currSceneStart = elapsedTime;
         std::cout << "Loading scene 1\n";
 
         animator.playAnimation(nullptr);
     }
     else if (elapsedTime >= 0.0f && sceneIdx == -1) {
         sceneIdx = 0;
-        currSceneStart = elapsedTime;
         std::cout << "Loading scene 0\n";
+        soundPlayer.playSound("music/music.mp3");
 
         animator.playAnimation(&ResourceManager::getAnimation("happy_boy_anim"));
     }
@@ -149,7 +152,6 @@ void MainApp::render() {
     }
 
     renderer.setScene(scenes[sceneIdx]);
-    scenes[sceneIdx]->getCameraController()->setEnabled(animationRunning);
 
     renderer.update(delta);
     animator.update(delta);
@@ -165,6 +167,9 @@ void MainApp::render() {
     }
 
     renderer.draw();
+    if (elapsedTime > 100.0f) {
+        soundPlayer.stopSound();
+    }
     if (animationRunning) {
         elapsedTime += delta;
     }
@@ -175,14 +180,6 @@ void MainApp::render() {
 //
 //    }
 }
-
-
-//void MainApp::buildImGui() {
-//    if (ImGui::SphericalSlider("Light direction", lightDir)) {
-//        scene0->getDirLight()->setDirection(lightDir);
-//        renderer.updateLightingUniforms();
-//    }
-//}
 
 void MainApp::keyCallback(Key key, Action action) {
     float cameraSpeed = 25.0f;
@@ -541,7 +538,7 @@ void MainApp::createRenderObjects() {
     ground2.setMesh("plane");
     ground2.setDiffuseTexture("grass");
     ground2.setScale(200.0f);
-    scene2->addRenderObject(std::move(ground2), tiledGeomId);
+    scene2->addRenderObject(std::move(ground2), texturedGeomId);
 
     RenderObject sad1;
     sad1.setAnimationModel("sad_boy");
