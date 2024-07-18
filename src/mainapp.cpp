@@ -109,6 +109,8 @@ void MainApp::render() {
         sceneIdx = 5;
         currSceneStart = elapsedTime;
         std::cout << "Loading scene 5\n";
+        soundPlayer.stopSound();
+        soundPlayer.playSound("music/party.mp3");
 
         animator.playAnimation(&ResourceManager::getAnimation("happy_boy_anim"));
     }
@@ -116,12 +118,17 @@ void MainApp::render() {
         sceneIdx = 4;
         currSceneStart = elapsedTime;
         std::cout << "Loading scene 4\n";
-
+        soundPlayer.stopSound();
+        soundPlayer.playSound("music/hope.mp3");
         animator.playAnimation(nullptr);
     }
     else if (sceneIdx == 1 && elapsedTime > currSceneStart + sceneDuration[sceneIdx]) {
         sceneIdx = 2;
         currSceneStart = elapsedTime;
+      
+        soundPlayer.stopSound();
+        soundPlayer.playSound("music/sad.mp3");
+      
         std::cout << "Loading scene 2\n";
 
         animator.playAnimation(&ResourceManager::getAnimation("sad_boy_anim"));
@@ -129,6 +136,10 @@ void MainApp::render() {
     else if (sceneIdx == 0 && elapsedTime > currSceneStart + sceneDuration[sceneIdx]) {
         sceneIdx = 1;
         currSceneStart = elapsedTime;
+      
+        soundPlayer.stopSound();
+        soundPlayer.playSound("music/storm lightning and thunder sound effect.mp3");
+
         std::cout << "Loading scene 1\n";
 
         animator.playAnimation(nullptr);
@@ -137,10 +148,11 @@ void MainApp::render() {
         sceneIdx = 0;
         currSceneStart = elapsedTime;
         std::cout << "Loading scene 0\n";
+        soundPlayer.playSound("music/music.mp3");
 
         animator.playAnimation(&ResourceManager::getAnimation("happy_boy_anim"));
     }
-
+  
     // update lightning meshes
     if (sceneIdx == 1) {
         if (elapsedTime - currSceneStart > 0.3f) scene1->getRenderObject(simpleGeomId, lightningObjId).setMesh("lightning1");
@@ -165,8 +177,13 @@ void MainApp::render() {
     }
 
     renderer.draw();
+  
     if (animationRunning) {
         elapsedTime += delta;
+    }
+  
+    if (elapsedTime > 100.0f) {
+        soundPlayer.stopSound();
     }
 
 //    } else {
